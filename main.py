@@ -19,15 +19,39 @@ from model import ConvE, Complex
 
 dir = os.getcwd()
 
-class KgVocab(Dataset):
-    def __init__(self, knowledge_graph):
-        self.
+def make_train_vocab(train_data):
+    res = {}
+    res['e1'] = set()
+    res['rel'] = set()
+    res['e2_e1toe2'] = set()
+    with open(train_data) as f:
+        for i, line in enumerate(f):
+            line = json.loads(line)
+            res['e1'][line['e1']] = i
+            res['rel'][line['rel']] = i
+            res['e2_e1toe2'][line['e2_e1toe2']] = i
 
-    def __len__(self):
-        return len(self.vocab)
+    return res
 
-    def __get__(self, idx):
+def make_test_vocab(test_data):
+    res = {}
+    res['e1'] = set()
+    res['rel'] = set()
+    res['rel_reverse'] = set()
+    res['e2_e1toe2'] = set()
+    res['e2_e2toe1'] = set()
+    with open(test_data) as f:
+        for i, line in enumerate(f):
+            line = json.loads(line)
+            res['e1'][line['e1']] = i
+            res['rel'][line['rel']] = i
+            res['rel_eval'][line['rel_eval']] = i
+            for meta in (line['e2_e1toe2'].split(' ')):
+                res['e2_e1toe2'][meta] = i
+            for meta in line(['e2_e2toe1'].split(' ')):
+                res['e2_e2toe1'][meta] = i
 
+    return res
 
 def main(args):
 
@@ -35,14 +59,18 @@ def main(args):
     valid_ranking_path = dir + '/data/e1rel_to_e2_ranking_valid.json'
     test_ranking_path = dir + '/data/e1rel_to_e2_ranking_test.json'
 
-    make_vocab = KgVocab()
-    train_vocab = make_vocab(train_data)
-    valid_vocab = make_vocab(valid_ranking_path)
-    test_vocab = make_vocab(test_ranking_path)
+    train_vocab = make_train_vocab(train_data)
+    valid_vocab = make_test_vocab(valid_ranking_path)
+    test_vocab = make_test_vocab(test_ranking_path)
+
+    print (train_vocab)
 
     train_batch = DataLoader(train_vocab, batch_size=args.batch_size, shuffle=True, num_workers=args.loader_threads)
     valid_batch = DataLoader(valid_vocab, batch_size=args.batch_size, shuffle=True, num_workers=args.loader_threads)
     test_batch = DataLoader(test_vocab, batch_size=args.batch_size, shuffle=True, num_workers=args.loader_threads)
+
+    model = ConvE(args, len(train_vocab['e1']), len(train_vocab['rel']))
+    model.cuda() if torch.cuda.is_available() else model.cpu()
 
 
 if __name__ == '__main__':
@@ -54,7 +82,7 @@ if __name__ == '__main__':
     parser.add_argument('--seed', type=int, default=17, metavar='S', help='random seed (default: 17)')
     parser.add_argument('--log-interval', type=int, default=100, help='how many batches to wait before logging training status')
     parser.add_argument('--data', type=str, default='person', help='The kind of domain for training cruise data, default: person')
-    parser.add_argument('--l2', type=float, default=0.0, help='Weight decay value to use in the optimizer. Default: 0.0')
+    parser.add_argument('--ld', type=float, default=0.0, help='Weight decay value to use in the optimizer. Default: 0.0')
     parser.add_argument('--model', type=str, default='conve', help='Choose from: {conve, distmult, complex}')
     parser.add_argument('--embedding-dim', type=int, default=200, help='The embedding dimension (1D). Default: 200')
     parser.add_argument('--embedding-shape1', type=int, default=20, help='The first dimension of the reshaped 2D embedding. The second dimension is infered. Default: 20')
