@@ -114,7 +114,7 @@ if __name__ == '__main__':
     parser.add_argument('--seed', type=int, default=17, metavar='S', help='random seed (default: 17)')
     parser.add_argument('--log-interval', type=int, default=100, help='how many batches to wait before logging training status')
     parser.add_argument('--data', type=str, default='person', help='The kind of domain for training cruise data, default: person')
-    parser.add_argument('--ld', type=float, default=0.0, help='Weight decay value to use in the optimizer. Default: 0.0')
+    parser.add_argument('--l2', type=float, default=0.0, help='Weight decay value to use in the optimizer. Default: 0.0')
     parser.add_argument('--model', type=str, default='conve', help='Choose from: {conve, distmult, complex}')
     parser.add_argument('--embedding-dim', type=int, default=200, help='The embedding dimension (1D). Default: 200')
     parser.add_argument('--embedding-shape1', type=int, default=20, help='The first dimension of the reshaped 2D embedding. The second dimension is infered. Default: 20')
