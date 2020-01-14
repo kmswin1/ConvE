@@ -60,18 +60,15 @@ def main(args, model_path):
     valid_ranking_path = dir + '/data/e1rel_to_e2_ranking_valid.json'
     test_ranking_path = dir + '/data/e1rel_to_e2_ranking_test.json'
 
-    print (train_data)
-
     train_vocab = make_train_vocab(train_data)
     valid_vocab = make_test_vocab(valid_ranking_path)
     test_vocab = make_test_vocab(test_ranking_path)
-
-    print (train_vocab)
 
     train_batch = DataLoader(train_vocab, batch_size=args.batch_size, shuffle=True, num_workers=args.loader_threads)
     valid_batch = DataLoader(valid_vocab, batch_size=args.batch_size, shuffle=True, num_workers=args.loader_threads)
     test_batch = DataLoader(test_vocab, batch_size=args.batch_size, shuffle=True, num_workers=args.loader_threads)
 
+    print (train_batch)
     model = ConvE(args, len(train_vocab['e1']), len(train_vocab['rel']))
     model.cuda() if torch.cuda.is_available() else model.cpu()
 
@@ -123,7 +120,7 @@ if __name__ == '__main__':
     parser.add_argument('--embedding-shape1', type=int, default=20, help='The first dimension of the reshaped 2D embedding. The second dimension is infered. Default: 20')
     parser.add_argument('--hidden-drop', type=float, default=0.3, help='Dropout for the hidden layer. Default: 0.3.')
     parser.add_argument('--input-drop', type=float, default=0.2, help='Dropout for the input embeddings. Default: 0.2.')
-    parser.add_argument('--feat -drop', type=float, default=0.2, help='Dropout for the convolutional features. Default: 0.2.')
+    parser.add_argument('--feat-drop', type=float, default=0.2, help='Dropout for the convolutional features. Default: 0.2.')
     parser.add_argument('--lr-decay', type=float, default=0.995, help='Decay the learning rate by this factor every epoch. Default: 0.995')
     parser.add_argument('--loader-threads', type=int, default=4, help='How many loader threads to use for the batch loaders. Default: 4')
     parser.add_argument('--preprocess', action='store_true', help='Preprocess the dataset. Needs to be executed only once. Default: 4')

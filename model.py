@@ -65,8 +65,10 @@ class ConvE(torch.nn.Module):
         print(num_entities, num_relations)
 
     def init(self):
-        kaiming_normal_(self.emb_e.weight.data)
-        kaiming_normal_(self.emb_rel.weight.data)
+        #kaiming_normal_(self.emb_e.weight.data)
+        #kaiming_normal_(self.emb_rel.weight.data)
+        xavier_normal_(self.emb_e.weight.data)
+        xavier_normal_(self.emb_rel.weight.data)
 
     def forward(self, e1, rel):
         e1_embedded= self.emb_e(e1).view(-1, 1, self.emb_dim1, self.emb_dim2)
