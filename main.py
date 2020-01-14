@@ -74,7 +74,7 @@ def main(args):
 
 
 if __name__ == '__main__':
-    parser = argparse.AgumentParser(description='KG completion for cruise contents data')
+    parser = argparse.ArgumentParser(description='KG completion for cruise contents data')
     parser.add_argument('--batch-size', type=int, default=128, help='input batch size for training (default: 128)')
     parser.add_argument('--test-batch-size', type=int, default=128, help='input batch size for testing/validation (default: 128)')
     parser.add_argument('--epochs', type=int, default=1000, help='number of epochs to train (default: 1000)')
