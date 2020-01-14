@@ -53,7 +53,7 @@ def make_test_vocab(test_data):
 
     return res
 
-def main(args):
+def main(args, model_path):
 
     train_data = dir + '/data/e1rel_to_e2_train.json'
     valid_ranking_path = dir + '/data/e1rel_to_e2_ranking_valid.json'
