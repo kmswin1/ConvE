@@ -48,7 +48,7 @@ def make_test_vocab(test_data):
             res['rel_eval'][line['rel_eval']] = i
             for meta in (line['e2_e1toe2'].split(' ')):
                 res['e2_e1toe2'][meta] = i
-            for meta in line(['e2_e2toe1'].split(' ')):
+            for meta in (line['e2_e2toe1'].split(' ')):
                 res['e2_e2toe1'][meta] = i
 
     return res
