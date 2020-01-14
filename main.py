@@ -21,6 +21,9 @@ dir = os.getcwd()
 
 def make_train_vocab(train_data):
     res = {}
+    res['e1'] = {}
+    res['rel'] = {}
+    res['e2_e1toe2'] = {}
     with open(train_data) as f:
         for i, line in enumerate(f):
             line = json.loads(line)
@@ -32,6 +35,11 @@ def make_train_vocab(train_data):
 
 def make_test_vocab(test_data):
     res = {}
+    res['e1'] = {}
+    res['rel'] = {}
+    res['rel_eval'] = {}
+    res['e2_e1toe2'] = {}
+    res['e2_e2toe1'] = {}
     with open(test_data) as f:
         for i, line in enumerate(f):
             line = json.loads(line)
