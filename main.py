@@ -12,7 +12,7 @@ import pickle
 import logging
 import random
 import time
-
+from evaluation import ranking_and_hits
 from os.path import join
 
 from model import ConvE, Complex
@@ -54,10 +54,13 @@ def make_test_vocab(test_data):
     return res
 
 def main(args, model_path):
+    print (os.getcwd())
 
     train_data = dir + '/data/e1rel_to_e2_train.json'
     valid_ranking_path = dir + '/data/e1rel_to_e2_ranking_valid.json'
     test_ranking_path = dir + '/data/e1rel_to_e2_ranking_test.json'
+
+    print (train_data)
 
     train_vocab = make_train_vocab(train_data)
     valid_vocab = make_test_vocab(valid_ranking_path)
@@ -71,6 +74,38 @@ def main(args, model_path):
 
     model = ConvE(args, len(train_vocab['e1']), len(train_vocab['rel']))
     model.cuda() if torch.cuda.is_available() else model.cpu()
+
+
+
+
+
+    opt = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.l2)
+    for epoch in range(args.epochs):
+        model.train()
+        for i, str2var in enumerate(train_batch):
+            opt.zero_grad()
+            e1 = str2var['e1']
+            rel = str2var['rel']
+            e2_multi = str2var['e2_multi1_binary'].float()
+            # label smoothing
+            e2_multi = ((1.0-args.label_smoothing)*e2_multi) + (1.0/e2_multi.size(1))
+
+            pred = model.forward(e1, rel)
+            loss = model.loss(pred, e2_multi)
+            loss.backward()
+            opt.step()
+
+
+        print('saving to {0}'.format(model_path))
+        torch.save(model.state_dict(), model_path)
+
+        model.eval()
+        with torch.no_grad():
+            if epoch % 5 == 0 and epoch > 0:
+                ranking_and_hits(model, valid_batch, valid_vocab, 'dev_evaluation')
+            if epoch % 5 == 0:
+                if epoch > 0:
+                    ranking_and_hits(model, test_batch, test_vocab, 'test_evaluation')
 
 
 if __name__ == '__main__':
