@@ -6,7 +6,7 @@ import numpy as np
 import argparse
 import sys
 import os
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, Dataset
 import math
 import pickle
 import logging
@@ -19,9 +19,14 @@ from model import ConvE, Complex
 
 dir = os.getcwd()
 
-def make_vocab(knowledge_graph):
-    input_keys = ['e1', 'rel', 'rel_eval', 'e2', 'e2_e1toe2', 'e2_e2toe1']
+class KgVocab(Dataset):
+    def __init__(self, knowledge_graph):
+        self.
 
+    def __len__(self):
+        return len(self.vocab)
+
+    def __get__(self, idx):
 
 
 def main(args):
@@ -30,22 +35,14 @@ def main(args):
     valid_ranking_path = dir + '/data/e1rel_to_e2_ranking_valid.json'
     test_ranking_path = dir + '/data/e1rel_to_e2_ranking_test.json'
 
+    make_vocab = KgVocab()
     train_vocab = make_vocab(train_data)
     valid_vocab = make_vocab(valid_ranking_path)
     test_vocab = make_vocab(test_ranking_path)
 
-    train_batch = DataLoader(train_vocab, batch_size=args.batch_size, shuffle=True, sampler=None,
-           batch_sampler=None, num_workers=args.loader_threads, collate_fn=None,
-           pin_memory=False, drop_last=False, timeout=0,
-           worker_init_fn=None)
-    valid_batch = DataLoader(valid_vocab, batch_size=args.batch_size, shuffle=True, sampler=None,
-           batch_sampler=None, num_workers=args.loader_threads, collate_fn=None,
-           pin_memory=False, drop_last=False, timeout=0,
-           worker_init_fn=None)
-    test_batch = DataLoader(test_vocab, batch_size=args.batch_size, shuffle=True, sampler=None,
-           batch_sampler=None, num_workers=args.loader_threads, collate_fn=None,
-           pin_memory=False, drop_last=False, timeout=0,
-           worker_init_fn=None)
+    train_batch = DataLoader(train_vocab, batch_size=args.batch_size, shuffle=True, num_workers=args.loader_threads)
+    valid_batch = DataLoader(valid_vocab, batch_size=args.batch_size, shuffle=True, num_workers=args.loader_threads)
+    test_batch = DataLoader(test_vocab, batch_size=args.batch_size, shuffle=True, num_workers=args.loader_threads)
 
 
 if __name__ == '__main__':

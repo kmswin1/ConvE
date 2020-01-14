@@ -45,7 +45,7 @@ for file in files:
         for i, line in enumerate(f):
             line = json.loads(line)
             e1 = line['src']
-            e2 = line['dst']
+            e2 = line['dst'].encode('utf-8')
             rel = line['dstProperty']
             rel_reverse = rel+ '_reverse'
 
