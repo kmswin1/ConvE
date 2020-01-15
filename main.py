@@ -11,7 +11,7 @@ import math
 import pickle
 import logging
 import random
-import time, datetime.datetime
+import time, datetime
 from itertools import count
 from collections import namedtuple
 from evaluation import ranking_and_hits
@@ -21,7 +21,7 @@ from os.path import join
 from logger import get_logger
 
 logger = get_logger('train', console_log=True, file_log=True)
-logger.info('START TIME : {}'.format(datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
+logger.info('START TIME : {}'.format(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
 
 from model import ConvE, Complex
 
