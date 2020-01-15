@@ -11,13 +11,17 @@ import math
 import pickle
 import logging
 import random
-import time
+import time, datetime
 from itertools import count
 from collections import namedtuple
 from evaluation import ranking_and_hits
 from random import randint
 from collections import defaultdict
 from os.path import join
+from logger import get_logger
+
+logger = get_logger('train', console_log=True, file_log=True)
+logger.info('START TIME : {}'.format(datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
 
 from model import ConvE, Complex
 
@@ -267,8 +271,6 @@ if __name__ == '__main__':
     parser.add_argument('--feat-drop', type=float, default=0.2, help='Dropout for the convolutional features. Default: 0.2.')
     parser.add_argument('--lr-decay', type=float, default=0.995, help='Decay the learning rate by this factor every epoch. Default: 0.995')
     parser.add_argument('--loader-threads', type=int, default=4, help='How many loader threads to use for the batch loaders. Default: 4')
-    parser.add_argument('--preprocess', action='store_true', help='Preprocess the dataset. Needs to be executed only once. Default: 4')
-    parser.add_argument('--resume', action='store_true', help='Resume a model.')
     parser.add_argument('--use-bias', action='store_true', help='Use a bias in the convolutional layer. Default: True')
     parser.add_argument('--label-smoothing', type=float, default=0.1, help='Label smoothing value to use. Default: 0.1')
     parser.add_argument('--hidden-size', type=int, default=9728, help='The side of the hidden layer. The required size changes with the size of the embeddings. Default: 9728 (embedding size 200).')
