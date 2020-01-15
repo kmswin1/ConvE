@@ -11,7 +11,7 @@ import math
 import pickle
 import logging
 import random
-import time, datetime
+import time, datetime.datetime
 from itertools import count
 from collections import namedtuple
 from evaluation import ranking_and_hits
