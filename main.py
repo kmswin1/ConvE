@@ -200,7 +200,7 @@ def main(args, model_path):
     print(sum(params))
     opt = torch.optim.Adam(model.parameters())
 
-    for epoch in range(args.epovh):
+    for epoch in range(args.epochs):
         epoch_loss = 0
         start = time.time()
         model.train()
