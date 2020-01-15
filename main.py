@@ -22,7 +22,6 @@ from os.path import join
 from model import ConvE, Complex
 
 dir = os.getcwd()
-kg_vocab = namedtuple('kg_vocab', ['ent_list', 'rel_list', 'rel_rev_list' 'ent_id', 'rel_id', 'rel_rev_id'])
 
 def heads_tails(n_ent, train_data, valid_data=None, test_data=None):
     train_src, train_rel, train_dst = train_data
@@ -89,6 +88,7 @@ def batch_by_size(batch_size, *lists, n_sample=None):
             yield ret[0]
 
 def make_kg_vocab(*data):
+    kg_vocab = namedtuple('kg_vocab', ['ent_list', 'rel_list', 'rel_rev_list', 'ent_id', 'rel_id', 'rel_rev_id'])
     ent_set = set()
     rel_set = set()
     rel_rev_set = set()
