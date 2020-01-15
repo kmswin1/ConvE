@@ -21,7 +21,7 @@ from os.path import join
 
 from model import ConvE, Complex
 
-dir = os.getcwd()
+dir = os.getcwd() + '/data'
 
 def heads_tails(n_ent, train_data, valid_data=None, test_data=None):
     train_src, train_rel, train_dst = train_data
@@ -169,9 +169,9 @@ def read_data_with_rel_reverse(filename, kg_vocab):
 def main(args, model_path):
     print (os.getcwd())
 
-    train_data = dir + '/data/train.json'
-    valid_data = dir + '/data/valid.json'
-    test_data = dir + '/data/test.json'
+    train_data = dir + '/train.json'
+    valid_data = dir + '/valid.json'
+    test_data = dir + '/test.json'
 
     kg_vocab = make_kg_vocab(train_data, valid_data, test_data)
     n_ent, n_rel = graph_size(kg_vocab)
