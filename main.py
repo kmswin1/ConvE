@@ -6,103 +6,247 @@ import numpy as np
 import argparse
 import sys
 import os
-from torch.utils.data import DataLoader, Dataset
+#from utils import heads_tails, inplace_shuffle, batch_by_num, batch_by_size, make_kg_vocab, graph_size, read_data, read_reverse_data, read_data_with_rel_reverse
 import math
 import pickle
 import logging
 import random
 import time
+from itertools import count
+from collections import namedtuple
 from evaluation import ranking_and_hits
+from random import randint
+from collections import defaultdict
 from os.path import join
 
 from model import ConvE, Complex
 
 dir = os.getcwd()
 
-def make_train_vocab(train_data):
-    res = {}
-    res['e1'] = {}
-    res['rel'] = {}
-    res['e2_e1toe2'] = {}
-    with open(train_data) as f:
-        for i, line in enumerate(f):
+def heads_tails(n_ent, train_data, valid_data=None, test_data=None):
+    train_src, train_rel, train_dst = train_data
+    if valid_data:
+        valid_src, valid_rel, valid_dst = valid_data
+    else:
+        valid_src = valid_rel = valid_dst = []
+    if test_data:
+        test_src, test_rel, test_dst = test_data
+    else:
+        test_src = test_rel = test_dst = []
+    all_src = train_src + valid_src + test_src
+    all_rel = train_rel + valid_rel + test_rel
+    all_dst = train_dst + valid_dst + test_dst
+    heads = defaultdict(lambda: set())
+    tails = defaultdict(lambda: set())
+    for s, r, t in zip(all_src, all_rel, all_dst):
+        tails[s, r].add(t)
+        heads[t, r].add(s)
+    heads_sp = {}
+    tails_sp = {}
+    for k in tails.keys():
+        tails_sp[k] = torch.sparse.FloatTensor(torch.LongTensor([list(tails[k])]),
+                                               torch.ones(len(tails[k])), torch.Size([n_ent]))
+    for k in heads.keys():
+        heads_sp[k] = torch.sparse.FloatTensor(torch.LongTensor([list(heads[k])]),
+                                               torch.ones(len(heads[k])), torch.Size([n_ent]))
+    return heads_sp, tails_sp
+
+
+def inplace_shuffle(*lists):
+    idx = []
+    for i in range(len(lists[0])):
+        idx.append(randint(0, i))
+    for ls in lists:
+        for i, item in enumerate(ls):
+            j = idx[i]
+            ls[i], ls[j] = ls[j], ls[i]
+
+
+def batch_by_num(n_batch, *lists, n_sample=None):
+    if n_sample is None:
+        n_sample = len(lists[0])
+    for i in range(n_batch):
+        head = int(n_sample * i / n_batch)
+        tail = int(n_sample * (i + 1) / n_batch)
+        ret = [ls[head:tail] for ls in lists]
+        if len(ret) > 1:
+            yield ret
+        else:
+            yield ret[0]
+
+def batch_by_size(batch_size, *lists, n_sample=None):
+    if n_sample is None:
+        n_sample = len(lists[0])
+    head = 0
+    while head < n_sample:
+        tail = min(n_sample, head + batch_size)
+        ret = [ls[head:tail] for ls in lists]
+        head += batch_size
+        if len(ret) > 1:
+            yield ret
+        else:
+            yield ret[0]
+
+def make_kg_vocab(*data):
+    kg_vocab = namedtuple('kg_vocab', ['ent_list', 'rel_list', 'rel_rev_list' 'ent_id', 'rel_id', 'rel_rev_id'])
+    ent_set = set()
+    rel_set = set()
+    rel_rev_set = set()
+    for filename in data:
+        with open(filename) as f:
+            for line in f:
+                line = json.loads(line)
+                e1 = line['src']
+                rel = line['dstProperty']
+                e2 = line['dst']
+                rel_rev = rel + '_reverse'
+                ent_set.add(e1)
+                ent_set.add(e2)
+                rel_set.add(rel)
+                rel_rev_set.add(rel_rev)
+    ent_list = sorted(list(ent_set))
+    rel_list = sorted(list(rel_set))
+    rel_rev_list = sorted(list(rel_rev_set))
+    ent_id = dict(zip(ent_list, count()))
+    rel_id = dict(zip(rel_list, count()))
+    len_rel = len(rel_id)
+    rel_rev_id = dict(zip(rel_rev_set, count(len_rel)))
+    return kg_vocab(ent_list, rel_list, rel_rev_list, ent_id, rel_id, rel_rev_id)
+
+def graph_size(vocab):
+    return len(vocab.ent_id), len(vocab.rel_id)*2
+
+def read_data(filename, kg_vocab):
+    src = []
+    rel = []
+    dst = []
+    with open(filename) as f:
+        for line in f:
             line = json.loads(line)
-            res['e1'][line['e1']] = i
-            res['rel'][line['rel']] = i
-            res['e2_e1toe2'][line['e2_e1toe2']] = i
+            h = line['src']
+            r = line['dstProperty']
+            t = line['dst']
+            src.append(kg_vocab.ent_id[h])
+            rel.append(kg_vocab.rel_id[r])
+            dst.append(kg_vocab.ent_id[t])
+    return src, rel, dst
 
-    return res
-
-def make_test_vocab(test_data):
-    res = {}
-    res['e1'] = {}
-    res['rel'] = {}
-    res['rel_eval'] = {}
-    res['e2_e1toe2'] = {}
-    res['e2_e2toe1'] = {}
-    with open(test_data) as f:
-        for i, line in enumerate(f):
+def read_reverse_data(filename, kg_vocab):
+    src = []
+    rel = []
+    dst = []
+    with open(filename) as f:
+        for line in f:
             line = json.loads(line)
-            res['e1'][line['e1']] = i
-            res['rel'][line['rel']] = i
-            res['rel_eval'][line['rel_eval']] = i
-            for meta in (line['e2_e1toe2'].split(' ')):
-                res['e2_e1toe2'][meta] = i
-            for meta in (line['e2_e2toe1'].split(' ')):
-                res['e2_e2toe1'][meta] = i
+            h = line['src']
+            r = line['dstProperty']
+            t = line['dst']
+            r_revsers = r + '_reverse'
+            src.append(kg_vocab.ent_id[t])
+            rel.append(kg_vocab.rel_id[r_revsers])
+            dst.append(kg_vocab.ent_id[h])
+    return src, rel, dst
 
-    return res
+def read_data_with_rel_reverse(filename, kg_vocab):
+    src = []
+    rel = []
+    dst = []
+    with open(filename) as f:
+        for line in f:
+            line = json.loads(line)
+            h = line['src']
+            r = line['dstProperty']
+            t = line['dst']
+            r_reverse = r + '_reverse'
+            src.append(kg_vocab.ent_id[h])
+            rel.append(kg_vocab.rel_id[r])
+            dst.append(kg_vocab.ent_id[t])
+            src.append(kg_vocab.ent_id[t])
+            rel.append(kg_vocab.rel_rev_id[r_reverse])
+            dst.append(kg_vocab.ent_id[h])
+    return src, rel, dst
 
 def main(args, model_path):
     print (os.getcwd())
 
-    train_data = dir + '/data/e1rel_to_e2_train.json'
-    valid_ranking_path = dir + '/data/e1rel_to_e2_ranking_valid.json'
-    test_ranking_path = dir + '/data/e1rel_to_e2_ranking_test.json'
+    train_data = dir + '/data/train.json'
+    valid_data = dir + '/data/valid.json'
+    test_data = dir + '/data/test.json'
 
-    train_vocab = make_train_vocab(train_data)
-    valid_vocab = make_test_vocab(valid_ranking_path)
-    test_vocab = make_test_vocab(test_ranking_path)
+    kg_vocab = make_kg_vocab(train_data, valid_data, test_data)
+    n_ent, n_rel = graph_size(kg_vocab)
 
-    train_batch = DataLoader(train_vocab, batch_size=args.batch_size, shuffle=True, num_workers=args.loader_threads)
-    valid_batch = DataLoader(valid_vocab, batch_size=args.batch_size, shuffle=True, num_workers=args.loader_threads)
-    test_batch = DataLoader(test_vocab, batch_size=args.batch_size, shuffle=True, num_workers=args.loader_threads)
+    train_data_with_reverse = read_data_with_rel_reverse(os.path.join(dir, 'train.json'), kg_vocab)
+    inplace_shuffle(*train_data_with_reverse)
+    heads, tails = heads_tails(n_ent, train_data_with_reverse)
 
-    print (train_batch)
-    model = ConvE(args, len(train_vocab['e1']), len(train_vocab['rel']))
+    train_data = read_data(os.path.join(dir, 'train.json'), kg_vocab)
+    valid_data = read_data(os.path.join(dir, 'valid.json'), kg_vocab)
+    test_data = read_data(os.path.join(dir, 'test.json'), kg_vocab)
+    eval_h, eval_t = heads_tails(n_ent, train_data, valid_data, test_data)
+
+    valid_data = [torch.LongTensor(vec) for vec in valid_data]
+    test_data = [torch.LongTensor(vec) for vec in test_data]
+    train_data_with_reverse = [torch.LongTensor(vec) for vec in train_data_with_reverse]
+
+
+
+    model = ConvE(args, n_ent, n_rel)
     model.cuda() if torch.cuda.is_available() else model.cpu()
 
+    model.init()
+    params = [value.numel() for value in model.parameters()]
+    print(params)
+    print(sum(params))
+    opt = torch.optim.Adam(model.parameters())
 
-
-
-
-    opt = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.l2)
-    for epoch in range(args.epochs):
+    for epoch in range(args.epovh):
+        epoch_loss = 0
+        start = time.time()
         model.train()
-        for i, str2var in enumerate(train_batch):
-            opt.zero_grad()
-            e1 = str2var['e1']
-            rel = str2var['rel']
-            e2_multi = str2var['e2_multi1_binary'].float()
-            # label smoothing
-            e2_multi = ((1.0-args.label_smoothing)*e2_multi) + (1.0/e2_multi.size(1))
+        h, r, t = train_data_with_reverse
+        n_train = h.size(0)
+        rand_idx = torch.randperm(n_train)
+        h = h[rand_idx].cuda()
+        r = r[rand_idx].cuda()
+        tot = 0.0
 
-            pred = model.forward(e1, rel)
+        for bh, br in batch_by_num(args.batch_size, h, r):
+            opt.zero_grad()
+            batch_size = bh.size(0)
+            e2_multi = torch.empty(batch_size, n_ent)
+            # label smoothing
+            for i, (head, rel) in enumerate(zip(bh, br)):
+                head = head.item()
+                rel = rel.item()
+                e2_multi[i] = tails[head, rel].to_dense()
+            e2_multi = ((1.0-args.label_smoothing)*e2_multi) + (1.0/e2_multi.shape[1])
+            e2_multi = e2_multi.cuda()
+            pred = model.forward(bh, br)
             loss = model.loss(pred, e2_multi)
             loss.backward()
             opt.step()
-
-
-        print('saving to {0}'.format(model_path))
+            batch_loss = torch.sum(loss)
+            epoch_loss += batch_loss
+            tot += bh.size(0)
+            print('\r{:>10} progress {} loss: {}'.format('', tot/n_train, batch_loss), end='')
+        logging.info('')
+        end = time.time()
+        time_used = end - start
+        logging.info('one epoch time: {} minutes'.format(time_used/60))
+        logging.info('epoch {} loss: {}'.format(epoch+1, epoch_loss))
+        logging.info('saving to {0}'.format(model_path))
         torch.save(model.state_dict(), model_path)
 
         model.eval()
         with torch.no_grad():
-            if epoch % 5 == 0 and epoch > 0:
-                ranking_and_hits(model, valid_batch, valid_vocab, 'dev_evaluation')
-            if epoch % 5 == 0:
+            start = time.time()
+            ranking_and_hits(model, args.batch_size, valid_data, eval_h, eval_t,'dev_evaluation')
+            end = time.time()
+            logging.info('eval time used: {} minutes'.format((end - start)/60))
+            if epoch % 3 == 0:
                 if epoch > 0:
-                    ranking_and_hits(model, test_batch, test_vocab, 'test_evaluation')
+                    ranking_and_hits(model, args.batch_size, test_data, eval_h, eval_t, 'test_evaluation')
 
 
 if __name__ == '__main__':

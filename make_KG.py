@@ -14,78 +14,79 @@ import time
 
 rdm = np.random.RandomState(234234)
 
-dir = os.getcwd()
-print (dir)
-if len(sys.argv) > 1:
-    dataset_name = sys.argv[1]
-else:
-    dataset_name = 'person'
-    #dataset_name = 'melon'
-print('Processing dataset')
+def make_knowledge_graph():
+    dir = os.getcwd()
+    print (dir)
+    if len(sys.argv) > 1:
+        dataset_name = sys.argv[1]
+    else:
+        dataset_name = 'person'
+        #dataset_name = 'melon'
+    print('Processing dataset')
 
-base_path = dir+'/data/'
-files = ['train.json', 'valid.json', 'test.json']
+    base_path = dir+'/data/'
+    files = ['train.json', 'valid.json', 'test.json']
 
-data = []
-for file in files:
-    with open(join(base_path, file)) as f:
-        data = f.readlines() + data
-
-
-label_graph = {}
-train_graph = {}
-test_cases = {}
-for file in files:
-    test_cases[file] = []
-    train_graph[file] = {}
+    data = []
+    for file in files:
+        with open(join(base_path, file)) as f:
+            data = f.readlines() + data
 
 
-for file in files:
-    with open(join(base_path, file)) as f:
-        for i, line in enumerate(f):
-            line = json.loads(line)
-            e1 = line['src']
-            e2 = line['dst']
-            rel = line['dstProperty']
-            rel_reverse = rel+ '_reverse'
+    label_graph = {}
+    train_graph = {}
+    test_cases = {}
+    for file in files:
+        test_cases[file] = []
+        train_graph[file] = {}
 
-            # data
-            # (Mike, fatherOf, John)
-            # (John, fatherOf, Tom)
 
-            if (e1 , rel) not in label_graph:
-                label_graph[(e1, rel)] = set()
+    for file in files:
+        with open(join(base_path, file)) as f:
+            for i, line in enumerate(f):
+                line = json.loads(line)
+                e1 = line['src']
+                e2 = line['dst']
+                rel = line['dstProperty']
+                rel_reverse = rel+ '_reverse'
 
-            if (e2,  rel_reverse) not in label_graph:
-                label_graph[(e2, rel_reverse)] = set()
+                # data
+                # (Mike, fatherOf, John)
+                # (John, fatherOf, Tom)
 
-            if (e1,  rel) not in train_graph[file]:
-                train_graph[file][(e1, rel)] = set()
-            if (e2, rel_reverse) not in train_graph[file]:
-                train_graph[file][(e2, rel_reverse)] = set()
+                if (e1 , rel) not in label_graph:
+                    label_graph[(e1, rel)] = set()
 
-            # labels
-            # (Mike, fatherOf, John)
-            # (John, fatherOf, Tom)
-            # (John, fatherOf_reverse, Mike)
-            # (Tom, fatherOf_reverse, Mike)
-            label_graph[(e1, rel)].add(e2)
+                if (e2,  rel_reverse) not in label_graph:
+                    label_graph[(e2, rel_reverse)] = set()
 
-            label_graph[(e2, rel_reverse)].add(e1)
+                if (e1,  rel) not in train_graph[file]:
+                    train_graph[file][(e1, rel)] = set()
+                if (e2, rel_reverse) not in train_graph[file]:
+                    train_graph[file][(e2, rel_reverse)] = set()
 
-            # test cases
-            # (Mike, fatherOf, John)
-            # (John, fatherOf, Tom)
-            test_cases[file].append([e1, rel, e2])
+                # labels
+                # (Mike, fatherOf, John)
+                # (John, fatherOf, Tom)
+                # (John, fatherOf_reverse, Mike)
+                # (Tom, fatherOf_reverse, Mike)
+                label_graph[(e1, rel)].add(e2)
 
-            # data
-            # (Mike, fatherOf, John)
-            # (John, fatherOf, Tom)
-            # (John, fatherOf_reverse, Mike)
-            # (Tom, fatherOf_reverse, John)
-            train_graph[file][(e1, rel)].add(e2)
-            train_graph[file][(e2, rel_reverse)].add(e1)
+                label_graph[(e2, rel_reverse)].add(e1)
 
+                # test cases
+                # (Mike, fatherOf, John)
+                # (John, fatherOf, Tom)
+                test_cases[file].append([e1, rel, e2])
+
+                # data
+                # (Mike, fatherOf, John)
+                # (John, fatherOf, Tom)
+                # (John, fatherOf_reverse, Mike)
+                # (Tom, fatherOf_reverse, John)
+                train_graph[file][(e1, rel)].add(e2)
+                train_graph[file][(e2, rel_reverse)].add(e1)
+    return label_graph, train_graph, test_cases
 
 
 def write_training_graph(cases, graph, path):
@@ -138,10 +139,15 @@ def write_evaluation_graph(cases, graph, path):
 
             f.write(json.dumps(data_point)  + '\n')
 
-start = time.time()
-all_cases = test_cases['train.json'] + test_cases['valid.json'] + test_cases['test.json']
-write_training_graph(test_cases['train.json'], train_graph['train.json'], 'data/e1rel_to_e2_train.json')
-write_evaluation_graph(test_cases['valid.json'], label_graph, 'data/e1rel_to_e2_ranking_valid.json')
-write_evaluation_graph(test_cases['test.json'], label_graph, 'data/e1rel_to_e2_ranking_test.json')
-write_training_graph(all_cases, label_graph, 'data/e1rel_to_e2_full.json')
-print (time.time() - start)
+def main():
+    label_graph, train_graph, test_cases = make_knowledge_graph()
+    start = time.time()
+    all_cases = test_cases['train.json'] + test_cases['valid.json'] + test_cases['test.json']
+    write_training_graph(test_cases['train.json'], train_graph['train.json'], 'data/e1rel_to_e2_train.json')
+    write_evaluation_graph(test_cases['valid.json'], label_graph, 'data/e1rel_to_e2_ranking_valid.json')
+    write_evaluation_graph(test_cases['test.json'], label_graph, 'data/e1rel_to_e2_ranking_test.json')
+    write_training_graph(all_cases, label_graph, 'data/e1rel_to_e2_full.json')
+    print (time.time() - start)
+
+if __name__ == '__main__':
+    main()
