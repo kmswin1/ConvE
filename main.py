@@ -20,7 +20,7 @@ from collections import defaultdict
 from os.path import join
 from logger import get_logger
 
-logger = get_logger('train', console_log=True, file_log=True)
+logger = get_logger('train', True, True, 'training.txt')
 logger.info('START TIME : {}'.format(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
 
 from model import ConvE, Complex
@@ -197,6 +197,7 @@ def main(args, model_path):
 
     model = ConvE(args, n_ent, n_rel)
     model.cuda() if torch.cuda.is_available() else model.cpu()
+    print ('cuda : ' + str(torch.cuda.is_available()))
 
     model.init()
     params = [value.numel() for value in model.parameters()]
@@ -205,6 +206,7 @@ def main(args, model_path):
     opt = torch.optim.Adam(model.parameters())
 
     for epoch in range(args.epochs):
+        print (epoch)
         epoch_loss = 0
         start = time.time()
         model.train()
@@ -238,6 +240,7 @@ def main(args, model_path):
         end = time.time()
         time_used = end - start
         logging.info('one epoch time: {} minutes'.format(time_used/60))
+        logging.info('{} epochs'.format(epoch))
         logging.info('epoch {} loss: {}'.format(epoch+1, epoch_loss))
         logging.info('saving to {0}'.format(model_path))
         torch.save(model.state_dict(), model_path)
@@ -257,11 +260,11 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='KG completion for cruise contents data')
     parser.add_argument('--batch-size', type=int, default=128, help='input batch size for training (default: 128)')
     parser.add_argument('--test-batch-size', type=int, default=128, help='input batch size for testing/validation (default: 128)')
-    parser.add_argument('--epochs', type=int, default=1000, help='number of epochs to train (default: 1000)')
+    parser.add_argument('--epochs', type=int, default=100, help='number of epochs to train (default: 1000)')
     parser.add_argument('--lr', type=float, default=0.003, help='learning rate (default: 0.003)')
     parser.add_argument('--seed', type=int, default=17, metavar='S', help='random seed (default: 17)')
     parser.add_argument('--log-interval', type=int, default=100, help='how many batches to wait before logging training status')
-    parser.add_argument('--data', type=str, default='person', help='The kind of domain for training cruise data, default: person')
+    parser.add_argument('--data', type=str, default='entire', help='The kind of domain for training cruise data, default: person')
     parser.add_argument('--l2', type=float, default=0.0, help='Weight decay value to use in the optimizer. Default: 0.0')
     parser.add_argument('--model', type=str, default='conve', help='Choose from: {conve, distmult, complex}')
     parser.add_argument('--embedding-dim', type=int, default=200, help='The embedding dimension (1D). Default: 200')
