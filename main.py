@@ -152,9 +152,8 @@ def batch_by_size(batch_size, *lists, n_sample=None):
         else:
             yield ret[0]
 
-KBIndex = namedtuple('KBIndex', ['ent_list', 'rel_list', 'rel_reverse_list', 'ent_id', 'rel_id', 'rel_reverse_id'])
-
 def make_kg_vocab(*filenames):
+    KBIndex = namedtuple('KBIndex', ['ent_list', 'rel_list', 'rel_reverse_list', 'ent_id', 'rel_id', 'rel_reverse_id'])
     ent_set = set()
     rel_set = set()
     rel_reverse = set()
@@ -199,12 +198,15 @@ def read_reverse_data(filename, kb_index):
     rel = []
     dst = []
     with open(filename) as f:
-        for ln in f:
-            s, r, t = ln.strip().split('\t')
-            r_revsers = r + '_reverse'
-            src.append(kb_index.ent_id[t])
-            rel.append(kb_index.rel_id[r_revsers])
-            dst.append(kb_index.ent_id[s])
+        for line in f:
+            line = json.loads(line)
+            e1 = line['src']
+            rel = line['dstProperty']
+            e2 = line['dst']
+            rel_rev = rel + '_reverse'
+            src.append(kb_index.ent_id[e2])
+            rel.append(kb_index.rel_reverse_id[rel_rev])
+            dst.append(kb_index.ent_id[e1])
     return src, rel, dst
 
 def read_data_with_rel_reverse(filename, kb_index):
@@ -212,15 +214,18 @@ def read_data_with_rel_reverse(filename, kb_index):
     rel = []
     dst = []
     with open(filename) as f:
-        for ln in f:
-            s, r, t = ln.strip().split('\t')
-            r_reverse = r + '_reverse'
-            src.append(kb_index.ent_id[s])
-            rel.append(kb_index.rel_id[r])
-            dst.append(kb_index.ent_id[t])
-            src.append(kb_index.ent_id[t])
-            rel.append(kb_index.rel_reverse_id[r_reverse])
-            dst.append(kb_index.ent_id[s])
+        for line in f:
+            line = json.loads(line)
+            e1 = line['src']
+            rel = line['dstProperty']
+            e2 = line['dst']
+            rel_rev = rel + '_reverse'
+            src.append(kb_index.ent_id[e1])
+            rel.append(kb_index.rel_id[rel])
+            dst.append(kb_index.ent_id[e2])
+            src.append(kb_index.ent_id[e2])
+            rel.append(kb_index.rel_reverse_id[rel_rev])
+            dst.append(kb_index.ent_id[e1])
     return src, rel, dst
 
 
