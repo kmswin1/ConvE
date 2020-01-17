@@ -6,7 +6,7 @@ import numpy as np
 import argparse
 import sys
 import os
-#from utils import heads_tails, inplace_shuffle, batch_by_num, batch_by_size, make_kg_vocab, graph_size, read_data, read_reverse_data, read_data_with_rel_reverse
+from utils import heads_tails, inplace_shuffle, batch_by_num, batch_by_size, make_kg_vocab, graph_size, read_data, read_reverse_data, read_data_with_rel_reverse
 import math
 import pickle
 import logging
@@ -91,93 +91,15 @@ def batch_by_size(batch_size, *lists, n_sample=None):
         else:
             yield ret[0]
 
-def make_kg_vocab(*data):
-    kg_vocab = namedtuple('kg_vocab', ['ent_list', 'rel_list', 'rel_rev_list', 'ent_id', 'rel_id', 'rel_rev_id'])
-    ent_set = set()
-    rel_set = set()
-    rel_rev_set = set()
-    for filename in data:
-        with open(filename) as f:
-            for line in f:
-                line = json.loads(line)
-                e1 = line['src']
-                rel = line['dstProperty']
-                e2 = line['dst']
-                rel_rev = rel + '_reverse'
-                ent_set.add(e1)
-                ent_set.add(e2)
-                rel_set.add(rel)
-                rel_rev_set.add(rel_rev)
-    ent_list = sorted(list(ent_set))
-    rel_list = sorted(list(rel_set))
-    rel_rev_list = sorted(list(rel_rev_set))
-    ent_id = dict(zip(ent_list, count()))
-    rel_id = dict(zip(rel_list, count()))
-    len_rel = len(rel_id)
-    rel_rev_id = dict(zip(rel_rev_set, count(len_rel)))
-    return kg_vocab(ent_list, rel_list, rel_rev_list, ent_id, rel_id, rel_rev_id)
-
-def graph_size(vocab):
-    return len(vocab.ent_id), len(vocab.rel_id)*2
-
-def read_data(filename, kg_vocab):
-    src = []
-    rel = []
-    dst = []
-    with open(filename) as f:
-        for line in f:
-            line = json.loads(line)
-            h = line['src']
-            r = line['dstProperty']
-            t = line['dst']
-            src.append(kg_vocab.ent_id[h])
-            rel.append(kg_vocab.rel_id[r])
-            dst.append(kg_vocab.ent_id[t])
-    return src, rel, dst
-
-def read_reverse_data(filename, kg_vocab):
-    src = []
-    rel = []
-    dst = []
-    with open(filename) as f:
-        for line in f:
-            line = json.loads(line)
-            h = line['src']
-            r = line['dstProperty']
-            t = line['dst']
-            r_revsers = r + '_reverse'
-            src.append(kg_vocab.ent_id[t])
-            rel.append(kg_vocab.rel_id[r_revsers])
-            dst.append(kg_vocab.ent_id[h])
-    return src, rel, dst
-
-def read_data_with_rel_reverse(filename, kg_vocab):
-    src = []
-    rel = []
-    dst = []
-    with open(filename) as f:
-        for line in f:
-            line = json.loads(line)
-            h = line['src']
-            r = line['dstProperty']
-            t = line['dst']
-            r_reverse = r + '_reverse'
-            src.append(kg_vocab.ent_id[h])
-            rel.append(kg_vocab.rel_id[r])
-            dst.append(kg_vocab.ent_id[t])
-            src.append(kg_vocab.ent_id[t])
-            rel.append(kg_vocab.rel_rev_id[r_reverse])
-            dst.append(kg_vocab.ent_id[h])
-    return src, rel, dst
 
 def main(args, model_path):
     print (os.getcwd())
 
     train_data = dir + '/train.json'
-    valid_data = dir + '/valid.json'
+    #valid_data = dir + '/valid.json'
     test_data = dir + '/test.json'
 
-    kg_vocab = make_kg_vocab(train_data, valid_data, test_data)
+    kg_vocab = make_kg_vocab(train_data, test_data)
     n_ent, n_rel = graph_size(kg_vocab)
 
     train_data_with_reverse = read_data_with_rel_reverse(os.path.join(dir, 'train.json'), kg_vocab)
@@ -185,11 +107,11 @@ def main(args, model_path):
     heads, tails = heads_tails(n_ent, train_data_with_reverse)
 
     train_data = read_data(os.path.join(dir, 'train.json'), kg_vocab)
-    valid_data = read_data(os.path.join(dir, 'valid.json'), kg_vocab)
+    #valid_data = read_data(os.path.join(dir, 'valid.json'), kg_vocab)
     test_data = read_data(os.path.join(dir, 'test.json'), kg_vocab)
-    eval_h, eval_t = heads_tails(n_ent, train_data, valid_data, test_data)
+    eval_h, eval_t = heads_tails(n_ent, train_data, test_data)
 
-    valid_data = [torch.LongTensor(vec) for vec in valid_data]
+    #valid_data = [torch.LongTensor(vec) for vec in valid_data]
     test_data = [torch.LongTensor(vec) for vec in test_data]
     train_data_with_reverse = [torch.LongTensor(vec) for vec in train_data_with_reverse]
 
@@ -203,7 +125,7 @@ def main(args, model_path):
     params = [value.numel() for value in model.parameters()]
     print(params)
     print(sum(params))
-    opt = torch.optim.Adam(model.parameters())
+    opt = torch.optim.Adam(model.parameters()                                                                                                                                            )
 
     for epoch in range(args.epochs):
         print (epoch)
@@ -248,12 +170,10 @@ def main(args, model_path):
         model.eval()
         with torch.no_grad():
             start = time.time()
-            ranking_and_hits(model, args.batch_size, valid_data, eval_h, eval_t,'dev_evaluation')
+            ranking_and_hits(model, args.batch_size, test_data, eval_h, eval_t,'dev_evaluation')
             end = time.time()
             logging.info('eval time used: {} minutes'.format((end - start)/60))
-            if epoch % 3 == 0:
-                if epoch > 0:
-                    ranking_and_hits(model, args.batch_size, test_data, eval_h, eval_t, 'test_evaluation')
+            logging.info('valid {} loss: {}'.format(epoch + 1, epoch_loss))
 
 
 if __name__ == '__main__':
