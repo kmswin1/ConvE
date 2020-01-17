@@ -1,24 +1,12 @@
 # !coding=utf8
 import json
 import torch
-import pickle
-import numpy as np
 import argparse
-import sys
 import os
 from utils import heads_tails, inplace_shuffle, batch_by_num, batch_by_size, make_kg_vocab, graph_size, read_data, read_reverse_data, read_data_with_rel_reverse
-import math
-import pickle
 import logging
-import random
 import time, datetime
-from itertools import count
-from collections import namedtuple
 from evaluation import ranking_and_hits
-from random import randint
-from collections import defaultdict
-from os.path import join
-from logger import get_logger
 
 from model import ConvE, Complex
 
