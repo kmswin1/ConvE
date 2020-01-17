@@ -88,12 +88,12 @@ def batch_by_size(batch_size, *lists, n_sample=None):
         else:
             yield ret[0]
 
-def make_kg_vocab(*filenames):
-    KBIndex = namedtuple('KBIndex', ['ent_list', 'rel_list', 'rel_reverse_list', 'ent_id', 'rel_id', 'rel_reverse_id'])
+def make_kg_vocab(*data):
+    kg_vocab = namedtuple('kg_vocab', ['ent_list', 'rel_list', 'rel_rev_list', 'ent_id', 'rel_id', 'rel_rev_id'])
     ent_set = set()
     rel_set = set()
-    rel_reverse = set()
-    for filename in filenames:
+    rel_rev_set = set()
+    for filename in data:
         with open(filename) as f:
             for line in f:
                 line = json.loads(line)
@@ -104,67 +104,67 @@ def make_kg_vocab(*filenames):
                 ent_set.add(e1)
                 ent_set.add(e2)
                 rel_set.add(rel)
-                rel_reverse.add(rel_rev)
+                rel_rev_set.add(rel_rev)
     ent_list = sorted(list(ent_set))
     rel_list = sorted(list(rel_set))
-    rel_reverse_list = sorted(list(rel_reverse))
+    rel_rev_list = sorted(list(rel_rev_set))
     ent_id = dict(zip(ent_list, count()))
     rel_id = dict(zip(rel_list, count()))
-    rel_size = len(rel_id)
-    rel_reverse_id = dict(zip(rel_reverse_list, count(rel_size)))
-    return KBIndex(ent_list, rel_list, rel_reverse_list, ent_id, rel_id, rel_reverse_id)
+    len_rel = len(rel_id)
+    rel_rev_id = dict(zip(rel_rev_set, count(len_rel)))
+    return kg_vocab(ent_list, rel_list, rel_rev_list, ent_id, rel_id, rel_rev_id)
 
 def graph_size(vocab):
     return len(vocab.ent_id), len(vocab.rel_id)*2
 
-def read_data(filename, kb_index):
+def read_data(filename, kg_vocab):
     src = []
     rel = []
     dst = []
     with open(filename) as f:
         for line in f:
             line = json.loads(line)
-            e1 = line['src']
-            rel = line['dstProperty']
-            e2 = line['dst']
-            src.append(kb_index.ent_id[e1])
-            rel.append(kb_index.rel_id[rel])
-            dst.append(kb_index.ent_id[e2])
+            h = line['src']
+            r = line['dstProperty']
+            t = line['dst']
+            src.append(kg_vocab.ent_id[h])
+            rel.append(kg_vocab.rel_id[r])
+            dst.append(kg_vocab.ent_id[t])
     return src, rel, dst
 
-def read_reverse_data(filename, kb_index):
+def read_reverse_data(filename, kg_vocab):
     src = []
     rel = []
     dst = []
     with open(filename) as f:
         for line in f:
             line = json.loads(line)
-            e1 = line['src']
-            rel = line['dstProperty']
-            e2 = line['dst']
-            rel_rev = rel + '_reverse'
-            src.append(kb_index.ent_id[e2])
-            rel.append(kb_index.rel_reverse_id[rel_rev])
-            dst.append(kb_index.ent_id[e1])
+            h = line['src']
+            r = line['dstProperty']
+            t = line['dst']
+            r_revsers = r + '_reverse'
+            src.append(kg_vocab.ent_id[t])
+            rel.append(kg_vocab.rel_id[r_revsers])
+            dst.append(kg_vocab.ent_id[h])
     return src, rel, dst
 
-def read_data_with_rel_reverse(filename, kb_index):
+def read_data_with_rel_reverse(filename, kg_vocab):
     src = []
     rel = []
     dst = []
     with open(filename) as f:
         for line in f:
             line = json.loads(line)
-            e1 = line['src']
-            rel = line['dstProperty']
-            e2 = line['dst']
-            rel_rev = rel + '_reverse'
-            src.append(kb_index.ent_id[e1])
-            rel.append(kb_index.rel_id[rel])
-            dst.append(kb_index.ent_id[e2])
-            src.append(kb_index.ent_id[e2])
-            rel.append(kb_index.rel_reverse_id[rel_rev])
-            dst.append(kb_index.ent_id[e1])
+            h = line['src']
+            r = line['dstProperty']
+            t = line['dst']
+            r_reverse = r + '_reverse'
+            src.append(kg_vocab.ent_id[h])
+            rel.append(kg_vocab.rel_id[r])
+            dst.append(kg_vocab.ent_id[t])
+            src.append(kg_vocab.ent_id[t])
+            rel.append(kg_vocab.rel_rev_id[r_reverse])
+            dst.append(kg_vocab.ent_id[h])
     return src, rel, dst
 
 
