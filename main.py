@@ -160,13 +160,16 @@ def make_kg_vocab(*filenames):
     rel_reverse = set()
     for filename in filenames:
         with open(filename) as f:
-            for ln in f:
-                s, r, t = ln.strip().split('\t')[:3]
-                r_reverse = r + '_reverse'
-                ent_set.add(s)
-                ent_set.add(t)
-                rel_set.add(r)
-                rel_reverse.add(r_reverse)
+            for line in f:
+                line = json.loads(line)
+                e1 = line['src']
+                rel = line['dstProperty']
+                e2 = line['dst']
+                rel_rev = rel + '_reverse'
+                ent_set.add(e1)
+                ent_set.add(e2)
+                rel_set.add(rel)
+                rel_reverse.add(rel_rev)
     ent_list = sorted(list(ent_set))
     rel_list = sorted(list(rel_set))
     rel_reverse_list = sorted(list(rel_reverse))
