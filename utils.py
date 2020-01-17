@@ -103,11 +103,14 @@ def read_data(filename, kb_index):
     rel = []
     dst = []
     with open(filename) as f:
-        for ln in f:
-            s, r, t = ln.strip().split('\t')
-            src.append(kb_index.ent_id[s])
-            rel.append(kb_index.rel_id[r])
-            dst.append(kb_index.ent_id[t])
+        for line in f:
+            line = json.loads(line)
+            e1 = line['src']
+            rel = line['dstProperty']
+            e2 = line['dst']
+            src.append(kb_index.ent_id[e1])
+            rel.append(kb_index.rel_id[rel])
+            dst.append(kb_index.ent_id[e2])
     return src, rel, dst
 
 def read_reverse_data(filename, kb_index):
