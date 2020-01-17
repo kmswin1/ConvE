@@ -23,8 +23,6 @@ from logger import get_logger
 from model import ConvE, Complex
 
 dir = os.getcwd() + '/data'
-kg_vocab = namedtuple('kg_vocab', ['ent_list', 'rel_list', 'rel_rev_list' 'ent_id', 'rel_id', 'rel_rev_id'])
-
 
 def heads_tails(n_ent, train_data, valid_data=None, test_data=None):
     train_src, train_rel, train_dst = train_data
@@ -154,29 +152,29 @@ def batch_by_size(batch_size, *lists, n_sample=None):
         else:
             yield ret[0]
 
-def make_kg_vocab(*data):
+KBIndex = namedtuple('KBIndex', ['ent_list', 'rel_list', 'rel_reverse_list', 'ent_id', 'rel_id', 'rel_reverse_id'])
+
+def make_kg_vocab(*filenames):
     ent_set = set()
     rel_set = set()
-    rel_rev_set = set()
-    for filename in data:
+    rel_reverse = set()
+    for filename in filenames:
         with open(filename) as f:
-            for line in f:
-                line = json.loads(line)
-                e1 = line['src']
-                rel = line['dstProperty']
-                e2 = line['dst']
-                rel_rev = rel + '_reverse'
-                ent_set.add(e1)
-                ent_set.add(e2)
-                rel_set.add(rel)
-                rel_rev_set.add(rel_rev)
+            for ln in f:
+                s, r, t = ln.strip().split('\t')[:3]
+                r_reverse = r + '_reverse'
+                ent_set.add(s)
+                ent_set.add(t)
+                rel_set.add(r)
+                rel_reverse.add(r_reverse)
     ent_list = sorted(list(ent_set))
     rel_list = sorted(list(rel_set))
-    rel_rev_list = sorted(list(rel_rev_set))
+    rel_reverse_list = sorted(list(rel_reverse))
     ent_id = dict(zip(ent_list, count()))
     rel_id = dict(zip(rel_list, count()))
-    rel_rev_id = dict(zip(rel_rev_set, count()))
-    return kg_vocab(ent_list, rel_list, rel_rev_list, ent_id, rel_id, rel_rev_id)
+    rel_size = len(rel_id)
+    rel_reverse_id = dict(zip(rel_reverse_list, count(rel_size)))
+    return KBIndex(ent_list, rel_list, rel_reverse_list, ent_id, rel_id, rel_reverse_id)
 
 def graph_size(vocab):
     return len(vocab.ent_id), len(vocab.rel_id)*2
