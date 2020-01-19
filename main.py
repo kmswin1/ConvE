@@ -63,7 +63,7 @@ def main(args, model_path):
         for bh, br in batch_by_num(args.batch_size, h, r):
             opt.zero_grad()
             batch_size = bh.size(0)
-            e2_multi = torch.empty(batch_size, n_ent, device=torch.device('cuda'))
+            e2_multi = torch.empty(batch_size, n_ent)
             # label smoothing
             for i, (head, rel) in enumerate(zip(bh, br)):
                 head = head.item()
