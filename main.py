@@ -48,6 +48,8 @@ def main(args, model_path):
     print(sum(params))
     opt = torch.optim.Adam(model.parameters())
 
+    train_data_with_reverse = torch.nn.DataParallel(train_data_with_reverse)
+
     for epoch in range(args.epochs):
         print (epoch)
         epoch_loss = 0
