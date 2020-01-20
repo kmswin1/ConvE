@@ -71,11 +71,6 @@ def ranking_and_hits(model, batch_size, dateset, eval_h, eval_t, name, kg_vocab)
             # ranks.append(rank2+1)
             ranks_right.append(rank2)
 
-            print ("find_target1")
-            print (find_target1)
-            print ("rank1")
-            print (rank1)
-
             # this could be done more elegantly, but here you go
             hits[9].append(int(rank1<=10))
             hits[9].append(int(rank2<=10))
