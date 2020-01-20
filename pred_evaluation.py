@@ -104,7 +104,7 @@ def ranking_and_hits(model, batch_size, dateset, eval_h, eval_t, name, kg_vocab)
             idx2 = i
     logger.info ('head : ' + kg_vocab.ent_list[h])
     logger.info("predicted tails : ")
-    logger.info(kg_vocab.ent_list[argsort1[idx1])
+    logger.info(kg_vocab.ent_list[argsort1[idx1]])
     logger.info ('tail : ' + kg_vocab.ent_list[t])
     logger.info(kg_vocab.ent_list[argsort2[idx2]])
     logger.info("predicted heads : ")
