@@ -3,6 +3,7 @@ import json
 import torch
 import argparse
 import os
+from logger import get_logger, logger_init
 from utils import heads_tails, inplace_shuffle, batch_by_num, batch_by_size, make_kg_vocab, graph_size, read_data, read_reverse_data, read_data_with_rel_reverse
 import logging
 import time, datetime
@@ -12,6 +13,7 @@ from model import ConvE, Complex
 
 dir = os.getcwd() + '/data'
 
+logger = get_logger('training', True, True, 'training.txt')
 
 def main(args, model_path):
     print (os.getcwd())
@@ -61,7 +63,7 @@ def main(args, model_path):
         r = r[rand_idx].cuda()
         tot = 0.0
 
-        for bh, br in batch_by_num(args.batch_size, h, r):
+        for bh, br in batch_by_size(args.batch_size, h, r):
             opt.zero_grad()
             batch_size = bh.size(0)
             e2_multi = torch.empty(batch_size, n_ent)
@@ -92,7 +94,7 @@ def main(args, model_path):
         model.eval()
         with torch.no_grad():
             start = time.time()
-            ranking_and_hits(model, args.batch_size, test_data, eval_h, eval_t,'dev_evaluation')
+            ranking_and_hits(model, args.test_batch_size, test_data, eval_h, eval_t,'dev_evaluation')
             end = time.time()
             logging.info('eval time used: {} minutes'.format((end - start)/60))
             logging.info('valid {} loss: {}'.format(epoch + 1, epoch_loss))

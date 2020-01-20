@@ -41,7 +41,7 @@ def main(args, model_path):
     model = model.load_state_dict(torch.load('/root/person_conve_0.2_0.3.model'))
     print ('cuda : ' + str(torch.cuda.is_available()))
 
-    model.eval()
+    #model.eval()
     with torch.no_grad():
         start = time.time()
         ranking_and_hits(model, args.batch_size, test_data, eval_h, eval_t,'prediction', kg_vocab)

@@ -5,7 +5,7 @@ from logger import get_logger
 from utils import batch_by_size
 import time
 #timer = CUDATimer()
-logger = get_logger('eval', True, True, 'prediction.txt')
+logger = get_logger('pred', True, True, 'prediction.txt')
 
 # ranking_and_hits(model, Config.batch_size, valid_data, eval_h, eval_t,'dev_evaluation', kg_vocab)
 def ranking_and_hits(model, batch_size, dateset, eval_h, eval_t, name, kg_vocab):
