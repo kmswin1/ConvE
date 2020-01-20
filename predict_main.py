@@ -7,6 +7,7 @@ from utils import heads_tails, inplace_shuffle, batch_by_num, batch_by_size, mak
 import logging
 import time, datetime
 from pred_evaluation import ranking_and_hits
+from model import ConvE, Complex
 
 dir = os.getcwd() + '/data'
 
@@ -35,13 +36,14 @@ def main(args, model_path):
     test_data = [torch.LongTensor(vec) for vec in test_data]
     train_data_with_reverse = [torch.LongTensor(vec) for vec in train_data_with_reverse]
 
-    model = torch.load_state_dict(torch.load('/root/person_conve_0.2_0.3.model'))
+    model = ConvE(args, n_ent, n_rel)
+    model = model.load_state_dict(torch.load('/root/person_conve_0.2_0.3.model'))
     print ('cuda : ' + str(torch.cuda.is_available()))
 
     model.eval()
     with torch.no_grad():
         start = time.time()
-        ranking_and_hits(model, args.batch_size, test_data, eval_h, eval_t,'dev_evaluation', kg_vocab)
+        ranking_and_hits(model, args.batch_size, test_data, eval_h, eval_t,'prediction', kg_vocab)
         end = time.time()
         logging.info('eval time used: {} minutes'.format((end - start)/60))
 
