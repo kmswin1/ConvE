@@ -92,11 +92,11 @@ def ranking_and_hits(model, batch_size, dateset, eval_h, eval_t, name, kg_vocab)
     # for i in range(10):
     #     logger.info('Hits left @{0}: {1}'.format(i+1, np.mean(hits_left[i])))
     #     logger.info('Hits right @{0}: {1}'.format(i+1, np.mean(hits_right[i])))
-    logger.info ('head : ' + kg_vocab.entlist[h])
+    logger.info ('head : ' + kg_vocab.ent_list[h])
     logger.info("predicted tails : ")
     for i in argsort1:
         logger.info(kg_vocab.entlist[i])
-    logger.info ('tail : ' + kg_vocab.entlist[t])
+    logger.info ('tail : ' + kg_vocab.ent_list[t])
     for i in argsort2:
         logger.info(kg_vocab.entlist[i])
     logger.info("predicted heads : ")
