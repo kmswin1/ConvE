@@ -15,6 +15,7 @@ dir = os.getcwd() + '/data'
 
 def main(args, model_path):
     print (os.getcwd())
+    print ("start training ...")
 
     train_data = dir + '/train.json'
     #valid_data = dir + '/valid.json'

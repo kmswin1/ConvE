@@ -57,7 +57,6 @@ def ranking_and_hits(model, batch_size, dateset, eval_h, eval_t, name):
         # sort and rank
         max_values, argsort1 = torch.sort(pred1, 1, descending=True)
         max_values, argsort2 = torch.sort(pred2, 1, descending=True)
-        # max_values, argsort2 = torch.sort(pred2, 1, descending=True)
         for i in range(b_size):
             # find the rank of the target entities
             find_target1 = argsort1[i] == bt[i]
