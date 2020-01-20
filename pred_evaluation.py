@@ -57,6 +57,8 @@ def ranking_and_hits(model, batch_size, dateset, eval_h, eval_t, name, kg_vocab)
         # sort and rank
         max_values, argsort1 = torch.sort(pred1, 1, descending=True)
         max_values, argsort2 = torch.sort(pred2, 1, descending=True)
+        print ("argsort1")
+        print (argsort1)
         for i in range(b_size):
             # find the rank of the target entities
             find_target1 = argsort1[i] == bt[i]
@@ -68,6 +70,11 @@ def ranking_and_hits(model, batch_size, dateset, eval_h, eval_t, name, kg_vocab)
             ranks_left.append(rank1)
             # ranks.append(rank2+1)
             ranks_right.append(rank2)
+
+            print ("find_target1")
+            print (find_target1)
+            print ("rank1")
+            print (rank1)
 
             # this could be done more elegantly, but here you go
             hits[9].append(int(rank1<=10))
@@ -94,10 +101,10 @@ def ranking_and_hits(model, batch_size, dateset, eval_h, eval_t, name, kg_vocab)
     #     logger.info('Hits right @{0}: {1}'.format(i+1, np.mean(hits_right[i])))
     logger.info ('head : ' + kg_vocab.ent_list[h])
     logger.info("predicted tails : ")
-    for i in argsort1:
+    for i in hits[9]:
         logger.info(kg_vocab.ent_list[i])
     logger.info ('tail : ' + kg_vocab.ent_list[t])
-    for i in argsort2:
+    for i in hits[9]:
         logger.info(kg_vocab.ent_list[i])
     logger.info("predicted heads : ")
     logger.info('Hits tail @{0}: {1}'.format(10, np.mean(hits_left[9])))
