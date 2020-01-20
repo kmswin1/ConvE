@@ -102,7 +102,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='KG completion for cruise contents data')
     parser.add_argument('--batch-size', type=int, default=128, help='input batch size for training (default: 128)')
     parser.add_argument('--test-batch-size', type=int, default=128, help='input batch size for testing/validation (default: 128)')
-    parser.add_argument('--epochs', type=int, default=100, help='number of epochs to train (default: 1000)')
+    parser.add_argument('--epochs', type=int, default=100, help='number of epochs to train (default: 100)')
     parser.add_argument('--lr', type=float, default=0.003, help='learning rate (default: 0.003)')
     parser.add_argument('--seed', type=int, default=17, metavar='S', help='random seed (default: 17)')
     parser.add_argument('--log-interval', type=int, default=100, help='how many batches to wait before logging training status')

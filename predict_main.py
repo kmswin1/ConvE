@@ -37,6 +37,7 @@ def main(args, model_path):
     train_data_with_reverse = [torch.LongTensor(vec) for vec in train_data_with_reverse]
 
     model = ConvE(args, n_ent, n_rel)
+    model.cuda() if torch.cuda.is_available() else model.cpu()
     model = model.load_state_dict(torch.load('/root/person_conve_0.2_0.3.model'))
     print ('cuda : ' + str(torch.cuda.is_available()))
 
