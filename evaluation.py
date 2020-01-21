@@ -105,9 +105,8 @@ def ranking_and_hits(model, batch_size, dateset, dataset_rev, eval_h, eval_t, na
     print('Mean reciprocal rank: {0}'.format(np.mean(1./np.array(ranks_left+ranks_right))))
 
     with open(dir+'/log_file/log.txt', 'w') as f:
-        f.write('-----evaluation-----')
+        f.write('-----evaluation-----\n')
         f.write('Hits tail @{0}: {1}\n'.format(10, np.mean(hits_left[9])))
-        f.write('Hits head @{0}: {1}\n'.format(10, np.mean(hits_right[9])))
         f.write('Hits head @{0}: {1}\n'.format(10, np.mean(hits_right[9])))
         f.write('Hits @{0}: {1}\n'.format(10, np.mean(hits[9])))
         f.write('Mean rank tail: {0}\n'.format(np.mean(ranks_left)))
