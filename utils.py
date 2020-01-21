@@ -129,7 +129,7 @@ def read_reverse_data(filename, kg_vocab):
             dst.append(kg_vocab.ent_id[h])
     return src, rel, dst
 
-def read_data_with_rel_reverse(filename, kg_vocab):
+'''def read_data_with_rel_reverse(filename, kg_vocab):
     src = []
     rel = []
     dst = []
@@ -146,4 +146,22 @@ def read_data_with_rel_reverse(filename, kg_vocab):
             src.append(kg_vocab.ent_id[t])
             rel.append(kg_vocab.rel_rev_id[r_reverse])
             dst.append(kg_vocab.ent_id[h])
-    return src, rel, dst
+    return src, rel, dst'''
+
+def read_data_with_rel_reverse(filename, kg_vocab):
+    src = []
+    rel = []
+    dst = []
+    rel_rev = []
+    with open(filename) as f:
+        for line in f:
+            line = json.loads(line)
+            h = line['src']
+            r = line['dstProperty']
+            t = line['dst']
+            r_reverse = r + '_reverse'
+            src.append(kg_vocab.ent_id[h])
+            rel.append(kg_vocab.rel_id[r])
+            rel_rev.append(kg_vocab.rel_rev_id[r_reverse])
+            dst.append(kg_vocab.ent_id[t])
+    return src, rel, rel_rev, dst
