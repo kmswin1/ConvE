@@ -124,7 +124,7 @@ def read_reverse_data(filename, kg_vocab):
             t = line['dst']
             r_revsers = r + '_reverse'
             src.append(kg_vocab.ent_id[t])
-            rel.append(kg_vocab.rel_id[r_revsers])
+            rel.append(kg_vocab.rel_rev_id[r_revsers])
             dst.append(kg_vocab.ent_id[h])
     return src, rel, dst
 
