@@ -38,11 +38,11 @@ def heads_tails_with_rev(n_ent, train_data, valid_data=None, test_data=None):
     if valid_data:
         valid_src, valid_rel, valid_rel_rev, valid_dst = valid_data
     else:
-        valid_src = valid_rel = valid_dst = []
+        valid_src = valid_rel = valid_rel_rev = valid_dst = []
     if test_data:
         test_src, test_rel, test_rel_rev, test_dst = test_data
     else:
-        test_src = test_rel = test_dst = []
+        test_src = test_rel = test_rel_rev = test_dst = []
     all_src = train_src + valid_src + test_src
     all_rel = train_rel + valid_rel + test_rel
     all_rel_rev = train_rel_rev + valid_rel_rev + test_rel_rev
