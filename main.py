@@ -13,8 +13,6 @@ from model import ConvE, Complex
 
 dir = os.getcwd() + '/data'
 
-logger = get_logger('training', True, True, 'training.txt')
-
 def main(args, model_path):
     print (os.getcwd())
     print ("start training ...")
