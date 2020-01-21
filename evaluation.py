@@ -51,6 +51,7 @@ def ranking_and_hits(model, batch_size, dateset, eval_h, eval_t, name):
             e2_multi2[i] = eval_h[t.item(), r.item()].to_dense()
         e2_multi1 = e2_multi1.cuda()
         e2_multi2 = e2_multi2.cuda()'''
+
         for i, (h, r, rr, t) in enumerate(zip(bh, br, brr, bt)):
             e2_multi1[i] = eval_t[h.item(), r.item()].to_dense()
             e2_multi2[i] = eval_h[t.item(), rr.item()].to_dense()
