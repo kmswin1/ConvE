@@ -33,17 +33,6 @@ def ranking_and_hits(model, batch_size, dateset, eval_h, eval_t, name, kg_vocab)
         pred1 = model.forward(bh, br)
         pred2 = model.forward(bt, br)
 
-        max_val = 0.0
-        for i, meta in enumerate(pred1):
-            if meta > max_val:
-                meta = max_val
-                idx1 = i
-        max_val = 0.0
-        for i, meta in enumerate(pred1):
-            if meta > max_val:
-                meta = max_val
-                idx2 = i
-
         e2_multi1 = torch.empty(b_size, pred1.size(1))
         e2_multi2 = torch.empty(b_size, pred1.size(1))
 
@@ -99,6 +88,13 @@ def ranking_and_hits(model, batch_size, dateset, eval_h, eval_t, name, kg_vocab)
             #     else:
             #         hits[hits_level].append(0.0)
             #         hits_right[hits_level].append(0.0)
+
+            for i, meta in enumerate(find_target1):
+                if meta.item() == True:
+                    idx1 = i
+            for i, meta in enumerate(find_target2):
+                if meta.item() == True:
+                    idx2 = i
 
     # for i in range(10):
     #     logger.info('Hits left @{0}: {1}'.format(i+1, np.mean(hits_left[i])))
