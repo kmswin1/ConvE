@@ -33,36 +33,6 @@ def heads_tails(n_ent, train_data, valid_data=None, test_data=None):
                                                torch.ones(len(heads[k])), torch.Size([n_ent]))
     return heads_sp, tails_sp
 
-def heads_tails_with_rev(n_ent, train_data, valid_data=None, test_data=None):
-    train_src, train_rel, train_rel_rev, train_dst = train_data
-    if valid_data:
-        valid_src, valid_rel, valid_rel_rev, valid_dst = valid_data
-    else:
-        valid_src = valid_rel = valid_rel_rev = valid_dst = []
-    if test_data:
-        test_src, test_rel, test_rel_rev, test_dst = test_data
-    else:
-        test_src = test_rel = test_rel_rev = test_dst = []
-    all_src = train_src + valid_src + test_src
-    all_rel = train_rel + valid_rel + test_rel
-    all_rel_rev = train_rel_rev + valid_rel_rev + test_rel_rev
-    all_dst = train_dst + valid_dst + test_dst
-    heads = defaultdict(lambda: set())
-    tails = defaultdict(lambda: set())
-    for s, r, r_rev, t in zip(all_src, all_rel, all_rel_rev, all_dst):
-        tails[s, r].add(t)
-        heads[t, r_rev].add(s)
-    heads_sp = {}
-    tails_sp = {}
-    for k in tails.keys():
-        tails_sp[k] = torch.sparse.FloatTensor(torch.LongTensor([list(tails[k])]),
-                                               torch.ones(len(tails[k])), torch.Size([n_ent]))
-    for k in heads.keys():
-        heads_sp[k] = torch.sparse.FloatTensor(torch.LongTensor([list(heads[k])]),
-                                               torch.ones(len(heads[k])), torch.Size([n_ent]))
-    return heads_sp, tails_sp
-
-
 def inplace_shuffle(*lists):
     idx = []
     for i in range(len(lists[0])):
@@ -158,7 +128,7 @@ def read_reverse_data(filename, kg_vocab):
             dst.append(kg_vocab.ent_id[h])
     return src, rel, dst
 
-'''def read_data_with_rel_reverse(filename, kg_vocab):
+def read_data_with_rel_reverse(filename, kg_vocab):
     src = []
     rel = []
     dst = []
@@ -175,22 +145,4 @@ def read_reverse_data(filename, kg_vocab):
             src.append(kg_vocab.ent_id[t])
             rel.append(kg_vocab.rel_rev_id[r_reverse])
             dst.append(kg_vocab.ent_id[h])
-    return src, rel, dst'''
-
-def read_data_with_rel_reverse(filename, kg_vocab):
-    src = []
-    rel = []
-    dst = []
-    rel_rev = []
-    with open(filename) as f:
-        for line in f:
-            line = json.loads(line)
-            h = line['src']
-            r = line['dstProperty']
-            t = line['dst']
-            r_reverse = r + '_reverse'
-            src.append(kg_vocab.ent_id[h])
-            rel.append(kg_vocab.rel_id[r])
-            rel_rev.append(kg_vocab.rel_rev_id[r_reverse])
-            dst.append(kg_vocab.ent_id[t])
-    return src, rel, rel_rev, dst
+    return src, rel, dst

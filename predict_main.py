@@ -20,26 +20,26 @@ def main(args, model_path):
     valid_data = dir + '/valid.json'
     test_data = dir + '/test.json'
 
-    kg_vocab = make_kg_vocab(train_data, valid_data, test_data)
+    kg_vocab = make_kg_vocab(train_data, test_data)
     n_ent, n_rel = graph_size(kg_vocab)
 
     train_data_with_reverse = read_data_with_rel_reverse(os.path.join(dir, 'train.json'), kg_vocab)
     inplace_shuffle(*train_data_with_reverse)
-    heads, tails = heads_tails(n_ent, train_data_with_reverse)
 
     train_data = read_data(os.path.join(dir, 'train.json'), kg_vocab)
     valid_data = read_data(os.path.join(dir, 'valid.json'), kg_vocab)
     test_data = read_data(os.path.join(dir, 'test.json'), kg_vocab)
-    eval_h, eval_t = heads_tails(n_ent, train_data, valid_data, test_data)
+    test_data_with_reverse = read_data_with_rel_reverse(os.path.join(dir, 'test.json'), kg_vocab)
+    eval_h, eval_t = heads_tails(n_ent, train_data, test_data)
 
     valid_data = [torch.LongTensor(vec) for vec in valid_data]
     test_data = [torch.LongTensor(vec) for vec in test_data]
-    train_data_with_reverse = [torch.LongTensor(vec) for vec in train_data_with_reverse]
+    test_data_with_reverse = [torch.LongTensor(vec) for vec in test_data_with_reverse]
 
     model = ConvE(args, n_ent, n_rel)
     model.cuda() if torch.cuda.is_available() else model.cpu()
     print ('cuda : ' + str(torch.cuda.is_available()))
-    model.load_state_dict(torch.load('/root/person_conve_0.2_0.3.model'))
+    model.load_state_dict(torch.load(args.model_path))
     print (model)
 
     model.eval()
@@ -72,6 +72,7 @@ if __name__ == '__main__':
     parser.add_argument('--label-smoothing', type=float, default=0.1, help='Label smoothing value to use. Default: 0.1')
     parser.add_argument('--hidden-size', type=int, default=9728, help='The side of the hidden layer. The required size changes with the size of the embeddings. Default: 9728 (embedding size 200).')
     parser.add_argument('--log-file', action='store', type=str)
+    parser.add_argument('--model-path', type=str, default='/saved_models/webtoon_conve_0.2_0.3.model', help='define your model to evaluate')
 
     args = parser.parse_args()
 

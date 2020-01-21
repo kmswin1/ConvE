@@ -4,7 +4,7 @@ import torch
 import argparse
 import os
 from logger import get_logger, logger_init
-from utils import heads_tails, heads_tails_with_rev, inplace_shuffle, batch_by_num, batch_by_size, make_kg_vocab, graph_size, read_data, read_reverse_data, read_data_with_rel_reverse
+from utils import heads_tails, inplace_shuffle, batch_by_num, batch_by_size, make_kg_vocab, graph_size, read_data, read_reverse_data, read_data_with_rel_reverse
 import logging
 import time, datetime
 from evaluation import ranking_and_hits
@@ -25,28 +25,18 @@ def main(args, model_path):
     n_ent, n_rel = graph_size(kg_vocab)
 
     train_data_with_reverse = read_data_with_rel_reverse(os.path.join(dir, 'train.json'), kg_vocab)
-    #inplace_shuffle(*train_data_with_reverse)
-    #heads, tails = heads_tails(n_ent, train_data_with_reverse)
+    inplace_shuffle(*train_data_with_reverse)
+    heads, tails = heads_tails(n_ent, train_data_with_reverse)
 
     train_data = read_data(os.path.join(dir, 'train.json'), kg_vocab)
-    inplace_shuffle(*train_data)
-    heads, tails = heads_tails(n_ent, train_data)
-
-    #train_data = read_data(os.path.join(dir, 'train.json'), kg_vocab)
     #valid_data = read_data(os.path.join(dir, 'valid.json'), kg_vocab)
     test_data = read_data(os.path.join(dir, 'test.json'), kg_vocab)
-    #eval_h, eval_t = heads_tails(n_ent, train_data, test_data)
-
-    test_data_with_reverse = read_data_with_rel_reverse(os.path.join(dir, 'test.json'), kg_vocab)
-    #eval_h, eval_t = heads_tails(n_ent, train_data, test_data)
-    eval_h, eval_t = heads_tails_with_rev(n_ent, train_data_with_reverse, test_data_with_reverse)
+    eval_h, eval_t = heads_tails(n_ent, train_data, test_data)
 
     #valid_data = [torch.LongTensor(vec) for vec in valid_data]
-    #test_data = [torch.LongTensor(vec) for vec in test_data]
-    #train_data_with_reverse = [torch.LongTensor(vec) for vec in train_data_with_reverse]
+    test_data = [torch.LongTensor(vec) for vec in test_data]
+    train_data_with_reverse = [torch.LongTensor(vec) for vec in train_data_with_reverse]
 
-    test_data_with_reverse = [torch.LongTensor(vec) for vec in test_data_with_reverse]
-    train_data = [torch.LongTensor(vec) for vec in train_data]
 
 
     model = ConvE(args, n_ent, n_rel)
@@ -64,8 +54,7 @@ def main(args, model_path):
         epoch_loss = 0
         start = time.time()
         model.train()
-        #h, r, t = train_data_with_reverse
-        h, r, t = train_data
+        h, r, t = train_data_with_reverse
         n_train = h.size(0)
         rand_idx = torch.randperm(n_train)
         h = h[rand_idx].cuda()
@@ -103,8 +92,7 @@ def main(args, model_path):
         model.eval()
         with torch.no_grad():
             start = time.time()
-            #ranking_and_hits(model, args.test_batch_size, test_data, eval_h, eval_t,'dev_evaluation')
-            ranking_and_hits(model, args.test_batch_size, test_data_with_reverse, eval_h, eval_t, 'dev_evaluation')
+            ranking_and_hits(model, args.test_batch_size, test_data, eval_h, eval_t,'dev_evaluation')
             end = time.time()
             logging.info('eval time used: {} minutes'.format((end - start)/60))
             logging.info('valid {} loss: {}'.format(epoch + 1, epoch_loss))
