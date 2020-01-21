@@ -23,7 +23,6 @@ def main(args, model_path):
 
     kg_vocab = make_kg_vocab(train_data, test_data)
     n_ent, n_rel = graph_size(kg_vocab)
-    n_rel /= 2
 
     train_data = read_data(os.path.join(dir, 'train.json'), kg_vocab)
     inplace_shuffle(*train_data)

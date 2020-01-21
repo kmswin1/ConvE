@@ -95,7 +95,7 @@ def make_kg_vocab(*data):
     return kg_vocab(ent_list, rel_list, rel_rev_list, ent_id, rel_id, rel_rev_id)
 
 def graph_size(vocab):
-    return len(vocab.ent_id), len(vocab.rel_id)*2
+    return len(vocab.ent_id), len(vocab.rel_id)
 
 def read_data(filename, kg_vocab):
     src = []
