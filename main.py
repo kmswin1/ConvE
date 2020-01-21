@@ -36,6 +36,7 @@ def main(args, model_path):
     #valid_data = [torch.LongTensor(vec) for vec in valid_data]
     test_data = [torch.LongTensor(vec) for vec in test_data]
     train_data_with_reverse = [torch.LongTensor(vec) for vec in train_data_with_reverse]
+    test_reverse = read_reverse_data(os.path.join(dir, 'test.json'), kg_vocab)
 
 
 
@@ -92,7 +93,7 @@ def main(args, model_path):
         model.eval()
         with torch.no_grad():
             start = time.time()
-            ranking_and_hits(model, args.test_batch_size, test_data, eval_h, eval_t,'dev_evaluation')
+            ranking_and_hits(model, args.test_batch_size, test_data, test_reverse, eval_h, eval_t,'dev_evaluation')
             end = time.time()
             logging.info('eval time used: {} minutes'.format((end - start)/60))
             logging.info('valid {} loss: {}'.format(epoch + 1, epoch_loss))

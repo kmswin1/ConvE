@@ -8,7 +8,8 @@ import time
 logger = get_logger('eval', True, True, 'evaluation.txt')
 
 # ranking_and_hits(model, Config.batch_size, valid_data, eval_h, eval_t,'dev_evaluation')
-def ranking_and_hits(model, batch_size, dateset, eval_h, eval_t, name):
+def ranking_and_hits(model, batch_size, dateset, dataset_rev, eval_h, eval_t, name):
+    heads_rev, rels_rev, tails_rev = dataset_rev
     heads, rels, tails = dateset
     logger.info('')
     logger.info('-'*50)
@@ -27,18 +28,18 @@ def ranking_and_hits(model, batch_size, dateset, eval_h, eval_t, name):
         hits_right.append([])
         hits.append([])
 
-    for bh, br, bt in batch_by_size(batch_size, heads, rels, tails):
+    for bh, br, brr, bt in batch_by_size(batch_size, heads, rels, rels_rev, tails):
         b_size = bh.size(0)
-        bh = bh.cuda();br = br.cuda();bt = bt.cuda()
+        bh = bh.cuda();br = br.cuda();bt = bt.cuda();brr = brr.cuda()
         pred1 = model.forward(bh, br)
-        pred2 = model.forward(bt, br)
+        pred2 = model.forward(bt, brr)
 
         e2_multi1 = torch.empty(b_size, pred1.size(1))
         e2_multi2 = torch.empty(b_size, pred1.size(1))
 
-        for i, (h, r, t) in enumerate(zip(bh, br, bt)):
+        for i, (h, r, rr, t) in enumerate(zip(bh, br, brr, bt)):
             e2_multi1[i] = eval_t[h.item(), r.item()].to_dense()
-            e2_multi2[i] = eval_h[t.item(), r.item()].to_dense()
+            e2_multi2[i] = eval_h[t.item(), rr.item()].to_dense()
         e2_multi1 = e2_multi1.cuda()
         e2_multi2 = e2_multi2.cuda()
 
