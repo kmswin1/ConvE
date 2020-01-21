@@ -31,7 +31,7 @@ def ranking_and_hits(model, batch_size, dateset, eval_h, eval_t, name):
         b_size = bh.size(0)
         bh = bh.cuda();br = br.cuda();bt = bt.cuda()
         pred1 = model.forward(bh, br)
-        pred2 = model.forward(bt, br)
+        #pred2 = model.forward(bt, br)
 
         e2_multi1 = torch.empty(b_size, pred1.size(1))
         e2_multi2 = torch.empty(b_size, pred1.size(1))
@@ -45,36 +45,36 @@ def ranking_and_hits(model, batch_size, dateset, eval_h, eval_t, name):
         for i in range(b_size):
             # save the prediction that is relevant
             target_value1 = pred1[i,bt[i].item()].item()
-            target_value2 = pred2[i,bh[i].item()].item()
+            #target_value2 = pred2[i,bh[i].item()].item()
             # zero all known cases (this are not interesting)
             # this corresponds to the filtered setting
             pred1[i] += e2_multi1[i] * (-1e20)
-            pred2[i] += e2_multi2[i] * (-1e20)
+            #pred2[i] += e2_multi2[i] * (-1e20)
             # write base the saved values
             pred1[i][bt[i].item()] = target_value1
-            pred2[i][bh[i].item()] = target_value2
+            #pred2[i][bh[i].item()] = target_value2
 
         # sort and rank
         max_values, argsort1 = torch.sort(pred1, 1, descending=True)
-        max_values, argsort2 = torch.sort(pred2, 1, descending=True)
+        #max_values, argsort2 = torch.sort(pred2, 1, descending=True)
         # max_values, argsort2 = torch.sort(pred2, 1, descending=True)
         for i in range(b_size):
             # find the rank of the target entities
             find_target1 = argsort1[i] == bt[i]
-            find_target2 = argsort2[i] == bh[i]
+            #find_target2 = argsort2[i] == bh[i]
             rank1 = torch.nonzero(find_target1)[0, 0].item() + 1
-            rank2 = torch.nonzero(find_target2)[0, 0].item() + 1
+            #rank2 = torch.nonzero(find_target2)[0, 0].item() + 1
             # rank+1, since the lowest rank is rank 1 not rank 0
             # ranks.append(rank1+1)
             ranks_left.append(rank1)
             # ranks.append(rank2+1)
-            ranks_right.append(rank2)
+            #ranks_right.append(rank2)
 
             # this could be done more elegantly, but here you go
             hits[9].append(int(rank1<=10))
-            hits[9].append(int(rank2<=10))
+            #hits[9].append(int(rank2<=10))
             hits_left[9].append((int(rank1<=10)))
-            hits_right[9].append((int(rank2<=10)))
+            #hits_right[9].append((int(rank2<=10)))
             # for hits_level in range(10):
             #     if rank1 <= hits_level:
             #         hits[hits_level].append(1.0)
@@ -94,11 +94,11 @@ def ranking_and_hits(model, batch_size, dateset, eval_h, eval_t, name):
     #     logger.info('Hits left @{0}: {1}'.format(i+1, np.mean(hits_left[i])))
     #     logger.info('Hits right @{0}: {1}'.format(i+1, np.mean(hits_right[i])))
     logger.info('Hits tail @{0}: {1}'.format(10, np.mean(hits_left[9])))
-    logger.info('Hits head @{0}: {1}'.format(10, np.mean(hits_right[9])))
+    #logger.info('Hits head @{0}: {1}'.format(10, np.mean(hits_right[9])))
     logger.info('Hits @{0}: {1}'.format(10, np.mean(hits[9])))
     logger.info('Mean rank tail: {0}'.format(np.mean(ranks_left)))
-    logger.info('Mean rank head: {0}'.format(np.mean(ranks_right)))
-    logger.info('Mean rank: {0}'.format(np.mean(ranks_left+ranks_right)))
+    #logger.info('Mean rank head: {0}'.format(np.mean(ranks_right)))
+    #logger.info('Mean rank: {0}'.format(np.mean(ranks_left+ranks_right)))
     logger.info('Mean reciprocal rank tail: {0}'.format(np.mean(1./np.array(ranks_left))))
-    logger.info('Mean reciprocal rank head: {0}'.format(np.mean(1./np.array(ranks_right))))
-    logger.info('Mean reciprocal rank: {0}'.format(np.mean(1./np.array(ranks_left+ranks_right))))
+    #logger.info('Mean reciprocal rank head: {0}'.format(np.mean(1./np.array(ranks_right))))
+    #logger.info('Mean reciprocal rank: {0}'.format(np.mean(1./np.array(ranks_left+ranks_right))))
