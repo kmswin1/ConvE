@@ -5,7 +5,6 @@ from logger import get_logger
 from utils import batch_by_size
 import time
 #timer = CUDATimer()
-logger = get_logger('eval', True, True, 'evaluation.txt')
 dir = os.getcwd()
 # ranking_and_hits(model, Config.batch_size, valid_data, eval_h, eval_t,'dev_evaluation')
 def ranking_and_hits(model, batch_size, dateset, dataset_rev, eval_h, eval_t, name):
@@ -94,7 +93,19 @@ def ranking_and_hits(model, batch_size, dateset, dataset_rev, eval_h, eval_t, na
     # for i in range(10):
     #     logger.info('Hits left @{0}: {1}'.format(i+1, np.mean(hits_left[i])))
     #     logger.info('Hits right @{0}: {1}'.format(i+1, np.mean(hits_right[i])))
+
+    print('Hits tail @{0}: {1}'.format(10, np.mean(hits_left[9])))
+    print('Hits head @{0}: {1}'.format(10, np.mean(hits_right[9])))
+    print('Hits @{0}: {1}'.format(10, np.mean(hits[9])))
+    print('Mean rank tail: {0}'.format(np.mean(ranks_left)))
+    print('Mean rank head: {0}'.format(np.mean(ranks_right)))
+    print('Mean rank: {0}'.format(np.mean(ranks_left+ranks_right)))
+    print('Mean reciprocal rank tail: {0}'.format(np.mean(1./np.array(ranks_left))))
+    print('Mean reciprocal rank head: {0}'.format(np.mean(1./np.array(ranks_right))))
+    print('Mean reciprocal rank: {0}'.format(np.mean(1./np.array(ranks_left+ranks_right))))
+
     with open(dir+'/log_file/log.txt', 'w') as f:
+        f.write('-----evaluation-----')
         f.write('Hits tail @{0}: {1}\n'.format(10, np.mean(hits_left[9])))
         f.write('Hits head @{0}: {1}\n'.format(10, np.mean(hits_right[9])))
         f.write('Hits head @{0}: {1}\n'.format(10, np.mean(hits_right[9])))
@@ -107,13 +118,3 @@ def ranking_and_hits(model, batch_size, dateset, dataset_rev, eval_h, eval_t, na
         f.write('Mean reciprocal rank: {0}\n'.format(np.mean(1./np.array(ranks_left+ranks_right))))
 
     f.close()
-
-    logger.info('Hits tail @{0}: {1}'.format(10, np.mean(hits_left[9])))
-    logger.info('Hits head @{0}: {1}'.format(10, np.mean(hits_right[9])))
-    logger.info('Hits @{0}: {1}'.format(10, np.mean(hits[9])))
-    logger.info('Mean rank tail: {0}'.format(np.mean(ranks_left)))
-    logger.info('Mean rank head: {0}'.format(np.mean(ranks_right)))
-    logger.info('Mean rank: {0}'.format(np.mean(ranks_left+ranks_right)))
-    logger.info('Mean reciprocal rank tail: {0}'.format(np.mean(1./np.array(ranks_left))))
-    logger.info('Mean reciprocal rank head: {0}'.format(np.mean(1./np.array(ranks_right))))
-    logger.info('Mean reciprocal rank: {0}'.format(np.mean(1./np.array(ranks_left+ranks_right))))
