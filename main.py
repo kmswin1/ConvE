@@ -4,7 +4,7 @@ import torch
 import argparse
 import os
 from logger import get_logger, logger_init
-from utils import heads_tails, inplace_shuffle, batch_by_num, batch_by_size, make_kg_vocab, graph_size, read_data, read_reverse_data, read_data_with_rel_reverse
+from utils import heads_tails, heads_tails_eval, inplace_shuffle, batch_by_num, batch_by_size, make_kg_vocab, graph_size, read_data, read_reverse_data, read_data_with_rel_reverse
 import logging
 import time, datetime
 from evaluation import ranking_and_hits
@@ -30,10 +30,11 @@ def main(args, model_path):
     heads, tails = heads_tails(n_ent, train_data_with_reverse)
 
     train_data = read_data(os.path.join(dir, 'train.json'), kg_vocab)
+    train_reverse = read_reverse_data(os.path.join(dir, 'train.json'), kg_vocab)
     #valid_data = read_data(os.path.join(dir, 'valid.json'), kg_vocab)
     test_data = read_data(os.path.join(dir, 'test.json'), kg_vocab)
     test_reverse = read_reverse_data(os.path.join(dir, 'test.json'), kg_vocab)
-    eval_h, eval_t = heads_tails(n_ent, train_data_with_reverse, test_data_with_reverse)
+    eval_h, eval_t = heads_tails_eval(n_ent, train_data, train_reverse, test_data, test_reverse)
 
     #valid_data = [torch.LongTensor(vec) for vec in valid_data]
     test_data = [torch.LongTensor(vec) for vec in test_data]
