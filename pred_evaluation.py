@@ -33,6 +33,17 @@ def ranking_and_hits(model, batch_size, dateset, eval_h, eval_t, name, kg_vocab)
         pred1 = model.forward(bh, br)
         pred2 = model.forward(bt, br)
 
+        max_val = 0.0
+        for i, meta in enumerate(pred1):
+            if meta > max_val:
+                meta = max_val
+                idx1 = i
+        max_val = 0.0
+        for i, meta in enumerate(pred1):
+            if meta > max_val:
+                meta = max_val
+                idx2 = i
+
         e2_multi1 = torch.empty(b_size, pred1.size(1))
         e2_multi2 = torch.empty(b_size, pred1.size(1))
 
@@ -92,19 +103,11 @@ def ranking_and_hits(model, batch_size, dateset, eval_h, eval_t, name, kg_vocab)
     # for i in range(10):
     #     logger.info('Hits left @{0}: {1}'.format(i+1, np.mean(hits_left[i])))
     #     logger.info('Hits right @{0}: {1}'.format(i+1, np.mean(hits_right[i])))
-    idx1 = 0
-    idx2 = 0
-    for i, meta in enumerate(find_target1):
-        if meta == True:
-            idx1 = i
-    for i, meta in enumerate(find_target2):
-        if meta == True:
-            idx2 = i
     logger.info ('head : ' + kg_vocab.ent_list[h])
     logger.info("predicted tails : ")
-    logger.info(kg_vocab.ent_list[argsort1[idx1].item()])
+    logger.info(kg_vocab.ent_list[idx1])
     logger.info ('tail : ' + kg_vocab.ent_list[t])
-    logger.info(kg_vocab.ent_list[argsort2[idx2].item()])
+    logger.info(kg_vocab.ent_list[idx2])
     logger.info("predicted heads : ")
     logger.info('Hits tail @{0}: {1}'.format(10, np.mean(hits_left[9])))
     logger.info('Hits head @{0}: {1}'.format(10, np.mean(hits_right[9])))
