@@ -1,12 +1,12 @@
 import torch
 import numpy as np
-import datetime
+import datetime, os
 from logger import get_logger
 from utils import batch_by_size
 import time
 #timer = CUDATimer()
 logger = get_logger('eval', True, True, 'evaluation.txt')
-
+dir = os.getcwd()
 # ranking_and_hits(model, Config.batch_size, valid_data, eval_h, eval_t,'dev_evaluation')
 def ranking_and_hits(model, batch_size, dateset, dataset_rev, eval_h, eval_t, name):
     heads_rev, rels_rev, tails_rev = dataset_rev
@@ -94,6 +94,20 @@ def ranking_and_hits(model, batch_size, dateset, dataset_rev, eval_h, eval_t, na
     # for i in range(10):
     #     logger.info('Hits left @{0}: {1}'.format(i+1, np.mean(hits_left[i])))
     #     logger.info('Hits right @{0}: {1}'.format(i+1, np.mean(hits_right[i])))
+    with open(dir+'/log_file/log.txt', 'w') as f:
+        f.write('Hits tail @{0}: {1}\n'.format(10, np.mean(hits_left[9])))
+        f.write('Hits head @{0}: {1}'.format(10, np.mean(hits_right[9])))
+        f.write('Hits head @{0}: {1}'.format(10, np.mean(hits_right[9])))
+        f.write('Hits @{0}: {1}'.format(10, np.mean(hits[9])))
+        f.write('Mean rank tail: {0}'.format(np.mean(ranks_left)))
+        f.write('Mean rank head: {0}'.format(np.mean(ranks_right)))
+        f.write('Mean rank: {0}'.format(np.mean(ranks_left+ranks_right)))
+        f.write('Mean reciprocal rank tail: {0}'.format(np.mean(1./np.array(ranks_left))))
+        f.write('Mean reciprocal rank head: {0}'.format(np.mean(1./np.array(ranks_right))))
+        f.write('Mean reciprocal rank: {0}'.format(np.mean(1./np.array(ranks_left+ranks_right))))
+
+    f.close()
+
     logger.info('Hits tail @{0}: {1}'.format(10, np.mean(hits_left[9])))
     logger.info('Hits head @{0}: {1}'.format(10, np.mean(hits_right[9])))
     logger.info('Hits @{0}: {1}'.format(10, np.mean(hits[9])))
