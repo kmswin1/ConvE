@@ -31,13 +31,13 @@ def main(args, model_path):
     train_data = read_data(os.path.join(dir, 'train.json'), kg_vocab)
     #valid_data = read_data(os.path.join(dir, 'valid.json'), kg_vocab)
     test_data = read_data(os.path.join(dir, 'test.json'), kg_vocab)
+    test_reverse = read_reverse_data(os.path.join(dir, 'test.json'), kg_vocab)
     eval_h, eval_t = heads_tails(n_ent, train_data, test_data)
 
     #valid_data = [torch.LongTensor(vec) for vec in valid_data]
     test_data = [torch.LongTensor(vec) for vec in test_data]
     train_data_with_reverse = [torch.LongTensor(vec) for vec in train_data_with_reverse]
-    test_reverse = read_reverse_data(os.path.join(dir, 'test.json'), kg_vocab)
-
+    test_reverse = [torch.LongTensor(vec) for vec in test_reverse]
 
 
     model = ConvE(args, n_ent, n_rel)
