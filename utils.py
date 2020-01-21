@@ -49,7 +49,7 @@ def heads_tails_eval(n_ent, train_data, train_reverse, test_data, test_reverse):
     for s, r, t in zip(all_src, all_rel, all_dst):
         tails[s, r].add(t)
     for s,r,t in zip(all_src_rev, all_rel_rev, all_dst_rev):
-        heads[t, r].add(s)
+        heads[s, r].add(t)
     heads_sp = {}
     tails_sp = {}
     for k in tails.keys():
