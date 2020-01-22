@@ -10,11 +10,6 @@ dir = os.getcwd()
 def ranking_and_hits(model, batch_size, dateset, dataset_rev, eval_h, eval_t, name, kg_vocab):
     heads_rev, rels_rev, tails_rev = dataset_rev
     heads, rels, tails = dateset
-    #logger.info('')
-    #logger.info('-'*50)
-    #logger.info(name)
-    #logger.info('-'*50)
-    #logger.info('')
     hits_left = []
     hits_right = []
     hits = []

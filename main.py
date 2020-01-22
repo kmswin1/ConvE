@@ -43,6 +43,7 @@ def main(args, model_path):
 
 
     model = ConvE(args, n_ent, n_rel)
+    model = torch.nn.DataParallel(model)
     model.cuda() if torch.cuda.is_available() else model.cpu()
     print ('cuda : ' + str(torch.cuda.is_available()))
 
@@ -67,7 +68,7 @@ def main(args, model_path):
         for bh, br in batch_by_size(args.batch_size, h, r):
             opt.zero_grad()
             batch_size = bh.size(0)
-            e2_multi = torch.empty(batch_size, n_ent)
+            e2_multi = torch.empty(batch_size, n_ent, device=torch.device('cuda'))
             # label smoothing
             for i, (head, rel) in enumerate(zip(bh, br)):
                 head = head.item()
