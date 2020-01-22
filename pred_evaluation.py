@@ -1,20 +1,20 @@
 import torch
 import numpy as np
-import datetime
+import datetime, os, pickle
 from logger import get_logger
 from utils import batch_by_size
 import time
 #timer = CUDATimer()
-logger = get_logger('pred', True, True, 'prediction.txt')
-
-# ranking_and_hits(model, Config.batch_size, valid_data, eval_h, eval_t,'dev_evaluation', kg_vocab)
-def ranking_and_hits(model, batch_size, dateset, eval_h, eval_t, name, kg_vocab):
+dir = os.getcwd()
+# ranking_and_hits(model, Config.batch_size, valid_data, eval_h, eval_t,'dev_evaluation')
+def ranking_and_hits(model, batch_size, dateset, dataset_rev, eval_h, eval_t, name, kg_vocab):
+    heads_rev, rels_rev, tails_rev = dataset_rev
     heads, rels, tails = dateset
-    logger.info('')
-    logger.info('-'*50)
-    logger.info(name)
-    logger.info('-'*50)
-    logger.info('')
+    #logger.info('')
+    #logger.info('-'*50)
+    #logger.info(name)
+    #logger.info('-'*50)
+    #logger.info('')
     hits_left = []
     hits_right = []
     hits = []
@@ -27,18 +27,24 @@ def ranking_and_hits(model, batch_size, dateset, eval_h, eval_t, name, kg_vocab)
         hits_right.append([])
         hits.append([])
 
-    for bh, br, bt in batch_by_size(batch_size, heads, rels, tails):
+    for bh, br, brr, bt in batch_by_size(batch_size, heads, rels, rels_rev, tails):
         b_size = bh.size(0)
-        bh = bh.cuda();br = br.cuda();bt = bt.cuda()
+        bh = bh.cuda();br = br.cuda();bt = bt.cuda();brr = brr.cuda()
         pred1 = model.forward(bh, br)
-        pred2 = model.forward(bt, br)
+        pred2 = model.forward(bt, brr)
+        test_heads = []
+        test_tails = []
+        test_rels = []
+        test_rels_rev = []
+        pred_heads = []
+        pred_tails = []
 
         e2_multi1 = torch.empty(b_size, pred1.size(1))
         e2_multi2 = torch.empty(b_size, pred1.size(1))
 
-        for i, (h, r, t) in enumerate(zip(bh, br, bt)):
+        for i, (h, r, rr, t) in enumerate(zip(bh, br, brr, bt)):
             e2_multi1[i] = eval_t[h.item(), r.item()].to_dense()
-            e2_multi2[i] = eval_h[t.item(), r.item()].to_dense()
+            e2_multi2[i] = eval_h[t.item(), rr.item()].to_dense()
         e2_multi1 = e2_multi1.cuda()
         e2_multi2 = e2_multi2.cuda()
 
@@ -57,6 +63,7 @@ def ranking_and_hits(model, batch_size, dateset, eval_h, eval_t, name, kg_vocab)
         # sort and rank
         max_values, argsort1 = torch.sort(pred1, 1, descending=True)
         max_values, argsort2 = torch.sort(pred2, 1, descending=True)
+        # max_values, argsort2 = torch.sort(pred2, 1, descending=True)
         for i in range(b_size):
             # find the rank of the target entities
             find_target1 = argsort1[i] == bt[i]
@@ -89,30 +96,51 @@ def ranking_and_hits(model, batch_size, dateset, eval_h, eval_t, name, kg_vocab)
             #         hits[hits_level].append(0.0)
             #         hits_right[hits_level].append(0.0)
 
-            for i, meta in enumerate(find_target1):
-                if meta.item() == True:
-                    idx1 = i
-            for i, meta in enumerate(find_target2):
-                if meta.item() == True:
-                    idx2 = i
-
     # for i in range(10):
     #     logger.info('Hits left @{0}: {1}'.format(i+1, np.mean(hits_left[i])))
     #     logger.info('Hits right @{0}: {1}'.format(i+1, np.mean(hits_right[i])))
-        logger.info ('head : ' + kg_vocab.ent_list[h])
-        logger.info("relation : " + kg_vocab.rel_list[r])
-        logger.info("predicted tails : ")
-        logger.info(kg_vocab.ent_list[idx1])
-        logger.info ('tail : ' + kg_vocab.ent_list[t])
-        logger.info("relation : " + kg_vocab.rel_list[r])
-        logger.info(kg_vocab.ent_list[idx2])
-        logger.info("predicted heads : ")
-    logger.info('Hits tail @{0}: {1}'.format(10, np.mean(hits_left[9])))
-    logger.info('Hits head @{0}: {1}'.format(10, np.mean(hits_right[9])))
-    logger.info('Hits @{0}: {1}'.format(10, np.mean(hits[9])))
-    logger.info('Mean rank tail: {0}'.format(np.mean(ranks_left)))
-    logger.info('Mean rank head: {0}'.format(np.mean(ranks_right)))
-    logger.info('Mean rank: {0}'.format(np.mean(ranks_left+ranks_right)))
-    logger.info('Mean reciprocal rank tail: {0}'.format(np.mean(1./np.array(ranks_left))))
-    logger.info('Mean reciprocal rank head: {0}'.format(np.mean(1./np.array(ranks_right))))
-    logger.info('Mean reciprocal rank: {0}'.format(np.mean(1./np.array(ranks_left+ranks_right))))
+        for i, meta in enumerate(find_target1):
+            if meta.item() == True:
+                idx1 = i
+                break
+        test_heads.append(kg_vocab.ent_list[h])
+        test_rels.append(kg_vocab.rel_list[r])
+        pred_tails.append(kg_vocab.ent_list[idx1])
+        for i, meta in enumerate(find_target2):
+            if meta.item() == True:
+                idx2 = i
+                break
+        test_tails.append(kg_vocab.ent_list[t])
+        test_rels_rev.append(kg_vocab.rel_rev_list[rr])
+        pred_heads.append(kg_vocab.ent_list[idx2])
+
+    print('Hits tail @{0}: {1}'.format(10, np.mean(hits_left[9])))
+    print('Hits head @{0}: {1}'.format(10, np.mean(hits_right[9])))
+    print('Hits @{0}: {1}'.format(10, np.mean(hits[9])))
+    print('Mean rank tail: {0}'.format(np.mean(ranks_left)))
+    print('Mean rank head: {0}'.format(np.mean(ranks_right)))
+    print('Mean rank: {0}'.format(np.mean(ranks_left+ranks_right)))
+    print('Mean reciprocal rank tail: {0}'.format(np.mean(1./np.array(ranks_left))))
+    print('Mean reciprocal rank head: {0}'.format(np.mean(1./np.array(ranks_right))))
+    print('Mean reciprocal rank: {0}'.format(np.mean(1./np.array(ranks_left+ranks_right))))
+
+    with open(dir+'/log_file/log.txt', 'w') as f:
+        f.write('-----evaluation-----\n')
+        pickle.dump(test_heads, f)
+        pickle.dump(test_rels, f)
+        pickle.dump(pred_tails, f)
+        pickle.dump(test_tails, f)
+        pickle.dump(test_rels_rev, f)
+        pickle.dump(pred_heads, f)
+        f.write('Hits tail @{0}: {1}\n'.format(10, np.mean(hits_left[9])))
+        f.write('Hits head @{0}: {1}\n'.format(10, np.mean(hits_right[9])))
+        f.write('Hits @{0}: {1}\n'.format(10, np.mean(hits[9])))
+        f.write('Mean rank tail: {0}\n'.format(np.mean(ranks_left)))
+        f.write('Mean rank head: {0}\n'.format(np.mean(ranks_right)))
+        f.write('Mean rank: {0}\n'.format(np.mean(ranks_left+ranks_right)))
+        f.write('Mean reciprocal rank tail: {0}\n'.format(np.mean(1./np.array(ranks_left))))
+        f.write('Mean reciprocal rank head: {0}\n'.format(np.mean(1./np.array(ranks_right))))
+        f.write('Mean reciprocal rank: {0}\n'.format(np.mean(1./np.array(ranks_left+ranks_right))))
+
+
+    f.close()

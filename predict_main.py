@@ -8,6 +8,7 @@ import logging
 import time, datetime
 from pred_evaluation import ranking_and_hits
 from model import ConvE, Complex
+from utils import heads_tails_eval
 
 dir = os.getcwd() + '/data'
 
@@ -27,14 +28,13 @@ def main(args, model_path):
     inplace_shuffle(*train_data_with_reverse)
 
     train_data = read_data(os.path.join(dir, 'train.json'), kg_vocab)
-    valid_data = read_data(os.path.join(dir, 'valid.json'), kg_vocab)
+    train_reverse = read_reverse_data(os.path.join(dir, 'train.json'), kg_vocab)
     test_data = read_data(os.path.join(dir, 'test.json'), kg_vocab)
-    test_data_with_reverse = read_data_with_rel_reverse(os.path.join(dir, 'test.json'), kg_vocab)
-    eval_h, eval_t = heads_tails(n_ent, train_data, test_data)
+    test_reverse = read_reverse_data(os.path.join(dir, 'test.json'), kg_vocab)
+    eval_h, eval_t = heads_tails_eval(n_ent, train_data, train_reverse, test_data, test_reverse)
 
-    valid_data = [torch.LongTensor(vec) for vec in valid_data]
     test_data = [torch.LongTensor(vec) for vec in test_data]
-    test_data_with_reverse = [torch.LongTensor(vec) for vec in test_data_with_reverse]
+    test_reverse = [torch.LongTensor(vec) for vec in test_reverse]
 
     model = ConvE(args, n_ent, n_rel)
     model.cuda() if torch.cuda.is_available() else model.cpu()
@@ -45,7 +45,7 @@ def main(args, model_path):
     model.eval()
     with torch.no_grad():
         start = time.time()
-        ranking_and_hits(model, args.batch_size, test_data, eval_h, eval_t,'prediction', kg_vocab)
+        ranking_and_hits(model, args.batch_size, test_data, test_reverse, eval_h, eval_t,'prediction', kg_vocab)
         end = time.time()
         logging.info('eval time used: {} minutes'.format((end - start)/60))
 
