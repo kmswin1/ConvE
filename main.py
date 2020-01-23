@@ -3,7 +3,6 @@ import json
 import torch
 import argparse
 import os
-from logger import get_logger, logger_init
 from utils import heads_tails, heads_tails_eval, inplace_shuffle, batch_by_num, batch_by_size, make_kg_vocab, graph_size, read_data, read_reverse_data, read_data_with_rel_reverse
 import logging
 import time, datetime
@@ -96,7 +95,7 @@ def main(args, model_path):
         model.eval()
         with torch.no_grad():
             start = time.time()
-            ranking_and_hits(model, args.test_batch_size, test_data, test_reverse, eval_h, eval_t,'dev_evaluation')
+            ranking_and_hits(model, args.test_batch_size, test_data, test_reverse, eval_h, eval_t,'dev_evaluation', epoch)
             end = time.time()
             logging.info('eval time used: {} minutes'.format((end - start)/60))
             logging.info('valid {} loss: {}'.format(epoch + 1, epoch_loss))

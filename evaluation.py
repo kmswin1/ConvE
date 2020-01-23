@@ -1,13 +1,12 @@
 import torch
 import numpy as np
 import datetime, os
-from logger import get_logger
 from utils import batch_by_size
 import time
 #timer = CUDATimer()
 dir = os.getcwd()
 # ranking_and_hits(model, Config.batch_size, valid_data, eval_h, eval_t,'dev_evaluation')
-def ranking_and_hits(model, batch_size, dateset, dataset_rev, eval_h, eval_t, name):
+def ranking_and_hits(model, batch_size, dateset, dataset_rev, eval_h, eval_t, name, epoch):
     heads_rev, rels_rev, tails_rev = dataset_rev
     heads, rels, tails = dateset
     hits_left = []
@@ -100,7 +99,7 @@ def ranking_and_hits(model, batch_size, dateset, dataset_rev, eval_h, eval_t, na
     print('Mean reciprocal rank: {0}'.format(np.mean(1./np.array(ranks_left+ranks_right))))
 
     with open(dir+'/log_file/log.txt', 'a') as f:
-        f.write('-----evaluation-----\n')
+        f.write(str(epoch) + '-----evaluation-----\n')
         f.write('Hits tail @{0}: {1}\n'.format(10, np.mean(hits_left[9])))
         f.write('Hits head @{0}: {1}\n'.format(10, np.mean(hits_right[9])))
         f.write('Hits @{0}: {1}\n'.format(10, np.mean(hits[9])))

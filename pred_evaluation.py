@@ -1,7 +1,6 @@
 import torch
 import numpy as np
 import datetime, os, pickle
-from logger import get_logger
 from utils import batch_by_size
 import time
 #timer = CUDATimer()
