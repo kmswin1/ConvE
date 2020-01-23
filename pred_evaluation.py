@@ -129,7 +129,7 @@ def ranking_and_hits(model, batch_size, dateset, dataset_rev, eval_h, eval_t, na
         elif rank2 > 1:
             with open(dir + '/log_file/nohit.txt', 'a') as f:
                 f.write(kg_vocab.ent_list[t])
-                f.writed(kg_vocab.rel_rev_list[r])
+                f.write(kg_vocab.rel_rev_list[r])
                 f.write(kg_vocab.ent_list[idx2])
                 f.close()
 
