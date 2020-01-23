@@ -26,12 +26,18 @@ def ranking_and_hits(model, batch_size, dateset, dataset_rev, eval_h, eval_t, na
         bh = bh.cuda();br = br.cuda();bt = bt.cuda();brr = brr.cuda()
         pred1 = model.forward(bh, br)
         pred2 = model.forward(bt, brr)
-        test_heads = []
-        test_tails = []
-        test_rels = []
-        test_rels_rev = []
-        pred_heads = []
-        pred_tails = []
+        test_heads_suc = []
+        test_tails_suc = []
+        test_rels_suc = []
+        test_rels_rev_suc = []
+        pred_heads_suc = []
+        pred_tails_suc = []
+        test_heads_fail = []
+        test_tails_fail = []
+        test_rels_fail = []
+        test_rels_rev_fail = []
+        pred_heads_fail = []
+        pred_tails_fail = []
 
         e2_multi1 = torch.empty(b_size, pred1.size(1))
         e2_multi2 = torch.empty(b_size, pred1.size(1))
@@ -97,17 +103,27 @@ def ranking_and_hits(model, batch_size, dateset, dataset_rev, eval_h, eval_t, na
             if meta.item() == True:
                 idx1 = i
                 break
-        test_heads.append(kg_vocab.ent_list[h])
-        test_rels.append(kg_vocab.rel_list[r])
-        pred_tails.append(kg_vocab.ent_list[idx1])
+        if rank1 == 1:
+            test_heads_suc.append(kg_vocab.ent_list[h])
+            test_rels_suc.append(kg_vocab.rel_list[r])
+            pred_tails_suc.append(kg_vocab.ent_list[idx1])
+        elif rank1 > 1:
+            test_heads_suc.append(kg_vocab.ent_list[h])
+            test_rels_suc.append(kg_vocab.rel_list[r])
+            pred_tails_suc.append(kg_vocab.ent_list[idx1])
 
         for i, meta in enumerate(find_target2):
             if meta.item() == True:
                 idx2 = i
                 break
-        test_tails.append(kg_vocab.ent_list[t])
-        test_rels_rev.append(kg_vocab.rel_rev_list[r])
-        pred_heads.append(kg_vocab.ent_list[idx2])
+        if rank2 == 1:
+            test_tails_fail.append(kg_vocab.ent_list[t])
+            test_rels_rev_fail.append(kg_vocab.rel_rev_list[r])
+            pred_heads_fail.append(kg_vocab.ent_list[idx2])
+        elif rank2 > 1:
+            test_tails_fail.append(kg_vocab.ent_list[t])
+            test_rels_rev_fail.append(kg_vocab.rel_rev_list[r])
+            pred_heads_fail.append(kg_vocab.ent_list[idx2])
 
 
     print('Hits tail @{0}: {1}'.format(10, np.mean(hits_left[9])))
@@ -120,14 +136,22 @@ def ranking_and_hits(model, batch_size, dateset, dataset_rev, eval_h, eval_t, na
     print('Mean reciprocal rank head: {0}'.format(np.mean(1./np.array(ranks_right))))
     print('Mean reciprocal rank: {0}'.format(np.mean(1./np.array(ranks_left+ranks_right))))
 
-    with open(dir+'/log_file/log.txt', 'a') as f:
+    with open(dir+'/log_file/test.txt', 'a') as f:
         f.write('-----evaluation-----\n')
-        pickle.dump(test_heads, f)
-        pickle.dump(test_rels, f)
-        pickle.dump(pred_tails, f)
-        pickle.dump(test_tails, f)
-        pickle.dump(test_rels_rev, f)
-        pickle.dump(pred_heads, f)
+        f.write('---------HIT--------\n')
+        pickle.dump(test_heads_suc, f)
+        pickle.dump(test_rels_suc, f)
+        pickle.dump(pred_tails_suc, f)
+        pickle.dump(test_tails_suc, f)
+        pickle.dump(test_rels_rev_suc, f)
+        pickle.dump(pred_heads_suc, f)
+        f.write('-------No HIT--------\n')
+        pickle.dump(test_heads_fail, f)
+        pickle.dump(test_rels_fail, f)
+        pickle.dump(pred_tails_fail, f)
+        pickle.dump(test_tails_fail, f)
+        pickle.dump(test_rels_rev_fail, f)
+        pickle.dump(pred_heads_fail, f)
         f.write('Hits tail @{0}: {1}\n'.format(10, np.mean(hits_left[9])))
         f.write('Hits head @{0}: {1}\n'.format(10, np.mean(hits_right[9])))
         f.write('Hits @{0}: {1}\n'.format(10, np.mean(hits[9])))
