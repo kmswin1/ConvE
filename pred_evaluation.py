@@ -100,13 +100,15 @@ def ranking_and_hits(model, batch_size, dateset, dataset_rev, eval_h, eval_t, na
         test_heads.append(kg_vocab.ent_list[h])
         test_rels.append(kg_vocab.rel_list[r])
         pred_tails.append(kg_vocab.ent_list[idx1])
+
         for i, meta in enumerate(find_target2):
             if meta.item() == True:
                 idx2 = i
                 break
         test_tails.append(kg_vocab.ent_list[t])
-        test_rels_rev.append(kg_vocab.rel_rev_list[rr])
+        test_rels_rev.append(kg_vocab.rel_rev_list[r])
         pred_heads.append(kg_vocab.ent_list[idx2])
+
 
     print('Hits tail @{0}: {1}'.format(10, np.mean(hits_left[9])))
     print('Hits head @{0}: {1}'.format(10, np.mean(hits_right[9])))

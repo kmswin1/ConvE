@@ -41,7 +41,6 @@ def main(args, model_path):
     model.cuda() if torch.cuda.is_available() else model.cpu()
     print ('cuda : ' + str(torch.cuda.is_available()))
     model.load_state_dict(torch.load(model_path))
-    print (model)
 
     model.eval()
     with torch.no_grad():

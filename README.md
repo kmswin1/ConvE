@@ -4,4 +4,4 @@
 cuda_visible_devices="devices" python main.py
 
 # Evaluation
-cuda_visible_devices="devices" python predict_main.py --model-path 'path'
+cuda_visible_devices="devices" python predict_main.py --model-name 'name'
