@@ -20,6 +20,8 @@ def main(args, model_path):
     valid_data = dir + '/valid.json'
     test_data = dir + '/test.json'
 
+    model_path = os.path.join(os.getcwd(), 'saved_models/'+args.model_name)
+
     kg_vocab = make_kg_vocab(train_data, test_data)
     n_ent, n_rel = graph_size(kg_vocab)
 
@@ -38,7 +40,7 @@ def main(args, model_path):
     model = ConvE(args, n_ent, n_rel)
     model.cuda() if torch.cuda.is_available() else model.cpu()
     print ('cuda : ' + str(torch.cuda.is_available()))
-    model.load_state_dict(torch.load('/root/KG-Completion/saved_models/webtoon_conve_0.2_0.3.model'))
+    model.load_state_dict(torch.load(model_path))
     print (model)
 
     model.eval()
@@ -71,7 +73,7 @@ if __name__ == '__main__':
     parser.add_argument('--label-smoothing', type=float, default=0.1, help='Label smoothing value to use. Default: 0.1')
     parser.add_argument('--hidden-size', type=int, default=9728, help='The side of the hidden layer. The required size changes with the size of the embeddings. Default: 9728 (embedding size 200).')
     parser.add_argument('--log-file', action='store', type=str)
-    parser.add_argument('--model-path', type=str, default='/saved_models/webtoon_conve_0.2_0.3.model', help='define your model to evaluate')
+    parser.add_argument('--model-name', type=str, default='webtoon_conve_0.2_0.3.model', help='define your model to evaluate')
 
     args = parser.parse_args()
 
