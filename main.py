@@ -3,7 +3,7 @@ import json
 import torch
 import argparse
 import os
-from utils import heads_tails, heads_tails_eval, inplace_shuffle, batch_by_size, make_kg_vocab, graph_size, read_data, read_reverse_data, read_data_with_rel_reverse, early_stopping
+from utils import heads_tails, heads_tails_eval, inplace_shuffle, batch_by_size, make_kg_vocab, graph_size, read_data, read_reverse_data, read_data_with_rel_reverse
 import time, datetime
 from evaluation import ranking_and_hits
 
