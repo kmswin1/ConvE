@@ -105,15 +105,15 @@ def ranking_and_hits(model, batch_size, dateset, dataset_rev, eval_h, eval_t, na
                 break
         if rank1 == 1:
             with open(dir + '/log_file/hit.txt', 'a') as f:
-                f.write(kg_vocab.ent_list[h])
-                f.write(kg_vocab.rel_list[r])
-                f.write(kg_vocab.ent_list[idx1])
+                f.write(kg_vocab.ent_list[h]+"\n")
+                f.write(kg_vocab.rel_list[r]+"\n")
+                f.write(kg_vocab.ent_list[idx1]+"\n")
                 f.close()
         elif rank1 > 1:
             with open(dir + '/log_file/nohit.txt', 'a') as f:
-                f.write(kg_vocab.ent_list[h])
-                f.write(kg_vocab.rel_list[r])
-                f.write(kg_vocab.ent_list[idx1])
+                f.write(kg_vocab.ent_list[h]+"\n")
+                f.write(kg_vocab.rel_list[r]+"\n")
+                f.write(kg_vocab.ent_list[idx1]+"\n")
                 f.close()
 
         for i, meta in enumerate(find_target2):
@@ -122,15 +122,15 @@ def ranking_and_hits(model, batch_size, dateset, dataset_rev, eval_h, eval_t, na
                 break
         if rank2 == 1:
             with open(dir + '/log_file/hit.txt', 'a') as f:
-                f.write(kg_vocab.ent_list[t])
-                f.write(kg_vocab.rel_rev_list[r])
-                f.write(kg_vocab.ent_list[idx2])
+                f.write(kg_vocab.ent_list[t]+"\n")
+                f.write(kg_vocab.rel_rev_list[r]+"\n")
+                f.write(kg_vocab.ent_list[idx2]+"\n")
                 f.close()
         elif rank2 > 1:
             with open(dir + '/log_file/nohit.txt', 'a') as f:
-                f.write(kg_vocab.ent_list[t])
-                f.write(kg_vocab.rel_rev_list[r])
-                f.write(kg_vocab.ent_list[idx2])
+                f.write(kg_vocab.ent_list[t]+"\n")
+                f.write(kg_vocab.rel_rev_list[r]+"\n")
+                f.write(kg_vocab.ent_list[idx2]+"\n")
                 f.close()
 
 
