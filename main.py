@@ -36,9 +36,9 @@ def main(args, model_path):
     eval_h, eval_t = heads_tails_eval(n_ent, train_data, train_reverse, test_data, test_reverse)
 
     #valid_data = [torch.LongTensor(vec) for vec in valid_data]
-    test_data = [torch.cuda.LongTensor(vec) for vec in test_data]
-    train_data_with_reverse = [torch.cuda.LongTensor(vec) for vec in train_data_with_reverse]
-    test_reverse = [torch.cuda.LongTensor(vec) for vec in test_reverse]
+    test_data = [torch.LongTensor(vec) for vec in test_data]
+    train_data_with_reverse = [torch.LongTensor(vec) for vec in train_data_with_reverse]
+    test_reverse = [torch.LongTensor(vec) for vec in test_reverse]
 
 
     model = ConvE(args, n_ent, n_rel)
