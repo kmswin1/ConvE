@@ -136,7 +136,7 @@ def ranking_and_hits(model, batch_size, dateset, dataset_rev, eval_h, eval_t, na
     print('Mean reciprocal rank head: {0}'.format(np.mean(1./np.array(ranks_right))))
     print('Mean reciprocal rank: {0}'.format(np.mean(1./np.array(ranks_left+ranks_right))))
 
-    with open(dir+'/log_file/test.txt', 'a') as f:
+    with open(dir+'/log_file/test.txt', 'wb') as f:
         f.write('-----evaluation-----\n')
         f.write('---------HIT--------\n')
         pickle.dump(test_heads_suc, f)
