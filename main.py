@@ -37,7 +37,7 @@ def main(args, model_path):
 
     #valid_data = [torch.LongTensor(vec) for vec in valid_data]
     test_data = [torch.cuda.LongTensor(vec) for vec in test_data]
-    train_data_with_reverse = [torch.LongTensor(vec) for vec in train_data_with_reverse]
+    train_data_with_reverse = [torch.cuda.LongTensor(vec) for vec in train_data_with_reverse]
     test_reverse = [torch.cuda.LongTensor(vec) for vec in test_reverse]
 
 
