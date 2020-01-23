@@ -99,39 +99,30 @@ def ranking_and_hits(model, batch_size, dateset, dataset_rev, eval_h, eval_t, na
     # for i in range(10):
     #     logger.info('Hits left @{0}: {1}'.format(i+1, np.mean(hits_left[i])))
     #     logger.info('Hits right @{0}: {1}'.format(i+1, np.mean(hits_right[i])))
-        for i, meta in enumerate(find_target1):
-            if meta.item() == True:
-                idx1 = i
-                break
-        if rank1 == 1:
-            with open(dir + '/log_file/hit.txt', 'a') as f:
-                f.write(kg_vocab.ent_list[h]+"\n")
-                f.write(kg_vocab.rel_list[r]+"\n")
-                f.write(kg_vocab.ent_list[idx1]+"\n")
-                f.close()
-        elif rank1 > 1:
-            with open(dir + '/log_file/nohit.txt', 'a') as f:
-                f.write(kg_vocab.ent_list[h]+"\n")
-                f.write(kg_vocab.rel_list[r]+"\n")
-                f.write(kg_vocab.ent_list[idx1]+"\n")
-                f.close()
-
-        for i, meta in enumerate(find_target2):
-            if meta.item() == True:
-                idx2 = i
-                break
-        if rank2 == 1:
-            with open(dir + '/log_file/hit.txt', 'a') as f:
-                f.write(kg_vocab.ent_list[t]+"\n")
-                f.write(kg_vocab.rel_rev_list[r]+"\n")
-                f.write(kg_vocab.ent_list[idx2]+"\n")
-                f.close()
-        elif rank2 > 1:
-            with open(dir + '/log_file/nohit.txt', 'a') as f:
-                f.write(kg_vocab.ent_list[t]+"\n")
-                f.write(kg_vocab.rel_rev_list[r]+"\n")
-                f.write(kg_vocab.ent_list[idx2]+"\n")
-                f.close()
+            if rank1 == 1:
+                with open(dir + '/log_file/hit.txt', 'a') as f:
+                    f.write(kg_vocab.ent_list[h]+"\n")
+                    f.write(kg_vocab.rel_list[r]+"\n")
+                    f.write(kg_vocab.ent_list[argsort1[i][0].item()]+"\n")
+                    f.close()
+            elif rank1 > 1:
+                with open(dir + '/log_file/nohit.txt', 'a') as f:
+                    f.write(kg_vocab.ent_list[h]+"\n")
+                    f.write(kg_vocab.rel_list[r]+"\n")
+                    f.write(kg_vocab.ent_list[argsort1[i][1].item()]+"\n")
+                    f.close()
+            if rank2 == 1:
+                with open(dir + '/log_file/hit.txt', 'a') as f:
+                    f.write(kg_vocab.ent_list[t]+"\n")
+                    f.write(kg_vocab.rel_rev_list[r]+"\n")
+                    f.write(kg_vocab.ent_list[argsort2[i][0].item()]+"\n")
+                    f.close()
+            elif rank2 > 1:
+                with open(dir + '/log_file/nohit.txt', 'a') as f:
+                    f.write(kg_vocab.ent_list[t]+"\n")
+                    f.write(kg_vocab.rel_rev_list[r]+"\n")
+                    f.write(kg_vocab.ent_list[argsort2[i][1].item()]+"\n")
+                    f.close()
 
 
     print('Hits tail @{0}: {1}'.format(10, np.mean(hits_left[9])))
