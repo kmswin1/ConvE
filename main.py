@@ -3,7 +3,7 @@ import json
 import torch
 import argparse
 import os
-from utils import heads_tails, heads_tails_eval, inplace_shuffle, batch_by_num, batch_by_size, make_kg_vocab, graph_size, read_data, read_reverse_data, read_data_with_rel_reverse
+from utils import heads_tails, heads_tails_eval, inplace_shuffle, batch_by_size, make_kg_vocab, graph_size, read_data, read_reverse_data, read_data_with_rel_reverse, early_stopping
 import time, datetime
 from evaluation import ranking_and_hits
 
@@ -51,6 +51,8 @@ def main(args, model_path):
     print(sum(params))
     opt = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.l2)
 
+    max_mrr = 0.0
+    cnt = 0
     for epoch in range(args.epochs):
         print (epoch)
         epoch_loss = 0
@@ -94,10 +96,18 @@ def main(args, model_path):
         model.eval()
         with torch.no_grad():
             start = time.time()
-            ranking_and_hits(model, args.test_batch_size, test_data, test_reverse, eval_h, eval_t,'dev_evaluation', epoch)
+            cur_mrr = ranking_and_hits(model, args.test_batch_size, test_data, test_reverse, eval_h, eval_t,'dev_evaluation', epoch)
             end = time.time()
             print ('eval time used: {} minutes'.format((end - start)/60))
-            print ('valid {} loss: {}'.format(epoch + 1, epoch_loss))
+
+        if max_mrr < cur_mrr:
+            max_mrr = cur_mrr
+            cnt = 0
+        else:
+            cnt += 1
+            if cnt > 5:
+                print ("Early stopping ...")
+                break
 
 
 if __name__ == '__main__':

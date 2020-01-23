@@ -111,3 +111,5 @@ def ranking_and_hits(model, batch_size, dateset, dataset_rev, eval_h, eval_t, na
         f.write('Mean reciprocal rank: {0}\n'.format(np.mean(1./np.array(ranks_left+ranks_right))))
 
     f.close()
+
+    return np.mean(1./np.array(ranks_left+ranks_right))
