@@ -4,7 +4,6 @@ import torch
 import argparse
 import os
 from utils import heads_tails, heads_tails_eval, inplace_shuffle, batch_by_num, batch_by_size, make_kg_vocab, graph_size, read_data, read_reverse_data, read_data_with_rel_reverse
-import logging
 import time, datetime
 from evaluation import ranking_and_hits
 
@@ -82,14 +81,14 @@ def main(args, model_path):
             batch_loss = torch.sum(loss)
             epoch_loss += batch_loss
             tot += bh.size(0)
-            print('\r{:>10} progress {} loss: {}'.format('', tot/n_train, batch_loss), end='')
-        logging.info('')
+            print ('\r{:>10} progress {} loss: {}'.format('', tot/n_train, batch_loss), end='')
+        print ('')
         end = time.time()
         time_used = end - start
-        logging.info('one epoch time: {} minutes'.format(time_used/60))
-        logging.info('{} epochs'.format(epoch))
-        logging.info('epoch {} loss: {}'.format(epoch+1, epoch_loss))
-        logging.info('saving to {0}'.format(model_path))
+        print ('one epoch time: {} minutes'.format(time_used/60))
+        print ('{} epochs'.format(epoch))
+        print ('epoch {} loss: {}'.format(epoch+1, epoch_loss))
+        print ('saving to {0}'.format(model_path))
         torch.save(model.state_dict(), model_path)
 
         model.eval()
@@ -97,8 +96,8 @@ def main(args, model_path):
             start = time.time()
             ranking_and_hits(model, args.test_batch_size, test_data, test_reverse, eval_h, eval_t,'dev_evaluation', epoch)
             end = time.time()
-            logging.info('eval time used: {} minutes'.format((end - start)/60))
-            logging.info('valid {} loss: {}'.format(epoch + 1, epoch_loss))
+            print ('eval time used: {} minutes'.format((end - start)/60))
+            print ('valid {} loss: {}'.format(epoch + 1, epoch_loss))
 
 
 if __name__ == '__main__':

@@ -4,7 +4,6 @@ import torch
 import argparse
 import os
 from utils import heads_tails, inplace_shuffle, batch_by_num, batch_by_size, make_kg_vocab, graph_size, read_data, read_reverse_data, read_data_with_rel_reverse
-import logging
 import time, datetime
 from pred_evaluation import ranking_and_hits
 from model import ConvE, Complex
@@ -47,7 +46,7 @@ def main(args, model_path):
         start = time.time()
         ranking_and_hits(model, args.batch_size, test_data, test_reverse, eval_h, eval_t,'prediction', kg_vocab)
         end = time.time()
-        logging.info('eval time used: {} minutes'.format((end - start)/60))
+        print ('eval time used: {} minutes'.format((end - start)/60))
 
 
 if __name__ == '__main__':
