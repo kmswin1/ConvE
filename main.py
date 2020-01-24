@@ -81,9 +81,9 @@ def main(args, model_path):
             opt.step()
             batch_loss = torch.sum(loss)
             epoch_loss += batch_loss
-            epoch_loss /= batch_size
             tot += bh.size(0)
             print ('\r{:>10} progress {} loss: {}'.format('', tot/n_train, batch_loss), end='')
+        epoch_loss /= batch_size
         print ('')
         end = time.time()
         time_used = end - start
