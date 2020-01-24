@@ -24,16 +24,18 @@ def main(args, model_path):
     n_ent, n_rel = graph_size(kg_vocab)
 
     train_data_with_reverse = read_data_with_rel_reverse(os.path.join(dir, 'train.json'), kg_vocab)
-    test_data_with_reverse = read_data_with_rel_reverse(os.path.join(dir, 'test.json'), kg_vocab)
-    inplace_shuffle(*train_data_with_reverse)
-    heads, tails = heads_tails(n_ent, train_data_with_reverse)
-
     train_data = read_data(os.path.join(dir, 'train.json'), kg_vocab)
-    train_reverse = read_reverse_data(os.path.join(dir, 'train.json'), kg_vocab)
+    train_reverse = read_reverse_data(os.path.join(dir, 'train.json'), kg_vocab)    inplace_shuffle(*train_data_with_reverse)
+    heads, tails = heads_tails(n_ent, train_data_with_reverse)
+    print ("making read train data and make train heads, tails is finish")
+
+
     #valid_data = read_data(os.path.join(dir, 'valid.json'), kg_vocab)
     test_data = read_data(os.path.join(dir, 'test.json'), kg_vocab)
     test_reverse = read_reverse_data(os.path.join(dir, 'test.json'), kg_vocab)
     eval_h, eval_t = heads_tails_eval(n_ent, train_data, train_reverse, test_data, test_reverse)
+    print ("making read test data and make test heads, tails is finish")
+
 
     #valid_data = [torch.LongTensor(vec) for vec in valid_data]
     test_data = [torch.LongTensor(vec) for vec in test_data]
