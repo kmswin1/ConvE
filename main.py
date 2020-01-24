@@ -42,9 +42,11 @@ def main(args, model_path):
 
     model = ConvE(args, n_ent, n_rel)
     model.init()
-    #model = torch.nn.DataParallel(model)
-    model.cuda() if torch.cuda.is_available() else model.cpu()
-    print ('cuda : ' + str(torch.cuda.is_available()))
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    if torch.cuda.device_count() > 1:
+        model = torch.nn.DataParallel(model)
+    model.to(device)
+    print ('cuda : ' + str(torch.cuda.is_available()) + ' count : ' + str(torch.cuda.device_count()))
 
     params = [value.numel() for value in model.parameters()]
     print(params)
