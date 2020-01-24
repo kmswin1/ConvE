@@ -31,7 +31,7 @@ def main(args, model_path):
     train_reverse = read_reverse_data(os.path.join(dir, 'train.json'), kg_vocab)
     test_data = read_data(os.path.join(dir, 'test.json'), kg_vocab)
     test_reverse = read_reverse_data(os.path.join(dir, 'test.json'), kg_vocab)
-    eval_h, eval_t = heads_tails_eval(n_ent, train_data, train_reverse, test_data, test_reverse)
+    eval_h, eval_t = heads_tails_eval(n_ent, test_data, test_reverse)
 
     test_data = [torch.LongTensor(vec) for vec in test_data]
     test_reverse = [torch.LongTensor(vec) for vec in test_reverse]
