@@ -33,22 +33,14 @@ def heads_tails(n_ent, train_data, valid_data=None, test_data=None):
                                                torch.ones(len(heads[k])), torch.Size([n_ent]))
     return heads_sp, tails_sp
 
-def heads_tails_eval(n_ent, train_data, train_reverse, test_data, test_reverse):
-    train_src, train_rel, train_dst = train_data
+def heads_tails_eval(n_ent, test_data, test_reverse):
     test_src, test_rel, test_dst = test_data
-    train_src_rev, train_rel_rev, train_dst_rev = train_reverse
     test_src_rev, test_rel_rev, test_dst_rev = test_reverse
-    all_src = train_src  + test_src
-    all_rel = train_rel  + test_rel
-    all_dst = train_dst  + test_dst
-    all_src_rev = train_src_rev  + test_src_rev
-    all_rel_rev = train_rel_rev  + test_rel_rev
-    all_dst_rev = train_dst_rev  + test_dst_rev
     heads = defaultdict(lambda: set())
     tails = defaultdict(lambda: set())
-    for s, r, t in zip(all_src, all_rel, all_dst):
+    for s, r, t in zip(test_src, test_rel, test_dst):
         tails[s, r].add(t)
-    for s,r,t in zip(all_src_rev, all_rel_rev, all_dst_rev):
+    for s,r,t in zip(test_src_rev, test_rel_rev, test_dst_rev):
         heads[s, r].add(t)
     heads_sp = {}
     tails_sp = {}
