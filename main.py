@@ -20,6 +20,7 @@ def main(args, model_path):
     test_data = dir + '/test.json'
 
     kg_vocab = make_kg_vocab(train_data, test_data)
+    print ("making vocab is finish")
     n_ent, n_rel = graph_size(kg_vocab)
 
     train_data_with_reverse = read_data_with_rel_reverse(os.path.join(dir, 'train.json'), kg_vocab)
@@ -45,7 +46,8 @@ def main(args, model_path):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     if torch.cuda.device_count() > 1:
         model = torch.nn.DataParallel(model)
-    model.to(device)
+        criterion = torch.nn.BCELoss()
+    model.cuda()
     print ('cuda : ' + str(torch.cuda.is_available()) + ' count : ' + str(torch.cuda.device_count()))
 
     params = [value.numel() for value in model.parameters()]
@@ -78,7 +80,8 @@ def main(args, model_path):
             e2_multi = ((1.0-args.label_smoothing)*e2_multi) + (1.0/e2_multi.shape[1])
             e2_multi = e2_multi.cuda()
             pred = model.forward(bh, br)
-            loss = model.loss(pred, e2_multi)
+            #loss = model.loss(pred, e2_multi)
+            loss = criterion(pred, e2_multi)
             loss.backward()
             opt.step()
             batch_loss = torch.sum(loss)
