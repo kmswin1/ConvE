@@ -42,10 +42,10 @@ def main(args, model_path):
 
     model = ConvE(args, n_ent, n_rel)
     model.init()
-    model = torch.nn.DataParallel(model)
+    #model = torch.nn.DataParallel(model)
     model.cuda() if torch.cuda.is_available() else model.cpu()
     print ('cuda : ' + str(torch.cuda.is_available()))
-    
+
     params = [value.numel() for value in model.parameters()]
     print(params)
     print(sum(params))

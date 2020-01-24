@@ -78,6 +78,7 @@ class ConvE(torch.nn.Module):
 
         stacked_inputs = self.bn0(stacked_inputs)
         x= self.inp_drop(stacked_inputs)
+        x= x.to(torch.device('cuda'))
         x= self.conv1(x)
         x= self.bn1(x)
         x= F.relu(x)
