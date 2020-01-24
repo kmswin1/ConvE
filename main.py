@@ -45,7 +45,7 @@ def main(args, model_path):
     print ('cuda : ' + str(torch.cuda.is_available()))
 
     model.init()
-    #model = torch.nn.DataParallel(model)
+    model = torch.nn.DataParallelModel(model)
     params = [value.numel() for value in model.parameters()]
     print(params)
     print(sum(params))
