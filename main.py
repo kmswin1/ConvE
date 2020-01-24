@@ -25,7 +25,8 @@ def main(args, model_path):
 
     train_data_with_reverse = read_data_with_rel_reverse(os.path.join(dir, 'train.json'), kg_vocab)
     train_data = read_data(os.path.join(dir, 'train.json'), kg_vocab)
-    train_reverse = read_reverse_data(os.path.join(dir, 'train.json'), kg_vocab)    inplace_shuffle(*train_data_with_reverse)
+    train_reverse = read_reverse_data(os.path.join(dir, 'train.json'), kg_vocab)
+    inplace_shuffle(*train_data_with_reverse)
     heads, tails = heads_tails(n_ent, train_data_with_reverse)
     print ("making read train data and make train heads, tails is finish")
 
