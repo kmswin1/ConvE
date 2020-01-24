@@ -17,7 +17,6 @@ def main(args, model_path):
     print ('start prediction ...')
 
     train_data = dir + '/train.json'
-    valid_data = dir + '/valid.json'
     test_data = dir + '/test.json'
 
     model_path = os.path.join(os.getcwd(), 'saved_models/'+args.model_name)
