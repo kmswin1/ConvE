@@ -51,7 +51,6 @@ def main(args, model_path):
     print(sum(params))
     opt = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.l2)
 
-    max_mrr = 0.0
     cnt = 0
     for epoch in range(args.epochs):
         print (epoch)
@@ -82,6 +81,7 @@ def main(args, model_path):
             opt.step()
             batch_loss = torch.sum(loss)
             epoch_loss += batch_loss
+            epoch_loss /= batch_size
             tot += bh.size(0)
             print ('\r{:>10} progress {} loss: {}'.format('', tot/n_train, batch_loss), end='')
         print ('')
@@ -96,12 +96,11 @@ def main(args, model_path):
         model.eval()
         with torch.no_grad():
             start = time.time()
-            cur_mrr = ranking_and_hits(model, args.test_batch_size, test_data, test_reverse, eval_h, eval_t,'dev_evaluation', epoch)
+            val_loss = ranking_and_hits(model, args.test_batch_size, test_data, test_reverse, eval_h, eval_t,'dev_evaluation', epoch)
             end = time.time()
             print ('eval time used: {} minutes'.format((end - start)/60))
 
-        if max_mrr < cur_mrr:
-            max_mrr = cur_mrr
+        if epoch_loss < val_loss:
             cnt = 0
         else:
             cnt += 1

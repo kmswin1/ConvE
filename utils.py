@@ -149,9 +149,9 @@ def read_reverse_data(filename, kg_vocab):
             h = line['src']
             r = line['dstProperty']
             t = line['dst']
-            r_revsers = r + '_reverse'
+            r_reverse = r + '_reverse'
             src.append(kg_vocab.ent_id[t])
-            rel.append(kg_vocab.rel_rev_id[r_revsers])
+            rel.append(kg_vocab.rel_rev_id[r_reverse])
             dst.append(kg_vocab.ent_id[h])
     return src, rel, dst
 

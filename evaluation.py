@@ -15,6 +15,7 @@ def ranking_and_hits(model, batch_size, dateset, dataset_rev, eval_h, eval_t, na
     ranks = []
     ranks_left = []
     ranks_right = []
+    loss = 0.0
 
     for i in range(10):
         hits_left.append([])
@@ -35,6 +36,10 @@ def ranking_and_hits(model, batch_size, dateset, dataset_rev, eval_h, eval_t, na
             e2_multi2[i] = eval_h[t.item(), rr.item()].to_dense()
         e2_multi1 = e2_multi1.cuda()
         e2_multi2 = e2_multi2.cuda()
+
+        loss += model.loss(pred1, e2_multi1)
+        loss += model.loss(pred2, e2_multi2)
+        loss /= 2
 
         for i in range(b_size):
             # save the prediction that is relevant
@@ -112,4 +117,5 @@ def ranking_and_hits(model, batch_size, dateset, dataset_rev, eval_h, eval_t, na
 
     f.close()
 
-    return np.mean(1./np.array(ranks_left+ranks_right))
+    loss /= batch_size
+    return loss
