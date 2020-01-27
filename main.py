@@ -85,7 +85,6 @@ def main(args, model_path):
             pred = model.forward(bh, br)
             #loss = model.loss(pred, e2_multi)
             loss = criterion(pred, e2_multi)
-            del e2_multi
             loss.backward()
             opt.step()
             batch_loss = torch.sum(loss)

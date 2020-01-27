@@ -26,10 +26,10 @@ def heads_tails(n_ent, train_data, valid_data=None, test_data=None):
     heads_sp = {}
     tails_sp = {}
     for k in tails.keys():
-        tails_sp[k] = torch.cuda.sparse.FloatTensor(torch.LongTensor([list(tails[k])]),
+        tails_sp[k] = torch.sparse.FloatTensor(torch.LongTensor([list(tails[k])]),
                                                torch.ones(len(tails[k])), torch.Size([n_ent]))
     for k in heads.keys():
-        heads_sp[k] = torch.cuda.sparse.FloatTensor(torch.LongTensor([list(heads[k])]),
+        heads_sp[k] = torch.sparse.FloatTensor(torch.LongTensor([list(heads[k])]),
                                                torch.ones(len(heads[k])), torch.Size([n_ent]))
     return heads_sp, tails_sp
 
@@ -53,10 +53,10 @@ def heads_tails_eval(n_ent, train_data, train_reverse, test_data, test_reverse):
     heads_sp = {}
     tails_sp = {}
     for k in tails.keys():
-        tails_sp[k] = torch.cuda.sparse.FloatTensor(torch.LongTensor([list(tails[k])]),
+        tails_sp[k] = torch.sparse.FloatTensor(torch.LongTensor([list(tails[k])]),
                                                torch.ones(len(tails[k])), torch.Size([n_ent]))
     for k in heads.keys():
-        heads_sp[k] = torch.cuda.sparse.FloatTensor(torch.LongTensor([list(heads[k])]),
+        heads_sp[k] = torch.sparse.FloatTensor(torch.LongTensor([list(heads[k])]),
                                                torch.ones(len(heads[k])), torch.Size([n_ent]))
     return heads_sp, tails_sp
 
