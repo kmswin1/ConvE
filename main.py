@@ -19,25 +19,30 @@ def main(args, model_path):
     #valid_data = dir + '/valid.json'
     test_data = dir + '/test.json'
 
+    start = time.time()
     kg_vocab = make_kg_vocab(train_data, test_data)
-    print ("making vocab is done")
+    print ("making vocab is done "+str(time.time()-start))
     n_ent, n_rel = graph_size(kg_vocab)
 
+    start = time.time()
     train_data_with_reverse = read_data_with_rel_reverse(os.path.join(dir, 'train.json'), kg_vocab)
     train_data = read_data(os.path.join(dir, 'train.json'), kg_vocab)
     train_reverse = read_reverse_data(os.path.join(dir, 'train.json'), kg_vocab)
     inplace_shuffle(*train_data_with_reverse)
-    print ("making read_train data is done")
+    print ("making read_train data is done " + str(time.time()-start))
+    start = time.time()
     heads, tails = heads_tails(n_ent, train_data_with_reverse)
-    print ("making train heads, tails is done")
+    print ("making train heads, tails is done " + str(time.time()-start))
 
 
     #valid_data = read_data(os.path.join(dir, 'valid.json'), kg_vocab)
+    start = time.time()
     test_data = read_data(os.path.join(dir, 'test.json'), kg_vocab)
     test_reverse = read_reverse_data(os.path.join(dir, 'test.json'), kg_vocab)
-    print("making read_test data is done")
+    print("making read_test data is done " + str(time.time()-start))
     eval_h, eval_t = heads_tails_eval(n_ent, train_data, train_reverse, test_data, test_reverse)
-    print ("making test heads, tails is done")
+    start = time.time()
+    print ("making test heads, tails is done " + str(time.time()-start))
 
 
     #valid_data = [torch.LongTensor(vec) for vec in valid_data]
@@ -78,10 +83,12 @@ def main(args, model_path):
             batch_size = bh.size(0)
             e2_multi = torch.empty(batch_size, n_ent, device=torch.device('cuda'))
             # label smoothing
+            start = time.time()
             for i, (head, rel) in enumerate(zip(bh, br)):
                 head = head.item()
                 rel = rel.item()
                 e2_multi[i] = tails[head, rel].to_dense()
+            print ("e2_multi_time " +str(time.time()-start))
             e2_multi = ((1.0-args.label_smoothing)*e2_multi) + (1.0/e2_multi.shape[1])
             e2_multi = e2_multi.cuda()
             pred = model.forward(bh, br)
