@@ -25,7 +25,7 @@ def make_knowledge_graph():
     print('Processing dataset')
 
     base_path = dir+'/data/'
-    files = ['train.json', 'valid.json', 'test.json']
+    files = ['train.json', 'test.json']
 
     data = []
     for file in files:
@@ -142,9 +142,8 @@ def write_evaluation_graph(cases, graph, path):
 def main():
     label_graph, train_graph, test_cases = make_knowledge_graph()
     start = time.time()
-    all_cases = test_cases['train.json'] + test_cases['valid.json'] + test_cases['test.json']
+    all_cases = test_cases['train.json'] + test_cases['test.json']
     write_training_graph(test_cases['train.json'], train_graph['train.json'], 'data/e1rel_to_e2_train.json')
-    write_evaluation_graph(test_cases['valid.json'], label_graph, 'data/e1rel_to_e2_ranking_valid.json')
     write_evaluation_graph(test_cases['test.json'], label_graph, 'data/e1rel_to_e2_ranking_test.json')
     write_training_graph(all_cases, label_graph, 'data/e1rel_to_e2_full.json')
     print (time.time() - start)
