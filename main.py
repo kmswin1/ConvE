@@ -126,12 +126,15 @@ def main(args, model_path):
                 e2_multi[i][t] = 1
             e2_multi = ((1.0-args.label_smoothing)*e2_multi) + (1.0/e2_multi.shape[1])
             e2_multi = e2_multi.cuda()
+            print ("e2_multi" + str(time.time()-start) + "\n")
+            start = time.time()
             pred = model.forward(head, rel)
             #loss = model.loss(pred, e2_multi)
             loss = criterion(pred, e2_multi)
             loss.backward()
             opt.step()
             batch_loss = torch.sum(loss)
+            print ("step " + str(time.time()-start) + "\n")
             epoch_loss += batch_loss
             tot += head.size(0)
             print ('\r{:>10} progress {} loss: {}\n'.format('', tot/n_train, batch_loss), end='')
