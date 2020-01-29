@@ -93,8 +93,12 @@ def main(args, model_path):
     print(params)
     print(sum(params))
     opt = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.l2)
+    start = time.time()
     dataset = KG_DataSet(dir+'/e1rel_to_e2_train.json', kg_vocab)
+    print ("making train dataset is done " + str(time.time()-start))
+    start = time.time()
     evalset = KG_EvalSet(dir+'/e1rel_to_e2_ranking_test.json', kg_vocab)
+    print ("making evalset is done " + str(time.time()-start))
 
     cnt = 0
     for epoch in range(args.epochs):
