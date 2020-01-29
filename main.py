@@ -119,12 +119,13 @@ def main(args, model_path):
             head = head.cuda()
             rel = rel.cuda()
             batch_size = head.size(0)
-            e2_multi = torch.full((batch_size, n_ent), args.label_smoothing)
+            epsilon = 1.0 / n_ent
+            e2_multi = torch.full((batch_size, n_ent), epsilon)
             # label smoothing
             start = time.time()
             smoothed_value = 1 - args.label_smoothing
             for i, t in enumerate(tail):
-                e2_multi[i][t] = smoothed_value
+                e2_multi[i][t] = smoothed_value + epsilon
             e2_multi.cuda()
             print ("e2_multi " + str(time.time()-start) + "\n")
             start = time.time()
