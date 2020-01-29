@@ -43,6 +43,9 @@ class KG_EvalSet(Dataset):
         self.head = []
         self.rel = []
         self.tail = []
+        self.head2 = []
+        self.rel_rev = []
+        self.tail2 = []
         with open(file_path) as f:
             for line in f:
                 self.len += 1
@@ -54,11 +57,18 @@ class KG_EvalSet(Dataset):
                     self.tails.append(self.kg_vocab.ent_id[t])
                 self.tail.append(self.tails)
 
+                self.head2.append(self.kg_vocab.ent_id[line['e2']])
+                self.rel_rev.append(self.kg_vocab.rel_id[line['rel_eval']])
+                self.tails2 = []
+                for t in line['e2_e2toe1'].split('@@'):
+                    self.tails2.append(self.kg_vocab.ent_id[t])
+                self.tail2.append(self.tails2)
+
     def __len__(self):
         return self.len
 
     def __getitem__(self, idx):
-        return self.head[idx], self.rel[idx], self.tail[idx]
+        return self.head[idx], self.rel[idx], self.tail[idx], self.head2[idx], self.rel_rev[idx], self.tail2[idx]
 
 def main(args, model_path):
     print (os.getcwd())
@@ -98,6 +108,7 @@ def main(args, model_path):
     print(sum(params))
     opt = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.l2)
     dataset = KG_DataSet(dir+'/e1rel_to_e2_train.json', kg_vocab)
+    evalset = KG_EvalSet(dir+'/e1rel_to_e2_test.json', kg_vocab)
 
     cnt = 0
     for epoch in range(args.epochs):
@@ -120,6 +131,7 @@ def main(args, model_path):
             head = torch.LongTensor(head)
             rel = torch.LongTensor(rel)
             tail = [torch.LongTensor(vec) for vec in tail]
+            print (len(tail))
             head = head.cuda()
             rel = rel.cuda()
             batch_size = head.size(0)
@@ -150,20 +162,20 @@ def main(args, model_path):
         print ('saving to {0}'.format(model_path))
         torch.save(model.state_dict(), model_path)
 
-        #model.eval()
-        #with torch.no_grad():
-        #    start = time.time()
-        #    val_loss = ranking_and_hits(model, args.test_batch_size, test_data)
-        #    end = time.time()
-        #    print ('eval time used: {} minutes'.format((end - start)/60))
+        model.eval()
+        with torch.no_grad():
+            start = time.time()
+            val_loss = ranking_and_hits(model, args, evalset, n_ent, epoch)
+            end = time.time()
+            print ('eval time used: {} minutes'.format((end - start)/60))
 
-        #if epoch_loss < val_loss:
-        #    cnt = 0
-        #else:
-        #    cnt += 1
-        #    if cnt > 5:
-        #        print ("Early stopping ...")
-        #        break
+        if epoch_loss < val_loss:
+            cnt = 0
+        else:
+            cnt += 1
+            if cnt > 5:
+                print ("Early stopping ...")
+                break
 
 
 if __name__ == '__main__':

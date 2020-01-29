@@ -5,32 +5,6 @@ from random import randint
 from collections import defaultdict
 import torch
 
-#def heads_tails(n_ent, train_data, valid_data=None, test_data=None):
-
-
-def inplace_shuffle(*lists):
-    idx = []
-    for i in range(len(lists[0])):
-        idx.append(randint(0, i))
-    for ls in lists:
-        for i, item in enumerate(ls):
-            j = idx[i]
-            ls[i], ls[j] = ls[j], ls[i]
-
-
-def batch_by_size(batch_size, *lists, n_sample=None):
-    if n_sample is None:
-        n_sample = len(lists[0])
-    head = 0
-    while head < n_sample:
-        tail = min(n_sample, head + batch_size)
-        ret = [ls[head:tail] for ls in lists]
-        head += batch_size
-        if len(ret) > 1:
-            yield ret
-        else:
-            yield ret[0]
-
 def make_kg_vocab(*data):
     kg_vocab = namedtuple('kg_vocab', ['ent_list', 'rel_list', 'ent_id', 'rel_id'])
     ent_set = set()
