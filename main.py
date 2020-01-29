@@ -29,11 +29,15 @@ class KG_DataSet(Dataset):
             for t in line['e2_e1toe2'].split(' '):
                 self.tails.append(kg_vocab.ent_id[t])
             self.tail.append(self.tails)
+        self.head = torch.LongTensor(self.head)
+        self.rel = torch.LongTensor(self.rel)
+        self.tail = torch.LongTensor(self.tail)
+
     def __len__(self):
         return self.len
 
     def __getitem__(self, index):
-        return torch.LongTensor(self.head[index]), torch.LongTensor(self.rel[index]), torch.LongTensor(self.tail[index])
+        return self.head, self.rel, self.tail
 
 
 def main(args, model_path):
