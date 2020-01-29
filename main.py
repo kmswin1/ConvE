@@ -28,7 +28,7 @@ def main(args, model_path):
     train_data_with_reverse = read_data_with_rel_reverse(os.path.join(dir, 'train.json'), kg_vocab)
     train_data = read_data(os.path.join(dir, 'train.json'), kg_vocab)
     train_reverse = read_reverse_data(os.path.join(dir, 'train.json'), kg_vocab)
-    inplace_shuffle(*train_data_with_reverse)
+    #inplace_shuffle(*train_data_with_reverse)
     print ("making read_train data is done " + str(time.time()-start))
     start = time.time()
     heads, tails = heads_tails(n_ent, train_data_with_reverse)
@@ -40,7 +40,7 @@ def main(args, model_path):
     test_data = read_data(os.path.join(dir, 'test.json'), kg_vocab)
     test_reverse = read_reverse_data(os.path.join(dir, 'test.json'), kg_vocab)
     print("making read_test data is done " + str(time.time()-start))
-    eval_h, eval_t = heads_tails_eval(n_ent, train_data, train_reverse, test_data, test_reverse)
+    eval_h, eval_t = heads_tails_eval(n_ent, test_data, test_reverse)
     start = time.time()
     print ("making test heads, tails is done " + str(time.time()-start))
 
@@ -49,6 +49,8 @@ def main(args, model_path):
     test_data = [torch.LongTensor(vec) for vec in test_data]
     train_data_with_reverse = [torch.LongTensor(vec) for vec in train_data_with_reverse]
     test_reverse = [torch.LongTensor(vec) for vec in test_reverse]
+    train_data = [torch.LongTensor(vec) for vec in train_data]
+
 
 
     model = ConvE(args, n_ent, n_rel)
