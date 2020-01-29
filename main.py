@@ -94,7 +94,7 @@ def main(args, model_path):
         dataloader = torch.utils.data.DataLoader(dataset=dataset, num_workers=4, batch_size=args.batch_size, shuffle=True)
 
 
-        for i, head,rel,tail in enumerate(dataloader):
+        for i,  head, rel, tail in enumerate(zip(dataloader)):
             opt.zero_grad()
             batch_size = head.size(0)
             e2_multi = torch.empty(batch_size, n_ent, device=torch.device('cuda'))
