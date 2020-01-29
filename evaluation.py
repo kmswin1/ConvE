@@ -31,8 +31,8 @@ def ranking_and_hits(model, args, testset, n_ent, epoch):
         head = head.cuda()
         rel = rel.cuda()
         batch_size = head.size(0)
-        e2_multi1 = torch.empty(batch_size, n_ent, device=torch.device('cuda'))
-        e2_multi2 = torch.empty(batch_size, n_ent, device=torch.device('cuda'))
+        e2_multi1 = torch.zeros(batch_size, n_ent, device=torch.device('cuda'))
+        e2_multi2 = torch.zeros(batch_size, n_ent, device=torch.device('cuda'))
         # label smoothing
         start = time.time()
         for i, (t,t_r) in enumerate(zip(tail, tail2)):
