@@ -49,9 +49,9 @@ def main(args, model_path):
     print ("making vocab is done "+str(time.time()-start))
     n_ent, n_rel = graph_size(kg_vocab)
 
-    start = time.time()
+    #start = time.time()
     #train_data = read_data(os.path.join(dir, 'e1rel_toe2_train.json'), kg_vocab)
-    print ("making read_train data is done " + str(time.time()-start))
+    #print ("making read_train data is done " + str(time.time()-start))
 
     #start = time.time()
     #train_data = read_data(os.path.join(dir, 'e1rel_toe2_test_ranking.json'), kg_vocab)
@@ -66,7 +66,7 @@ def main(args, model_path):
     #if torch.cuda.device_count() > 1:
     #    model = torch.nn.DataParallel(model)
     #    criterion = torch.nn.BCELoss()
-    #model.cuda()
+    model.cuda()
     print ('cuda : ' + str(torch.cuda.is_available()) + ' count : ' + str(torch.cuda.device_count()))
 
     params = [value.numel() for value in model.parameters()]
