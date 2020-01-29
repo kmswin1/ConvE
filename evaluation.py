@@ -29,6 +29,8 @@ def ranking_and_hits(model, args, testset, n_ent, epoch):
         tail2 = [torch.LongTensor(vec) for vec in tail2]
         head = head.cuda()
         rel = rel.cuda()
+        head2 = head2.cuda()
+        rel_rev = rel_rev.cuda()
         batch_size = head.size(0)
         epsilon = 1.0/n_ent
         e2_multi1 = torch.full((batch_size, n_ent), epsilon)
@@ -40,9 +42,7 @@ def ranking_and_hits(model, args, testset, n_ent, epoch):
             e2_multi1[i][t] = smoothed_value + epsilon
             e2_multi2[i][t] = smoothed_value + epsilon
         print("e2_multi_time " + str(time.time() - start))
-        e2_multi1 = ((1.0 - args.label_smoothing) * e2_multi1) + (1.0 / e2_multi1.shape[1])
         e2_multi1 = e2_multi1.cuda()
-        e2_multi2 = ((1.0 - args.label_smoothing) * e2_multi2) + (1.0 / e2_multi2.shape[1])
         e2_multi2 = e2_multi2.cuda()
         pred1 = model.forward(head, rel)
         pred2 = model.forward(head2, rel_rev)
