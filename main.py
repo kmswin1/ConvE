@@ -119,13 +119,11 @@ def main(args, model_path):
             head = head.cuda()
             rel = rel.cuda()
             batch_size = head.size(0)
-            print (batch_size)
             e2_multi = torch.zeros(batch_size, n_ent)
             # label smoothing
             start = time.time()
             for i, t in enumerate(tail):
                 e2_multi[i][t] = 1
-            print ("e2_multi_time " +str(time.time()-start) +"\n")
             e2_multi = ((1.0-args.label_smoothing)*e2_multi) + (1.0/e2_multi.shape[1])
             e2_multi = e2_multi.cuda()
             pred = model.forward(head, rel)
