@@ -3,7 +3,7 @@ import json
 import torch
 import argparse
 import os
-from utils import make_kg_vocab, graph_size, read_data
+from utils import make_kg_vocab, graph_size
 import time, datetime
 from torch.utils.data import Dataset, DataLoader
 from evaluation import ranking_and_hits
@@ -107,7 +107,7 @@ def main(args, model_path):
         start = time.time()
         model.train()
         tot = 0.0
-        dataloader = torch.utils.data.DataLoader(dataset=dataset, num_workers=4, batch_size=args.batch_size, shuffle=True)
+        dataloader = DataLoader(dataset=dataset, num_workers=4, batch_size=args.batch_size, shuffle=True)
         n_train = dataset.__len__()
 
         for i, data in enumerate(dataloader):
