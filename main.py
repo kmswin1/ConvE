@@ -74,24 +74,10 @@ def main(args, model_path):
     print (os.getcwd())
     print ("start training ...")
 
-    train_data = dir + '/train.json'
-    #valid_data = dir + '/valid.json'
-    test_data = dir + '/test.json'
-
     start = time.time()
     kg_vocab = make_kg_vocab(dir+'/e1rel_to_e2_full.json')
     print ("making vocab is done "+str(time.time()-start))
     n_ent, n_rel = graph_size(kg_vocab)
-
-    #start = time.time()
-    #train_data = read_data(os.path.join(dir, 'e1rel_toe2_train.json'), kg_vocab)
-    #print ("making read_train data is done " + str(time.time()-start))
-
-    #start = time.time()
-    #train_data = read_data(os.path.join(dir, 'e1rel_toe2_test_ranking.json'), kg_vocab)
-    #print ("making read_test data is done " + str(time.time()-start))
-
-    #train_data = [torch.LongTensor(vec) for vec in train_data]
 
 
     model = ConvE(args, n_ent, n_rel)
@@ -108,7 +94,7 @@ def main(args, model_path):
     print(sum(params))
     opt = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.l2)
     dataset = KG_DataSet(dir+'/e1rel_to_e2_train.json', kg_vocab)
-    evalset = KG_EvalSet(dir+'/e1rel_to_e2_test.json', kg_vocab)
+    evalset = KG_EvalSet(dir+'/e1rel_to_e2_ranking_test.json', kg_vocab)
 
     cnt = 0
     for epoch in range(args.epochs):
@@ -116,11 +102,6 @@ def main(args, model_path):
         epoch_loss = 0
         start = time.time()
         model.train()
-        #h, r, t = train_data
-        #n_train = h.size(0)
-        #rand_idx = torch.randperm(n_train)
-        #h = h[rand_idx].cuda()
-        #r = r[rand_idx].cuda()
         tot = 0.0
         dataloader = torch.utils.data.DataLoader(dataset=dataset, num_workers=4, batch_size=args.batch_size, shuffle=True)
         n_train = dataset.__len__()
