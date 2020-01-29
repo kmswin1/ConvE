@@ -5,8 +5,7 @@ from utils import batch_by_size
 import time
 #timer = CUDATimer()
 dir = os.getcwd()
-# ranking_and_hits(model, Config.batch_size, valid_data, eval_h, eval_t,'dev_evaluation')
-def ranking_and_hits(model, batch_size, dateset, dataset_rev, eval_h, eval_t, name, epoch):
+def ranking_and_hits(model, batch_size, test_data):
     heads_rev, rels_rev, tails_rev = dataset_rev
     heads, rels, tails = dateset
     hits_left = []
