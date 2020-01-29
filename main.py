@@ -116,10 +116,10 @@ def main(args, model_path):
             head = torch.LongTensor(head)
             rel = torch.LongTensor(rel)
             tail = [torch.LongTensor(vec) for vec in tail]
-            print (len(tail))
             head = head.cuda()
             rel = rel.cuda()
             batch_size = head.size(0)
+            print (batch_size)
             e2_multi = torch.empty(batch_size, n_ent, device=torch.device('cuda'))
             # label smoothing
             start = time.time()
