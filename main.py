@@ -3,7 +3,7 @@ import json
 import torch
 import argparse
 import os
-from utils import batch_by_size, make_kg_vocab, graph_size, read_data
+from utils import make_kg_vocab, graph_size, read_data
 import time, datetime
 from torch.utils.data import Dataset, DataLoader
 from evaluation import ranking_and_hits
