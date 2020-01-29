@@ -148,20 +148,14 @@ def main(args, model_path):
         print ('saving to {0}'.format(model_path))
         torch.save(model.state_dict(), model_path)
 
+        # TODO: calculate valid loss and develop early stopping
+
         '''model.eval()
         with torch.no_grad():
             start = time.time()
-            val_loss = ranking_and_hits(model, args, evalset, n_ent, epoch)
+            ranking_and_hits(model, args, evalset, n_ent, epoch)
             end = time.time()
-            print ('eval time used: {} minutes'.format((end - start)/60))
-
-        if epoch_loss < val_loss:
-            cnt = 0
-        else:
-            cnt += 1
-            if cnt > 5:
-                print ("Early stopping ...")
-                break'''
+            print ('eval time used: {} minutes'.format((end - start)/60))'''
 
 
 if __name__ == '__main__':

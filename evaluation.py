@@ -124,6 +124,3 @@ def ranking_and_hits(model, args, testset, n_ent, epoch):
         f.write('Mean reciprocal rank: {0}\n'.format(np.mean(1./np.array(ranks_left+ranks_right))))
 
     f.close()
-
-    loss /= batch_size
-    return loss
