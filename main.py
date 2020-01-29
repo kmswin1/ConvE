@@ -107,7 +107,7 @@ def main(args, model_path):
         start = time.time()
         model.train()
         tot = 0.0
-        dataloader = DataLoader(dataset=dataset, num_workers=4, batch_size=args.batch_size, shuffle=True)
+        dataloader = DataLoader(dataset=dataset, num_workers=40, batch_size=args.batch_size, shuffle=True)
         n_train = dataset.__len__()
 
         for i, data in enumerate(dataloader):
@@ -126,7 +126,7 @@ def main(args, model_path):
                 e2_multi[i][t] = 1
             e2_multi = ((1.0-args.label_smoothing)*e2_multi) + (1.0/e2_multi.shape[1])
             e2_multi = e2_multi.cuda()
-            print ("e2_multi" + str(time.time()-start) + "\n")
+            print ("e2_multi " + str(time.time()-start) + "\n")
             start = time.time()
             pred = model.forward(head, rel)
             #loss = model.loss(pred, e2_multi)
