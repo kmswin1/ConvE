@@ -13,7 +13,6 @@ def ranking_and_hits(model, args, testset, n_ent, epoch):
     ranks = []
     ranks_left = []
     ranks_right = []
-    loss = 0.0
 
     for i in range(10):
         hits_left.append([])
@@ -48,7 +47,6 @@ def ranking_and_hits(model, args, testset, n_ent, epoch):
 
         loss1 = model.loss(pred1, e2_multi1)
         loss2 = model.loss(pred2, e2_multi2)
-        loss = (torch.sum(loss1) + torch.sub(loss2))/2
 
         for i in range(args.batch_size):
             # save the prediction that is relevant
