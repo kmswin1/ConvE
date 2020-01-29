@@ -45,7 +45,7 @@ def main(args, model_path):
     test_data = dir + '/test.json'
 
     start = time.time()
-    kg_vocab = make_kg_vocab(dir+'/data/e1rel_to_e2_full.json')
+    kg_vocab = make_kg_vocab(dir+'/e1rel_to_e2_full.json')
     print ("making vocab is done "+str(time.time()-start))
     n_ent, n_rel = graph_size(kg_vocab)
 
@@ -73,7 +73,7 @@ def main(args, model_path):
     print(params)
     print(sum(params))
     opt = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.l2)
-    dataset = KG_DataSet(dir+'/data/e1rel_to_e2_train.json', kg_vocab)
+    dataset = KG_DataSet(dir+'/e1rel_to_e2_train.json', kg_vocab)
 
     cnt = 0
     for epoch in range(args.epochs):
