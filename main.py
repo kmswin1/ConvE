@@ -124,8 +124,8 @@ def main(args, model_path):
             start = time.time()
             for i, t in enumerate(tail):
                 e2_multi[i][t] = 1
+            e2_multi.cuda()
             e2_multi = ((1.0-args.label_smoothing)*e2_multi) + (1.0/e2_multi.shape[1])
-            e2_multi = e2_multi.cuda()
             print ("e2_multi " + str(time.time()-start) + "\n")
             start = time.time()
             pred = model.forward(head, rel)
