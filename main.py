@@ -81,11 +81,11 @@ def main(args, model_path):
         epoch_loss = 0
         start = time.time()
         model.train()
-        h, r, t = train_data
-        n_train = h.size(0)
-        rand_idx = torch.randperm(n_train)
-        h = h[rand_idx].cuda()
-        r = r[rand_idx].cuda()
+        #h, r, t = train_data
+        #n_train = h.size(0)
+        #rand_idx = torch.randperm(n_train)
+        #h = h[rand_idx].cuda()
+        #r = r[rand_idx].cuda()
         tot = 0.0
         dataloader = torch.utils.data.DataLoader(dataset = dataset, num_workers=4, batch_size=args.batch_size, shuffle=True)
 
