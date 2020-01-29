@@ -101,7 +101,7 @@ def write_training_graph(cases, graph, path):
 
             # (John, fatherOf) -> Tom
             # (John, fatherOf_reverse, Mike)
-            entities1 = ",,,".join(list(graph[key]))
+            entities1 = "@@".join(list(graph[key]))
 
             data_point = {}
             data_point['e1'] = e1
