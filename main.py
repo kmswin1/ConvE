@@ -97,6 +97,9 @@ def main(args, model_path):
         for i, data in enumerate(dataloader):
             opt.zero_grad()
             head, rel, tail = data
+            head = head.cuda()
+            rel = rel.cuda()
+            tail = tail.cuda()
             batch_size = head.size(0)
             e2_multi = torch.empty(batch_size, n_ent, device=torch.device('cuda'))
             # label smoothing
