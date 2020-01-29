@@ -29,8 +29,6 @@ class KG_DataSet(Dataset):
                 for t in line['e2_e1toe2'].split('@@'):
                     self.tails.append(self.kg_vocab.ent_id[t])
                 self.tail.append(self.tails)
-        self.head = torch.LongTensor(self.head)
-        self.rel = torch.LongTensor(self.rel)
 
     def __len__(self):
         return self.len
