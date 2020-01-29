@@ -13,7 +13,6 @@ def ranking_and_hits(model, args, testset, n_ent, epoch):
     ranks = []
     ranks_left = []
     ranks_right = []
-    loss = 0.0
 
     for i in range(10):
         hits_left.append([])
@@ -30,25 +29,23 @@ def ranking_and_hits(model, args, testset, n_ent, epoch):
         tail2 = [torch.LongTensor(vec) for vec in tail2]
         head = head.cuda()
         rel = rel.cuda()
+        head2 = head2.cuda()
+        rel_rev = rel_rev.cuda()
         batch_size = head.size(0)
-        e2_multi1 = torch.zeros(batch_size, n_ent)
-        e2_multi2 = torch.zeros(batch_size, n_ent)
+        epsilon = 1.0/n_ent
+        e2_multi1 = torch.full((batch_size, n_ent), epsilon)
+        e2_multi2 = torch.full((batch_size, n_ent), epsilon)
         # label smoothing
         start = time.time()
+        smoothed_value = 1 - args.label_smoothing
         for i, (t,t_r) in enumerate(zip(tail, tail2)):
-            e2_multi1[i][t] = 1
-            e2_multi2[i][t] = 1
+            e2_multi1[i][t] = smoothed_value + epsilon
+            e2_multi2[i][t] = smoothed_value + epsilon
         print("e2_multi_time " + str(time.time() - start))
-        e2_multi1 = ((1.0 - args.label_smoothing) * e2_multi1) + (1.0 / e2_multi1.shape[1])
         e2_multi1 = e2_multi1.cuda()
-        e2_multi2 = ((1.0 - args.label_smoothing) * e2_multi2) + (1.0 / e2_multi2.shape[1])
         e2_multi2 = e2_multi2.cuda()
         pred1 = model.forward(head, rel)
         pred2 = model.forward(head2, rel_rev)
-
-        loss1 = model.loss(pred1, e2_multi1)
-        loss2 = model.loss(pred2, e2_multi2)
-        loss = (torch.sum(loss1) + torch.sub(loss2))/2
 
         for i in range(args.batch_size):
             # save the prediction that is relevant
@@ -124,6 +121,3 @@ def ranking_and_hits(model, args, testset, n_ent, epoch):
         f.write('Mean reciprocal rank: {0}\n'.format(np.mean(1./np.array(ranks_left+ranks_right))))
 
     f.close()
-
-    loss /= batch_size
-    return loss
