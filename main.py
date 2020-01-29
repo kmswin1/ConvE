@@ -87,21 +87,21 @@ def main(args, model_path):
         #h = h[rand_idx].cuda()
         #r = r[rand_idx].cuda()
         tot = 0.0
-        dataloader = torch.utils.data.DataLoader(dataset = dataset, num_workers=4, batch_size=args.batch_size, shuffle=True)
+        dataloader = torch.utils.data.DataLoader(dataset=dataset, num_workers=4, batch_size=args.batch_size, shuffle=True)
 
 
-        for i, data in enumerate(dataloader):
+        for i, head,rel,tail in enumerate(dataloader):
             opt.zero_grad()
-            batch_size = data.head.size(0)
+            batch_size = head.size(0)
             e2_multi = torch.empty(batch_size, n_ent, device=torch.device('cuda'))
             # label smoothing
             start = time.time()
-            for i, t in enumerate(data.tail):
+            for i, t in enumerate(tail):
                 e2_multi[i][t] = 1
             print ("e2_multi_time " +str(time.time()-start))
             e2_multi = ((1.0-args.label_smoothing)*e2_multi) + (1.0/e2_multi.shape[1])
             e2_multi = e2_multi.cuda()
-            pred = model.forward(data.head, data.rel)
+            pred = model.forward(head, rel)
             loss = model.loss(pred, e2_multi)
             #loss = criterion(pred, e2_multi)
             loss.backward()
