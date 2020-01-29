@@ -5,8 +5,7 @@ from torch.utils.data import DataLoader
 import time
 #timer = CUDATimer()
 dir = os.getcwd()
-# ranking_and_hits(model, Config.batch_size, valid_data, eval_h, eval_t,'dev_evaluation')
-def ranking_and_hits(model, args, testset, n_ent, epoch, kg_vocab):
+def ranking_and_hits(model, args, testset, n_ent, epoch):
     dataloader = DataLoader(dataset=testset, num_workers=4, batch_size=args.batch_size, shuffle=True)
     hits_left = []
     hits_right = []
@@ -30,24 +29,23 @@ def ranking_and_hits(model, args, testset, n_ent, epoch, kg_vocab):
         tail2 = [torch.LongTensor(vec) for vec in tail2]
         head = head.cuda()
         rel = rel.cuda()
+        head2 = head2.cuda()
+        rel_rev = rel_rev.cuda()
         batch_size = head.size(0)
-        e2_multi1 = torch.zeros(batch_size, n_ent)
-        e2_multi2 = torch.zeros(batch_size, n_ent)
+        epsilon = 1.0/n_ent
+        e2_multi1 = torch.full((batch_size, n_ent), epsilon)
+        e2_multi2 = torch.full((batch_size, n_ent), epsilon)
         # label smoothing
         start = time.time()
+        smoothed_value = 1 - args.label_smoothing
         for i, (t,t_r) in enumerate(zip(tail, tail2)):
-            e2_multi1[i][t] = 1
-            e2_multi2[i][t] = 1
+            e2_multi1[i][t] = smoothed_value + epsilon
+            e2_multi2[i][t] = smoothed_value + epsilon
         print("e2_multi_time " + str(time.time() - start))
-        e2_multi1 = ((1.0 - args.label_smoothing) * e2_multi1) + (1.0 / e2_multi1.shape[1])
-        e2_multi1.cuda()
-        e2_multi2 = ((1.0 - args.label_smoothing) * e2_multi2) + (1.0 / e2_multi2.shape[1])
-        e2_multi2.cuda()
+        e2_multi1 = e2_multi1.cuda()
+        e2_multi2 = e2_multi2.cuda()
         pred1 = model.forward(head, rel)
         pred2 = model.forward(head2, rel_rev)
-
-        loss1 = model.loss(pred1, e2_multi1)
-        loss2 = model.loss(pred2, e2_multi2)
 
         for i in range(args.batch_size):
             # save the prediction that is relevant
@@ -95,14 +93,6 @@ def ranking_and_hits(model, args, testset, n_ent, epoch, kg_vocab):
             #     else:
             #         hits[hits_level].append(0.0)
             #         hits_right[hits_level].append(0.0)
-
-    # for i in range(10):
-    #     logger.info('Hits left @{0}: {1}'.format(i+1, np.mean(hits_left[i])))
-    #     logger.info('Hits right @{0}: {1}'.format(i+1, np.mean(hits_right[i])))
-
-    # for i in range(10):
-    #     logger.info('Hits left @{0}: {1}'.format(i+1, np.mean(hits_left[i])))
-    #     logger.info('Hits right @{0}: {1}'.format(i+1, np.mean(hits_right[i])))
             if rank1 == 1:
                 with open(dir + '/log_file/hit.txt', 'a') as f:
                     f.write(kg_vocab.ent_list[h]+"\n")

@@ -47,9 +47,6 @@ def ranking_and_hits(model, args, testset, n_ent, epoch):
         pred1 = model.forward(head, rel)
         pred2 = model.forward(head2, rel_rev)
 
-        loss1 = model.loss(pred1, e2_multi1)
-        loss2 = model.loss(pred2, e2_multi2)
-
         for i in range(args.batch_size):
             # save the prediction that is relevant
             target_value1 = pred1[i,tail[i].item()].item()
