@@ -36,6 +36,29 @@ class KG_DataSet(Dataset):
     def __getitem__(self, idx):
         return self.head[idx], self.rel[idx], self.tail[idx]
 
+class KG_EvalSet(Dataset):
+    def __init__(self, file_path, kg_vocab):
+        self.kg_vocab = kg_vocab
+        self.len = 0
+        self.head = []
+        self.rel = []
+        self.tail = []
+        with open(file_path) as f:
+            for line in f:
+                self.len += 1
+                line = json.loads(line)
+                self.head.append(self.kg_vocab.ent_id[line['e1']])
+                self.rel.append(self.kg_vocab.rel_id[line['rel']])
+                self.tails = []
+                for t in line['e2_e1toe2'].split('@@'):
+                    self.tails.append(self.kg_vocab.ent_id[t])
+                self.tail.append(self.tails)
+
+    def __len__(self):
+        return self.len
+
+    def __getitem__(self, idx):
+        return self.head[idx], self.rel[idx], self.tail[idx]
 
 def main(args, model_path):
     print (os.getcwd())
@@ -89,7 +112,7 @@ def main(args, model_path):
         #r = r[rand_idx].cuda()
         tot = 0.0
         dataloader = torch.utils.data.DataLoader(dataset=dataset, num_workers=4, batch_size=args.batch_size, shuffle=True)
-
+        n_train = dataset.__len__()
 
         for i, data in enumerate(dataloader):
             opt.zero_grad()
@@ -116,7 +139,7 @@ def main(args, model_path):
             batch_loss = torch.sum(loss)
             epoch_loss += batch_loss
             tot += head.size(0)
-            print ('\r{:>10} progress {} loss: {}'.format('', tot/batch_size, batch_loss), end='')
+            print ('\r{:>10} progress {} loss: {}'.format('', tot/n_train, batch_loss), end='')
         epoch_loss /= batch_size
         print ('')
         end = time.time()
