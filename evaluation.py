@@ -30,13 +30,15 @@ def ranking_and_hits(model, args, testset, n_ent, epoch):
         head = head.cuda()
         rel = rel.cuda()
         batch_size = head.size(0)
-        e2_multi1 = torch.zeros(batch_size, n_ent)
-        e2_multi2 = torch.zeros(batch_size, n_ent)
+        epsilon = 1.0/n_ent
+        e2_multi1 = torch.full((batch_size, n_ent), epsilon)
+        e2_multi2 = torch.full((batch_size, n_ent), epsilon)
         # label smoothing
         start = time.time()
+        smoothed_value = 1 - args.label_smoothing
         for i, (t,t_r) in enumerate(zip(tail, tail2)):
-            e2_multi1[i][t] = 1
-            e2_multi2[i][t] = 1
+            e2_multi1[i][t] = smoothed_value + epsilon
+            e2_multi2[i][t] = smoothed_value + epsilon
         print("e2_multi_time " + str(time.time() - start))
         e2_multi1 = ((1.0 - args.label_smoothing) * e2_multi1) + (1.0 / e2_multi1.shape[1])
         e2_multi1 = e2_multi1.cuda()
