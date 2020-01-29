@@ -96,9 +96,9 @@ def main(args, model_path):
     start = time.time()
     dataset = KG_DataSet(dir+'/e1rel_to_e2_train.json', kg_vocab)
     print ("making train dataset is done " + str(time.time()-start))
-    start = time.time()
-    evalset = KG_EvalSet(dir+'/e1rel_to_e2_ranking_test.json', kg_vocab)
-    print ("making evalset is done " + str(time.time()-start))
+    #start = time.time()
+    #evalset = KG_EvalSet(dir+'/e1rel_to_e2_ranking_test.json', kg_vocab)
+    #print ("making evalset is done " + str(time.time()-start))
 
     cnt = 0
     for epoch in range(args.epochs):
@@ -147,7 +147,7 @@ def main(args, model_path):
         print ('saving to {0}'.format(model_path))
         torch.save(model.state_dict(), model_path)
 
-        model.eval()
+        '''model.eval()
         with torch.no_grad():
             start = time.time()
             val_loss = ranking_and_hits(model, args, evalset, n_ent, epoch)
@@ -160,7 +160,7 @@ def main(args, model_path):
             cnt += 1
             if cnt > 5:
                 print ("Early stopping ...")
-                break
+                break'''
 
 
 if __name__ == '__main__':
