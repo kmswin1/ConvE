@@ -83,9 +83,9 @@ def main(args, model_path):
     model = ConvE(args, n_ent, n_rel)
     model.init()
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    #if torch.cuda.device_count() > 1:
-    #    model = torch.nn.DataParallel(model)
-    #    criterion = torch.nn.BCELoss()
+    if torch.cuda.device_count() > 1:
+        model = torch.nn.DataParallel(model)
+        criterion = torch.nn.BCELoss()
     model.cuda()
     print ('cuda : ' + str(torch.cuda.is_available()) + ' count : ' + str(torch.cuda.device_count()))
 
@@ -127,8 +127,8 @@ def main(args, model_path):
             e2_multi = ((1.0-args.label_smoothing)*e2_multi) + (1.0/e2_multi.shape[1])
             e2_multi = e2_multi.cuda()
             pred = model.forward(head, rel)
-            loss = model.loss(pred, e2_multi)
-            #loss = criterion(pred, e2_multi)
+            #loss = model.loss(pred, e2_multi)
+            loss = criterion(pred, e2_multi)
             loss.backward()
             opt.step()
             batch_loss = torch.sum(loss)
