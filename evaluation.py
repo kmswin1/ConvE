@@ -39,9 +39,9 @@ def ranking_and_hits(model, args, testset, n_ent, epoch):
             e2_multi2[i][t] = 1
         print("e2_multi_time " + str(time.time() - start))
         e2_multi1 = ((1.0 - args.label_smoothing) * e2_multi1) + (1.0 / e2_multi1.shape[1])
-        e2_multi1.cuda()
+        e2_multi1 = e2_multi1.cuda()
         e2_multi2 = ((1.0 - args.label_smoothing) * e2_multi2) + (1.0 / e2_multi2.shape[1])
-        e2_multi2.cuda()
+        e2_multi2 = e2_multi2.cuda()
         pred1 = model.forward(head, rel)
         pred2 = model.forward(head2, rel_rev)
 

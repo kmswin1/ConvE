@@ -126,7 +126,7 @@ def main(args, model_path):
             smoothed_value = 1 - args.label_smoothing
             for i, t in enumerate(tail):
                 e2_multi[i][t] = smoothed_value + epsilon
-            e2_multi.cuda()
+            e2_multi = e2_multi.cuda()
             print ("e2_multi " + str(time.time()-start) + "\n")
             start = time.time()
             pred = model.forward(head, rel)
