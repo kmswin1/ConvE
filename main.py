@@ -107,7 +107,7 @@ def main(args, model_path):
         start = time.time()
         model.train()
         tot = 0.0
-        dataloader = DataLoader(dataset=dataset, num_workers=40, batch_size=args.batch_size, shuffle=True)
+        dataloader = DataLoader(dataset=dataset, num_workers=args.num_worker, batch_size=args.batch_size, shuffle=True)
         n_train = dataset.__len__()
 
         for i, data in enumerate(dataloader):
@@ -161,6 +161,7 @@ def main(args, model_path):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='KG completion for cruise contents data')
     parser.add_argument('--batch-size', type=int, default=128, help='input batch size for training (default: 128)')
+    parser.add_argument('--num-worker', type=int, default=16, help='num_process of dataloader (default: 16)')
     parser.add_argument('--test-batch-size', type=int, default=128, help='input batch size for testing/validation (default: 128)')
     parser.add_argument('--epochs', type=int, default=100, help='number of epochs to train (default: 100)')
     parser.add_argument('--lr', type=float, default=0.003, help='learning rate (default: 0.003)')
