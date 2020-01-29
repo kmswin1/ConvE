@@ -14,30 +14,29 @@ dir = os.getcwd() + '/data'
 
 class KG_DataSet(Dataset):
     def __init__(self, file_path, kg_vocab):
-        self.file_path = file_path
         self.kg_vocab = kg_vocab
-        self.file = open(file_path, 'r')
-        self.len = sum(1 for line in self.file.readlines())
+        self.len = 0
         self.head = []
         self.rel = []
         self.tail = []
-        for line in self.file.readlines():
-            line = json.loads(line)
-            self.head.append(kg_vocab.ent_id[line['e1']])
-            self.rel.append(kg_vocab.ent_id[line['rel']])
-            self.tails = []
-            for t in line['e2_e1toe2'].split(' '):
-                self.tails.append(kg_vocab.ent_id[t])
-            self.tail.append(self.tails)
+        with open(file_path) as f:
+            for line in f:
+                self.len += 1
+                line = json.loads(line)
+                self.head.append(self.kg_vocab.ent_id[line['e1']])
+                self.rel.append(self.kg_vocab.rel_id[line['rel']])
+                self.tails = []
+                for t in line['e2_e1toe2'].split('@@'):
+                    self.tails.append(self.kg_vocab.ent_id[t])
+                self.tail.append(self.tails)
         self.head = torch.LongTensor(self.head)
         self.rel = torch.LongTensor(self.rel)
-        self.tail = torch.LongTensor(self.tail)
 
     def __len__(self):
         return self.len
 
-    def __getitem__(self, index):
-        return self.head, self.rel, self.tail
+    def __getitem__(self, idx):
+        return self.head[idx], self.rel[idx], self.tail[idx]
 
 
 def main(args, model_path):
@@ -97,9 +96,11 @@ def main(args, model_path):
         for i, data in enumerate(dataloader):
             opt.zero_grad()
             head, rel, tail = data
+            head = torch.LongTensor(head)
+            rel = torch.LongTensor(rel)
+            tail = [torch.LongTensor(vec) for vec in tail]
             head = head.cuda()
             rel = rel.cuda()
-            tail = tail.cuda()
             batch_size = head.size(0)
             e2_multi = torch.empty(batch_size, n_ent, device=torch.device('cuda'))
             # label smoothing

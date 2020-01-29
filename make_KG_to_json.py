@@ -101,7 +101,7 @@ def write_training_graph(cases, graph, path):
 
             # (John, fatherOf) -> Tom
             # (John, fatherOf_reverse, Mike)
-            entities1 = " ".join(list(graph[key]))
+            entities1 = ",,,".join(list(graph[key]))
 
             data_point = {}
             data_point['e1'] = e1
@@ -122,11 +122,11 @@ def write_evaluation_graph(cases, graph, path):
             # (Mike, fatherOf) -> John
             # (John, fatherOf, Tom)
             rel_reverse = rel+'_reverse'
-            entities1 = " ".join(list(graph[(e1, rel)]))
-            entities2 = " ".join(list(graph[(e2, rel_reverse)]))
+            entities1 = "@@".join(list(graph[(e1, rel)]))
+            entities2 = "@@".join(list(graph[(e2, rel_reverse)]))
 
-            n1 += len(entities1.split(' '))
-            n2 += len(entities2.split(' '))
+            n1 += len(entities1.split('@@'))
+            n2 += len(entities2.split('@@'))
 
 
             data_point = {}
