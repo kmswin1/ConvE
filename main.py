@@ -120,12 +120,12 @@ def main(args, model_path):
             rel = rel.cuda()
             batch_size = head.size(0)
             print (batch_size)
-            e2_multi = torch.empty(batch_size, n_ent, device=torch.device('cuda'))
+            e2_multi = torch.zeros(batch_size, n_ent)
             # label smoothing
             start = time.time()
             for i, t in enumerate(tail):
                 e2_multi[i][t] = 1
-            print ("e2_multi_time " +str(time.time()-start))
+            print ("e2_multi_time " +str(time.time()-start) +"\n")
             e2_multi = ((1.0-args.label_smoothing)*e2_multi) + (1.0/e2_multi.shape[1])
             e2_multi = e2_multi.cuda()
             pred = model.forward(head, rel)
@@ -136,7 +136,7 @@ def main(args, model_path):
             batch_loss = torch.sum(loss)
             epoch_loss += batch_loss
             tot += head.size(0)
-            print ('\r{:>10} progress {} loss: {}'.format('', tot/n_train, batch_loss), end='')
+            print ('\r{:>10} progress {} loss: {}\n'.format('', tot/n_train, batch_loss), end='')
         epoch_loss /= batch_size
         print ('')
         end = time.time()
