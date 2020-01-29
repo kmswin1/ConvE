@@ -3,54 +3,81 @@ import json
 import torch
 import argparse
 import os
-from utils import heads_tails, heads_tails_eval, inplace_shuffle, batch_by_size, make_kg_vocab, graph_size, read_data, read_reverse_data, read_data_with_rel_reverse
+from utils import make_kg_vocab, graph_size
 import time, datetime
+from torch.utils.data import Dataset, DataLoader
 from evaluation import ranking_and_hits
 
 from model import ConvE, Complex
 
 dir = os.getcwd() + '/data'
 
+class KG_DataSet(Dataset):
+    def __init__(self, file_path, kg_vocab):
+        self.kg_vocab = kg_vocab
+        self.len = 0
+        self.head = []
+        self.rel = []
+        self.tail = []
+        with open(file_path) as f:
+            for line in f:
+                self.len += 1
+                line = json.loads(line)
+                self.head.append(self.kg_vocab.ent_id[line['e1']])
+                self.rel.append(self.kg_vocab.rel_id[line['rel']])
+                self.tails = []
+                for t in line['e2_e1toe2'].split('@@'):
+                    self.tails.append(self.kg_vocab.ent_id[t])
+                self.tail.append(self.tails)
+
+    def __len__(self):
+        return self.len
+
+    def __getitem__(self, idx):
+        return self.head[idx], self.rel[idx], self.tail[idx]
+
+class KG_EvalSet(Dataset):
+    def __init__(self, file_path, kg_vocab):
+        self.kg_vocab = kg_vocab
+        self.len = 0
+        self.head = []
+        self.rel = []
+        self.tail = []
+        self.head2 = []
+        self.rel_rev = []
+        self.tail2 = []
+        with open(file_path) as f:
+            for line in f:
+                self.len += 1
+                line = json.loads(line)
+                self.head.append(self.kg_vocab.ent_id[line['e1']])
+                self.rel.append(self.kg_vocab.rel_id[line['rel']])
+                self.tails = []
+                for t in line['e2_e1toe2'].split('@@'):
+                    self.tails.append(self.kg_vocab.ent_id[t])
+                self.tail.append(self.tails)
+
+                self.head2.append(self.kg_vocab.ent_id[line['e2']])
+                self.rel_rev.append(self.kg_vocab.rel_id[line['rel_eval']])
+                self.tails2 = []
+                for t in line['e2_e2toe1'].split('@@'):
+                    self.tails2.append(self.kg_vocab.ent_id[t])
+                self.tail2.append(self.tails2)
+
+    def __len__(self):
+        return self.len
+
+    def __getitem__(self, idx):
+        return self.head[idx], self.rel[idx], self.tail[idx], self.head2[idx], self.rel_rev[idx], self.tail2[idx]
+
 def main(args, model_path):
     print (os.getcwd())
     print ("start training ...")
 
-    train_data = dir + '/train.json'
-    #valid_data = dir + '/valid.json'
-    test_data = dir + '/test.json'
-
     start = time.time()
-    kg_vocab = make_kg_vocab(train_data, test_data)
+    kg_vocab = make_kg_vocab(dir+'/e1rel_to_e2_full.json')
     print ("making vocab is done "+str(time.time()-start))
     n_ent, n_rel = graph_size(kg_vocab)
-
-    start = time.time()
-    train_data_with_reverse = read_data_with_rel_reverse(os.path.join(dir, 'train.json'), kg_vocab)
-    train_data = read_data(os.path.join(dir, 'train.json'), kg_vocab)
-    train_reverse = read_reverse_data(os.path.join(dir, 'train.json'), kg_vocab)
-    #inplace_shuffle(*train_data_with_reverse)
-    print ("making read_train data is done " + str(time.time()-start))
-    start = time.time()
-    heads, tails = heads_tails(n_ent, train_data_with_reverse)
-    print ("making train heads, tails is done " + str(time.time()-start))
-
-
-    #valid_data = read_data(os.path.join(dir, 'valid.json'), kg_vocab)
-    start = time.time()
-    test_data = read_data(os.path.join(dir, 'test.json'), kg_vocab)
-    test_reverse = read_reverse_data(os.path.join(dir, 'test.json'), kg_vocab)
-    print("making read_test data is done " + str(time.time()-start))
-    eval_h, eval_t = heads_tails_eval(n_ent, test_data, test_reverse)
-    start = time.time()
-    print ("making test heads, tails is done " + str(time.time()-start))
-
-
-    #valid_data = [torch.LongTensor(vec) for vec in valid_data]
-    test_data = [torch.LongTensor(vec) for vec in test_data]
-    train_data_with_reverse = [torch.LongTensor(vec) for vec in train_data_with_reverse]
-    test_reverse = [torch.LongTensor(vec) for vec in test_reverse]
-    train_data = [torch.LongTensor(vec) for vec in train_data]
-
 
 
     model = ConvE(args, n_ent, n_rel)
@@ -66,6 +93,12 @@ def main(args, model_path):
     print(params)
     print(sum(params))
     opt = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.l2)
+    start = time.time()
+    dataset = KG_DataSet(dir+'/e1rel_to_e2_train.json', kg_vocab)
+    print ("making train dataset is done " + str(time.time()-start))
+    #start = time.time()
+    #evalset = KG_EvalSet(dir+'/e1rel_to_e2_ranking_test.json', kg_vocab)
+    #print ("making evalset is done " + str(time.time()-start))
 
     cnt = 0
     for epoch in range(args.epochs):
@@ -73,35 +106,35 @@ def main(args, model_path):
         epoch_loss = 0
         start = time.time()
         model.train()
-        h, r, t = train_data_with_reverse
-        n_train = h.size(0)
-        rand_idx = torch.randperm(n_train)
-        h = h[rand_idx].cuda()
-        r = r[rand_idx].cuda()
         tot = 0.0
+        dataloader = DataLoader(dataset=dataset, num_workers=4, batch_size=args.batch_size, shuffle=True)
+        n_train = dataset.__len__()
 
-        for bh, br in batch_by_size(args.batch_size, h, r):
+        for i, data in enumerate(dataloader):
             opt.zero_grad()
-            batch_size = bh.size(0)
-            e2_multi = torch.empty(batch_size, n_ent, device=torch.device('cuda'))
+            head, rel, tail = data
+            head = torch.LongTensor(head)
+            rel = torch.LongTensor(rel)
+            tail = [torch.LongTensor(vec) for vec in tail]
+            head = head.cuda()
+            rel = rel.cuda()
+            batch_size = head.size(0)
+            e2_multi = torch.zeros(batch_size, n_ent)
             # label smoothing
             start = time.time()
-            for i, (head, rel) in enumerate(zip(bh, br)):
-                head = head.item()
-                rel = rel.item()
-                e2_multi[i] = tails[head, rel].to_dense()
-            print ("e2_multi_time " +str(time.time()-start))
+            for i, t in enumerate(tail):
+                e2_multi[i][t] = 1
             e2_multi = ((1.0-args.label_smoothing)*e2_multi) + (1.0/e2_multi.shape[1])
             e2_multi = e2_multi.cuda()
-            pred = model.forward(bh, br)
+            pred = model.forward(head, rel)
             #loss = model.loss(pred, e2_multi)
             loss = criterion(pred, e2_multi)
             loss.backward()
             opt.step()
             batch_loss = torch.sum(loss)
             epoch_loss += batch_loss
-            tot += bh.size(0)
-            print ('\r{:>10} progress {} loss: {}'.format('', tot/n_train, batch_loss), end='')
+            tot += head.size(0)
+            print ('\r{:>10} progress {} loss: {}\n'.format('', tot/n_train, batch_loss), end='')
         epoch_loss /= batch_size
         print ('')
         end = time.time()
@@ -112,10 +145,10 @@ def main(args, model_path):
         print ('saving to {0}'.format(model_path))
         torch.save(model.state_dict(), model_path)
 
-        model.eval()
+        '''model.eval()
         with torch.no_grad():
             start = time.time()
-            val_loss = ranking_and_hits(model, args.test_batch_size, test_data, test_reverse, eval_h, eval_t,'dev_evaluation', epoch)
+            val_loss = ranking_and_hits(model, args, evalset, n_ent, epoch)
             end = time.time()
             print ('eval time used: {} minutes'.format((end - start)/60))
 
@@ -125,7 +158,7 @@ def main(args, model_path):
             cnt += 1
             if cnt > 5:
                 print ("Early stopping ...")
-                break
+                break'''
 
 
 if __name__ == '__main__':
