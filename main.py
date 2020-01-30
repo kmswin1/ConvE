@@ -26,9 +26,7 @@ class KG_DataSet(Dataset):
                 self.head.append(self.kg_vocab.ent_id[line['e1']])
                 self.rel.append(self.kg_vocab.rel_id[line['rel']])
                 self.tails = []
-                for t in line['e2_e1toe2'].split('@@'):
-                    self.tails.append(self.kg_vocab.ent_id[t])
-                self.tail.append(self.tails)
+                self.tail.append(line['e2_e1toe2'])
 
     def __len__(self):
         return self.len
@@ -53,16 +51,11 @@ class KG_EvalSet(Dataset):
                 self.head.append(self.kg_vocab.ent_id[line['e1']])
                 self.rel.append(self.kg_vocab.rel_id[line['rel']])
                 self.tails = []
-                for t in line['e2_e1toe2'].split('@@'):
-                    self.tails.append(self.kg_vocab.ent_id[t])
-                self.tail.append(self.tails)
+                self.tail.append(line['e2_e1toe2'])
 
                 self.head2.append(self.kg_vocab.ent_id[line['e2']])
                 self.rel_rev.append(self.kg_vocab.rel_id[line['rel_eval']])
-                self.tails2 = []
-                for t in line['e2_e2toe1'].split('@@'):
-                    self.tails2.append(self.kg_vocab.ent_id[t])
-                self.tail2.append(self.tails2)
+                self.tail2.append(line['e2_e2toe1'])
 
     def __len__(self):
         return self.len
@@ -96,15 +89,15 @@ def main(args, model_path):
     start = time.time()
     dataset = KG_DataSet(dir+'/e1rel_to_e2_train.json', kg_vocab)
     print ("making train dataset is done " + str(time.time()-start))
-    #start = time.time()
-    #evalset = KG_EvalSet(dir+'/e1rel_to_e2_ranking_test.json', kg_vocab)
-    #print ("making evalset is done " + str(time.time()-start))
+    start = time.time()
+    evalset = KG_EvalSet(dir+'/e1rel_to_e2_ranking_test.json', kg_vocab)
+    print ("making evalset is done " + str(time.time()-start))
 
     cnt = 0
     for epoch in range(args.epochs):
         print (epoch)
         epoch_loss = 0
-        start = time.time()
+        epoch_start = time.time()
         model.train()
         tot = 0.0
         dataloader = DataLoader(dataset=dataset, num_workers=args.num_worker, batch_size=args.batch_size, shuffle=True)
@@ -115,7 +108,14 @@ def main(args, model_path):
             head, rel, tail = data
             head = torch.LongTensor(head)
             rel = torch.LongTensor(rel)
-            tail = [torch.LongTensor(vec) for vec in tail]
+            tails = []
+            for meta in tail:
+                meta = meta.split('@@')
+                temp = []
+                for t in meta:
+                    temp.append(kg_vocab.ent_id[t])
+                tails.append(temp)
+            tails = [torch.LongTensor(vec) for vec in tails]
             head = head.cuda()
             rel = rel.cuda()
             batch_size = head.size(0)
@@ -124,7 +124,7 @@ def main(args, model_path):
             # label smoothing
             start = time.time()
             smoothed_value = 1 - args.label_smoothing
-            for i, t in enumerate(tail):
+            for i, t in enumerate(tails):
                 e2_multi[i][t] = smoothed_value + epsilon
             e2_multi = e2_multi.cuda()
             print ("e2_multi " + str(time.time()-start) + "\n")
@@ -138,11 +138,11 @@ def main(args, model_path):
             print ("step " + str(time.time()-start) + "\n")
             epoch_loss += batch_loss
             tot += head.size(0)
-            print ('\r{:>10} progress {} loss: {}\n'.format('', tot/n_train, batch_loss), end='')
+            print ('\r{:>10} epoch {} progress {} loss: {}\n'.format('', epoch, tot/n_train, batch_loss), end='')
         epoch_loss /= batch_size
         print ('')
         end = time.time()
-        time_used = end - start
+        time_used = end - epoch_start
         print ('one epoch time: {} minutes'.format(time_used/60))
         print ('{} epochs'.format(epoch))
         print ('epoch {} loss: {}'.format(epoch+1, epoch_loss))
@@ -151,12 +151,12 @@ def main(args, model_path):
 
         # TODO: calculate valid loss and develop early stopping
 
-        '''model.eval()
+        model.eval()
         with torch.no_grad():
             start = time.time()
-            ranking_and_hits(model, args, evalset, n_ent, epoch)
+            ranking_and_hits(model, args, evalset, n_ent, kg_vocab, epoch)
             end = time.time()
-            print ('eval time used: {} minutes'.format((end - start)/60))'''
+            print ('eval time used: {} minutes'.format((end - start)/60))
 
 
 if __name__ == '__main__':
