@@ -25,10 +25,7 @@ class KG_DataSet(Dataset):
                 line = json.loads(line)
                 self.head.append(self.kg_vocab.ent_id[line['e1']])
                 self.rel.append(self.kg_vocab.rel_id[line['rel']])
-                self.tails = []
-                for t in line['e2_e1toe2'].split('@@'):
-                    self.tails.append(self.kg_vocab.ent_id[t])
-                self.tail.append(self.tails)
+                self.tail.append(line['e2_e1toe2'])
 
     def __len__(self):
         return self.len
