@@ -31,10 +31,10 @@ def ranking_and_hits(model, args, testset, n_ent, epoch):
         rel = rel.cuda()
         head2 = head2.cuda()
         rel_rev = rel_rev.cuda()
-        batch_size = head.size(0)
+        batch_size = head.size(0) 
 
-        e2_multi1 = torch.zeros(args.batch_size, n_ent, dtype=torch.int64)
-        e2_multi2 = torch.zeros(args.batch_size, n_ent, dtype=torch.int64)
+        e2_multi1 = torch.zeros(batch_size, n_ent, dtype=torch.int64)
+        e2_multi2 = torch.zeros(batch_size, n_ent, dtype=torch.int64)
         for i, (t,t_r) in enumerate(zip(tail, tail2)):
             e2_multi1[i][t] = 1
             e2_multi2[i][t_r] = 1
@@ -45,8 +45,8 @@ def ranking_and_hits(model, args, testset, n_ent, epoch):
 
         for i in range(batch_size):
             # save the prediction that is relevant
-            target_value1 = pred1[i][tail[0][i].item()].item()
-            target_value2 = pred2[i][tail2[0][i].item()].item()
+            target_value1 = pred1[i][head2[i].item()].item()
+            target_value2 = pred2[i][head[i].item()].item()
             # zero all known cases (this are not interesting)
             # this corresponds to the filtered setting
             pred1[i][e2_multi1[i]] = 0.0
