@@ -104,7 +104,7 @@ def main(args, model_path):
     for epoch in range(args.epochs):
         print (epoch)
         epoch_loss = 0
-        start = time.time()
+        epoch_start = time.time()
         model.train()
         tot = 0.0
         dataloader = DataLoader(dataset=dataset, num_workers=args.num_worker, batch_size=args.batch_size, shuffle=True)
@@ -142,7 +142,7 @@ def main(args, model_path):
         epoch_loss /= batch_size
         print ('')
         end = time.time()
-        time_used = end - start
+        time_used = end - epoch_start
         print ('one epoch time: {} minutes'.format(time_used/60))
         print ('{} epochs'.format(epoch))
         print ('epoch {} loss: {}'.format(epoch+1, epoch_loss))
