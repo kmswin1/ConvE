@@ -26,9 +26,7 @@ class KG_DataSet(Dataset):
                 self.head.append(self.kg_vocab.ent_id[line['e1']])
                 self.rel.append(self.kg_vocab.rel_id[line['rel']])
                 self.tails = []
-                for t in line['e2_e1toe2'].split('@@'):
-                    self.tails.append(self.kg_vocab.ent_id[t])
-                self.tail.append(self.tails)
+                self.tail.append(line['e2_e1toe2'])
 
     def __len__(self):
         return self.len
@@ -53,16 +51,11 @@ class KG_EvalSet(Dataset):
                 self.head.append(self.kg_vocab.ent_id[line['e1']])
                 self.rel.append(self.kg_vocab.rel_id[line['rel']])
                 self.tails = []
-                for t in line['e2_e1toe2'].split('@@'):
-                    self.tails.append(self.kg_vocab.ent_id[t])
-                self.tail.append(self.tails)
+                self.tail.append(line['e2_e1toe2'])
 
                 self.head2.append(self.kg_vocab.ent_id[line['e2']])
                 self.rel_rev.append(self.kg_vocab.rel_id[line['rel_eval']])
-                self.tails2 = []
-                for t in line['e2_e2toe1'].split('@@'):
-                    self.tails2.append(self.kg_vocab.ent_id[t])
-                self.tail2.append(self.tails2)
+                self.tail2.append(line['e2_e2toe1'])
 
     def __len__(self):
         return self.len
@@ -115,7 +108,14 @@ def main(args, model_path):
             head, rel, tail = data
             head = torch.LongTensor(head)
             rel = torch.LongTensor(rel)
-            tail = [torch.LongTensor(vec) for vec in tail]
+            tails = []
+            for meta in tail:
+                meta = meta.split('@@')
+                temp = []
+                for t in meta:
+                    temp.append(kg_vocab[t])
+                tails.append(temp)
+            tails = [torch.LongTensor(vec) for vec in tail]
             head = head.cuda()
             rel = rel.cuda()
             batch_size = head.size(0)
@@ -124,7 +124,7 @@ def main(args, model_path):
             # label smoothing
             start = time.time()
             smoothed_value = 1 - args.label_smoothing
-            for i, t in enumerate(tail):
+            for i, t in enumerate(tails):
                 e2_multi[i][t] = smoothed_value + epsilon
             e2_multi = e2_multi.cuda()
             print ("e2_multi " + str(time.time()-start) + "\n")
