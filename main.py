@@ -46,6 +46,8 @@ class KG_EvalSet(Dataset):
         self.head2 = []
         self.rel_rev = []
         self.tail2 = []
+        self.tails_len = []
+        self.tails2_len  = []
         with open(file_path) as f:
             for line in f:
                 self.len += 1
@@ -55,20 +57,22 @@ class KG_EvalSet(Dataset):
                 self.tails = []
                 for t in line['e2_e1toe2'].split('@@'):
                     self.tails.append(self.kg_vocab.ent_id[t])
-                self.tail.append(self.tails)
+                self.tail.extend(self.tails)
+                self.tails_len.append(len(self.tails))
 
                 self.head2.append(self.kg_vocab.ent_id[line['e2']])
                 self.rel_rev.append(self.kg_vocab.rel_id[line['rel_eval']])
                 self.tails2 = []
                 for t in line['e2_e2toe1'].split('@@'):
                     self.tails2.append(self.kg_vocab.ent_id[t])
-                self.tail2.append(self.tails2)
+                self.tail2.extend(self.tails2)
+                self.tails2_len.append(len(self.tails2))
 
     def __len__(self):
         return self.len
 
     def __getitem__(self, idx):
-        return self.head[idx], self.rel[idx], self.tail[idx], self.head2[idx], self.rel_rev[idx], self.tail2[idx]
+        return self.head[idx], self.rel[idx], self.tail[idx:self.tail_len[idx]], self.head2[idx], self.rel_rev[idx], self.tail2[idx:self.tails2_len[idx]]
 
 def main(args, model_path):
     print (os.getcwd())
