@@ -62,8 +62,8 @@ def ranking_and_hits(model, args, testset, n_ent, epoch):
         max_values, argsort2 = torch.sort(pred2, 1, descending=True)
         for i in range(args.batch_size):
             # find the rank of the target entities
-            find_target1 = argsort1[i].item() == head2[i].item()
-            find_target2 = argsort2[i].item() == head[i].item()
+            find_target1 = argsort1[i] == tail[0][i]
+            find_target2 = argsort2[i] == tail2[0][i]
             rank1 = torch.nonzero(find_target1)[0, 0].item() + 1
             rank2 = torch.nonzero(find_target2)[0, 0].item() + 1
             # rank+1, since the lowest rank is rank 1 not rank 0
