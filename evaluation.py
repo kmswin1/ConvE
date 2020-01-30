@@ -34,8 +34,8 @@ def ranking_and_hits(model, args, testset, n_ent, epoch):
         batch_size = head.size(0)
 
         start = time.time()
-        e2_multi1 = torch.zeros(args.batch_size, n_ent, dtype=torch.int32)
-        e2_multi2 = torch.zeros(args.batch_size, n_ent, dtype=torch.int32)
+        e2_multi1 = torch.zeros(args.batch_size, n_ent, dtype=torch.int64)
+        e2_multi2 = torch.zeros(args.batch_size, n_ent, dtype=torch.int64)
         for i, (t,t_r) in enumerate(zip(tail, tail2)):
             e2_multi1[i][t] = 1
             e2_multi2[i][t_r] = 1
