@@ -113,7 +113,7 @@ def main(args, model_path):
                 meta = meta.split('@@')
                 temp = []
                 for t in meta:
-                    temp.append(kg_vocab[t])
+                    temp.append(kg_vocab.ent_id[t])
                 tails.append(temp)
             tails = [torch.LongTensor(vec) for vec in tail]
             head = head.cuda()
