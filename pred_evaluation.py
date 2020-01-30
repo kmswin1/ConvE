@@ -31,7 +31,7 @@ def ranking_and_hits(model, args, testset, n_ent, epoch):
         rel = rel.cuda()
         head2 = head2.cuda()
         rel_rev = rel_rev.cuda()
-        batch_size = head.size(0) 
+        batch_size = head.size(0)
 
         e2_multi1 = torch.zeros(batch_size, n_ent, dtype=torch.int64)
         e2_multi2 = torch.zeros(batch_size, n_ent, dtype=torch.int64)

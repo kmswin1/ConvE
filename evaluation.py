@@ -45,8 +45,8 @@ def ranking_and_hits(model, args, testset, n_ent, epoch):
 
         for i in range(batch_size):
             # save the prediction that is relevant
-            target_value1 = pred1[i][tail[0][i].item()].item()
-            target_value2 = pred2[i][tail2[0][i].item()].item()
+            target_value1 = pred1[i][head2[i]].item()
+            target_value2 = pred2[i][head[i]].item()
             # zero all known cases (this are not interesting)
             # this corresponds to the filtered setting
             pred1[i][e2_multi1[i]] = 0.0
@@ -60,8 +60,8 @@ def ranking_and_hits(model, args, testset, n_ent, epoch):
         max_values, argsort2 = torch.sort(pred2, 1, descending=True)
         for i in range(batch_size):
             # find the rank of the target entities
-            find_target1 = argsort1[i] == tail[0][i]
-            find_target2 = argsort2[i] == tail2[0][i]
+            find_target1 = argsort1[i] == head2[i]
+            find_target2 = argsort2[i] == head[i]
             rank1 = torch.nonzero(find_target1)[0, 0].item() + 1
             rank2 = torch.nonzero(find_target2)[0, 0].item() + 1
             # rank+1, since the lowest rank is rank 1 not rank 0
