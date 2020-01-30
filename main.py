@@ -25,7 +25,10 @@ class KG_DataSet(Dataset):
                 line = json.loads(line)
                 self.head.append(self.kg_vocab.ent_id[line['e1']])
                 self.rel.append(self.kg_vocab.rel_id[line['rel']])
-                self.tail.append(line['e2_e1toe2'])
+                self.tails = []
+                for t in line['e2_e1toe2'].split('@@'):
+                    self.tails.append(self.kg_vocab.ent_id[t])
+                self.tail.append(self.tails)
 
     def __len__(self):
         return self.len
@@ -43,19 +46,23 @@ class KG_EvalSet(Dataset):
         self.head2 = []
         self.rel_rev = []
         self.tail2 = []
-        self.tails_len = []
-        self.tails2_len  = []
         with open(file_path) as f:
             for line in f:
                 self.len += 1
                 line = json.loads(line)
                 self.head.append(self.kg_vocab.ent_id[line['e1']])
                 self.rel.append(self.kg_vocab.rel_id[line['rel']])
-                self.tail.append(line['e2_e1toe2'])
+                self.tails = []
+                for t in line['e2_e1toe2'].split('@@'):
+                    self.tails.append(self.kg_vocab.ent_id[t])
+                self.tail.append(self.tails)
 
                 self.head2.append(self.kg_vocab.ent_id[line['e2']])
                 self.rel_rev.append(self.kg_vocab.rel_id[line['rel_eval']])
-                self.tail2.append(line['e2_e2toe1'])
+                self.tails2 = []
+                for t in line['e2_e2toe1'].split('@@'):
+                    self.tails2.append(self.kg_vocab.ent_id[t])
+                self.tail2.append(self.tails2)
 
     def __len__(self):
         return self.len
@@ -108,8 +115,7 @@ def main(args, model_path):
             head, rel, tail = data
             head = torch.LongTensor(head)
             rel = torch.LongTensor(rel)
-            tail = tail.split('@@')
-            tail = torch.LongTensor([kg_vocab[t] for t in tail])
+            tail = [torch.LongTensor(vec) for vec in tail]
             head = head.cuda()
             rel = rel.cuda()
             batch_size = head.size(0)
