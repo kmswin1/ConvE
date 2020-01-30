@@ -5,7 +5,7 @@ import time
 from torch.utils.data import DataLoader
 #timer = CUDATimer()
 dir = os.getcwd()
-def ranking_and_hits(model, args, testset, n_ent, epoch):
+def ranking_and_hits(model, args, testset, n_ent, kg_vocab, epoch):
     dataloader = DataLoader(dataset=testset, num_workers=4, batch_size=args.batch_size, shuffle=True)
     hits_left = []
     hits_right = []
@@ -23,10 +23,24 @@ def ranking_and_hits(model, args, testset, n_ent, epoch):
         head, rel, tail, head2, rel_rev, tail2 = data
         head = torch.LongTensor(head)
         rel = torch.LongTensor(rel)
-        tail = [torch.LongTensor(vec) for vec in tail]
+        tails = []
+        for meta in tail:
+            meta = meta.split('@@')
+            temp = []
+            for t in meta:
+                temp.append(kg_vocab.ent_id[t])
+            tails.append(temp)
+        tails = [torch.LongTensor(vec) for vec in tails]
         head2 = torch.LongTensor(head2)
         rel_rev = torch.LongTensor(rel_rev)
-        tail2 = [torch.LongTensor(vec) for vec in tail2]
+        tails2 = []
+        for meta in tail:
+            meta = meta.split('@@')
+            temp = []
+            for t in meta:
+                temp.append(kg_vocab.ent_id[t])
+            tails.append(temp)
+        tails2 = [torch.LongTensor(vec) for vec in tails2]
         head = head.cuda()
         rel = rel.cuda()
         head2 = head2.cuda()
@@ -35,7 +49,7 @@ def ranking_and_hits(model, args, testset, n_ent, epoch):
 
         e2_multi1 = torch.zeros(batch_size, n_ent, dtype=torch.int64)
         e2_multi2 = torch.zeros(batch_size, n_ent, dtype=torch.int64)
-        for i, (t,t_r) in enumerate(zip(tail, tail2)):
+        for i, (t,t_r) in enumerate(zip(tails, tails2)):
             e2_multi1[i][t] = 1
             e2_multi2[i][t_r] = 1
         e2_multi1 = e2_multi1.cuda()

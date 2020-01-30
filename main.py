@@ -115,7 +115,7 @@ def main(args, model_path):
                 for t in meta:
                     temp.append(kg_vocab.ent_id[t])
                 tails.append(temp)
-            tails = [torch.LongTensor(vec) for vec in tail]
+            tails = [torch.LongTensor(vec) for vec in tails]
             head = head.cuda()
             rel = rel.cuda()
             batch_size = head.size(0)
@@ -154,7 +154,7 @@ def main(args, model_path):
         model.eval()
         with torch.no_grad():
             start = time.time()
-            ranking_and_hits(model, args, evalset, n_ent, epoch)
+            ranking_and_hits(model, args, evalset, n_ent, kg_vocab, epoch)
             end = time.time()
             print ('eval time used: {} minutes'.format((end - start)/60))
 
