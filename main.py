@@ -83,9 +83,9 @@ def main(args, model_path):
     model = ConvE(args, n_ent, n_rel)
     model.init()
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    #if torch.cuda.device_count() > 1:
-    #    model = torch.nn.DataParallel(model)
-    #    criterion = torch.nn.BCELoss()
+    if torch.cuda.device_count() > 1:
+        model = torch.nn.DataParallel(model)
+        criterion = torch.nn.BCELoss()
     model.cuda()
     print ('cuda : ' + str(torch.cuda.is_available()) + ' count : ' + str(torch.cuda.device_count()))
 
@@ -107,7 +107,7 @@ def main(args, model_path):
         start = time.time()
         model.train()
         tot = 0.0
-        dataloader = DataLoader(dataset=dataset, num_workers=4, batch_size=args.batch_size, shuffle=True)
+        dataloader = DataLoader(dataset=dataset, num_workers=args.num_worker, batch_size=args.batch_size, shuffle=True)
         n_train = dataset.__len__()
 
         for i, data in enumerate(dataloader):
@@ -119,21 +119,23 @@ def main(args, model_path):
             head = head.cuda()
             rel = rel.cuda()
             batch_size = head.size(0)
-            print (batch_size)
-            e2_multi = torch.zeros(batch_size, n_ent)
+            epsilon = 1.0 / n_ent
+            e2_multi = torch.full((batch_size, n_ent), epsilon)
             # label smoothing
             start = time.time()
+            smoothed_value = 1 - args.label_smoothing
             for i, t in enumerate(tail):
-                e2_multi[i][t] = 1
-            print ("e2_multi_time " +str(time.time()-start) +"\n")
-            e2_multi = ((1.0-args.label_smoothing)*e2_multi) + (1.0/e2_multi.shape[1])
+                e2_multi[i][t] = smoothed_value + epsilon
             e2_multi = e2_multi.cuda()
+            print ("e2_multi " + str(time.time()-start) + "\n")
+            start = time.time()
             pred = model.forward(head, rel)
-            loss = model.loss(pred, e2_multi)
-            #loss = criterion(pred, e2_multi)
+            #loss = model.loss(pred, e2_multi)
+            loss = criterion(pred, e2_multi)
             loss.backward()
             opt.step()
             batch_loss = torch.sum(loss)
+            print ("step " + str(time.time()-start) + "\n")
             epoch_loss += batch_loss
             tot += head.size(0)
             print ('\r{:>10} epoch {} progress {} loss: {}\n'.format('', epoch, tot/n_train, batch_loss), end='')
@@ -147,25 +149,20 @@ def main(args, model_path):
         print ('saving to {0}'.format(model_path))
         torch.save(model.state_dict(), model_path)
 
+        # TODO: calculate valid loss and develop early stopping
+
         '''model.eval()
         with torch.no_grad():
             start = time.time()
-            val_loss = ranking_and_hits(model, args, evalset, n_ent, epoch)
+            ranking_and_hits(model, args, evalset, n_ent, epoch)
             end = time.time()
-            print ('eval time used: {} minutes'.format((end - start)/60))
-
-        if epoch_loss < val_loss:
-            cnt = 0
-        else:
-            cnt += 1
-            if cnt > 5:
-                print ("Early stopping ...")
-                break'''
+            print ('eval time used: {} minutes'.format((end - start)/60))'''
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='KG completion for cruise contents data')
     parser.add_argument('--batch-size', type=int, default=128, help='input batch size for training (default: 128)')
+    parser.add_argument('--num-worker', type=int, default=16, help='num_process of dataloader (default: 16)')
     parser.add_argument('--test-batch-size', type=int, default=128, help='input batch size for testing/validation (default: 128)')
     parser.add_argument('--epochs', type=int, default=100, help='number of epochs to train (default: 100)')
     parser.add_argument('--lr', type=float, default=0.003, help='learning rate (default: 0.003)')
