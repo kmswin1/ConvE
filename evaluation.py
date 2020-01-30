@@ -33,13 +33,11 @@ def ranking_and_hits(model, args, testset, n_ent, epoch):
         rel_rev = rel_rev.cuda()
         batch_size = head.size(0)
 
-        start = time.time()
         e2_multi1 = torch.zeros(args.batch_size, n_ent, dtype=torch.int64)
         e2_multi2 = torch.zeros(args.batch_size, n_ent, dtype=torch.int64)
         for i, (t,t_r) in enumerate(zip(tail, tail2)):
             e2_multi1[i][t] = 1
             e2_multi2[i][t_r] = 1
-        print("e2_multi_time " + str(time.time() - start))
         e2_multi1 = e2_multi1.cuda()
         e2_multi2 = e2_multi2.cuda()
         pred1 = model.forward(head, rel)
@@ -60,7 +58,7 @@ def ranking_and_hits(model, args, testset, n_ent, epoch):
         # sort and rank
         max_values, argsort1 = torch.sort(pred1, 1, descending=True)
         max_values, argsort2 = torch.sort(pred2, 1, descending=True)
-        for i in range(args.batch_size):
+        for i in range(batch_size):
             # find the rank of the target entities
             find_target1 = argsort1[i] == tail[0][i]
             find_target2 = argsort2[i] == tail2[0][i]
