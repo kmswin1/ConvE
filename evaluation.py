@@ -32,15 +32,11 @@ def ranking_and_hits(model, args, testset, n_ent, epoch):
         head2 = head2.cuda()
         rel_rev = rel_rev.cuda()
         batch_size = head.size(0)
-        epsilon = 1.0/n_ent
-        e2_multi1 = torch.full((batch_size, n_ent), epsilon)
-        e2_multi2 = torch.full((batch_size, n_ent), epsilon)
-        # label smoothing
+
         start = time.time()
-        smoothed_value = 1 - args.label_smoothing
         for i, (t,t_r) in enumerate(zip(tail, tail2)):
-            e2_multi1[i][t] = smoothed_value + epsilon
-            e2_multi2[i][t] = smoothed_value + epsilon
+            e2_multi1[i][t] = 1
+            e2_multi2[i][t_r] = 1
         print("e2_multi_time " + str(time.time() - start))
         e2_multi1 = e2_multi1.cuda()
         e2_multi2 = e2_multi2.cuda()
@@ -49,23 +45,23 @@ def ranking_and_hits(model, args, testset, n_ent, epoch):
 
         for i in range(args.batch_size):
             # save the prediction that is relevant
-            target_value1 = pred1[i,tail[i].item()].item()
-            target_value2 = pred2[i,tail2[i].item()].item()
+            target_value1 = pred1[i,tail[i,0].item()].item()
+            target_value2 = pred2[i,tail2[i,0].item()].item()
             # zero all known cases (this are not interesting)
             # this corresponds to the filtered setting
-            pred1[i] += e2_multi1[i] * (-1e20)
-            #pred2[i] += e2_multi2[i] * (-1e20)
+            pred1[i][e2_multi1[i]] = 0.0
+            pred2[i][e2_multi2[i]] = 0.0
             # write base the saved values
-            pred1[i][tail[i].item()] = target_value1
-            pred2[i][tail2[i].item()] = target_value2
+            pred1[i][head2[i]] = target_value1
+            pred2[i][head[i]] = target_value2
 
         # sort and rank
         max_values, argsort1 = torch.sort(pred1, 1, descending=True)
         max_values, argsort2 = torch.sort(pred2, 1, descending=True)
         for i in range(args.batch_size):
             # find the rank of the target entities
-            find_target1 = argsort1[i] == tail[i]
-            find_target2 = argsort2[i] == tail2[i]
+            find_target1 = argsort1[i] == head2[i,0]
+            find_target2 = argsort2[i] == head[i,0]
             rank1 = torch.nonzero(find_target1)[0, 0].item() + 1
             rank2 = torch.nonzero(find_target2)[0, 0].item() + 1
             # rank+1, since the lowest rank is rank 1 not rank 0
