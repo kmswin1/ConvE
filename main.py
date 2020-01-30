@@ -54,25 +54,17 @@ class KG_EvalSet(Dataset):
                 line = json.loads(line)
                 self.head.append(self.kg_vocab.ent_id[line['e1']])
                 self.rel.append(self.kg_vocab.rel_id[line['rel']])
-                self.tails = []
-                for t in line['e2_e1toe2'].split('@@'):
-                    self.tails.append(self.kg_vocab.ent_id[t])
-                self.tail.extend(self.tails)
-                self.tails_len.append(len(self.tails))
+                self.tail.append(line['e2_e1toe2'])
 
                 self.head2.append(self.kg_vocab.ent_id[line['e2']])
                 self.rel_rev.append(self.kg_vocab.rel_id[line['rel_eval']])
-                self.tails2 = []
-                for t in line['e2_e2toe1'].split('@@'):
-                    self.tails2.append(self.kg_vocab.ent_id[t])
-                self.tail2.extend(self.tails2)
-                self.tails2_len.append(len(self.tails2))
+                self.tail2.append(line['e2_e2toe1'])
 
     def __len__(self):
         return self.len
 
     def __getitem__(self, idx):
-        return self.head[idx], self.rel[idx], self.tail[idx:self.tail_len[idx]], self.head2[idx], self.rel_rev[idx], self.tail2[idx:self.tails2_len[idx]]
+        return self.head[idx], self.rel[idx], self.tail[idx], self.head2[idx], self.rel_rev[idx], self.tail2[idx]
 
 def main(args, model_path):
     print (os.getcwd())
@@ -119,7 +111,8 @@ def main(args, model_path):
             head, rel, tail = data
             head = torch.LongTensor(head)
             rel = torch.LongTensor(rel)
-            tail = [torch.LongTensor(vec) for vec in tail]
+            tail = tail.split('@@')
+            tail = torch.LongTensor([kg_vocab[t] for t in tail])
             head = head.cuda()
             rel = rel.cuda()
             batch_size = head.size(0)
