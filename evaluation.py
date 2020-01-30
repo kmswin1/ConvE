@@ -45,10 +45,10 @@ def ranking_and_hits(model, args, testset, n_ent, epoch):
         pred1 = model.forward(head, rel)
         pred2 = model.forward(head2, rel_rev)
 
-        for i in range(args.batch_size):
+        for i in range(batch_size):
             # save the prediction that is relevant
-            target_value1 = pred1[i,tail[i,0].item()].item()
-            target_value2 = pred2[i,tail2[i,0].item()].item()
+            target_value1 = pred1[i,tail[i][0].item()].item()
+            target_value2 = pred2[i,tail2[i][0].item()].item()
             # zero all known cases (this are not interesting)
             # this corresponds to the filtered setting
             pred1[i][e2_multi1[i]] = 0.0
