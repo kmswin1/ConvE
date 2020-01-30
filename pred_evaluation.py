@@ -5,7 +5,7 @@ from torch.utils.data import DataLoader
 import time
 #timer = CUDATimer()
 dir = os.getcwd()
-def ranking_and_hits(model, args, testset, n_ent, kg_vocab, epoch):
+def ranking_and_hits(model, args, testset, n_ent, epoch):
     dataloader = DataLoader(dataset=testset, num_workers=4, batch_size=args.batch_size, shuffle=True)
     hits_left = []
     hits_right = []
@@ -32,40 +32,36 @@ def ranking_and_hits(model, args, testset, n_ent, kg_vocab, epoch):
         head2 = head2.cuda()
         rel_rev = rel_rev.cuda()
         batch_size = head.size(0)
-        epsilon = 1.0/n_ent
-        e2_multi1 = torch.full((batch_size, n_ent), epsilon)
-        e2_multi2 = torch.full((batch_size, n_ent), epsilon)
-        # label smoothing
-        start = time.time()
-        smoothed_value = 1 - args.label_smoothing
+
+        e2_multi1 = torch.zeros(args.batch_size, n_ent, dtype=torch.int64)
+        e2_multi2 = torch.zeros(args.batch_size, n_ent, dtype=torch.int64)
         for i, (t,t_r) in enumerate(zip(tail, tail2)):
-            e2_multi1[i][t] = smoothed_value + epsilon
-            e2_multi2[i][t] = smoothed_value + epsilon
-        print("e2_multi_time " + str(time.time() - start))
+            e2_multi1[i][t] = 1
+            e2_multi2[i][t_r] = 1
         e2_multi1 = e2_multi1.cuda()
         e2_multi2 = e2_multi2.cuda()
         pred1 = model.forward(head, rel)
         pred2 = model.forward(head2, rel_rev)
 
-        for i in range(args.batch_size):
+        for i in range(batch_size):
             # save the prediction that is relevant
-            target_value1 = pred1[i,tail[i].item()].item()
-            target_value2 = pred2[i,tail2[i].item()].item()
+            target_value1 = pred1[i][tail[0][i].item()].item()
+            target_value2 = pred2[i][tail2[0][i].item()].item()
             # zero all known cases (this are not interesting)
             # this corresponds to the filtered setting
-            pred1[i] += e2_multi1[i] * (-1e20)
-            pred2[i] += e2_multi2[i] * (-1e20)
+            pred1[i][e2_multi1[i]] = 0.0
+            pred2[i][e2_multi2[i]] = 0.0
             # write base the saved values
-            pred1[i][tail[i].item()] = target_value1
-            pred2[i][tail2[i].item()] = target_value2
+            pred1[i][head2[i]] = target_value1
+            pred2[i][head[i]] = target_value2
 
         # sort and rank
         max_values, argsort1 = torch.sort(pred1, 1, descending=True)
         max_values, argsort2 = torch.sort(pred2, 1, descending=True)
-        for i in range(args.batch_size):
+        for i in range(batch_size):
             # find the rank of the target entities
-            find_target1 = argsort1[i] == tail[i]
-            find_target2 = argsort2[i] == tail2[i]
+            find_target1 = argsort1[i] == head2[i]
+            find_target2 = argsort2[i] == head[i]
             rank1 = torch.nonzero(find_target1)[0, 0].item() + 1
             rank2 = torch.nonzero(find_target2)[0, 0].item() + 1
             # rank+1, since the lowest rank is rank 1 not rank 0
