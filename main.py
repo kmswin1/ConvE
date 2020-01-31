@@ -24,9 +24,9 @@ def main(args, model_path):
     model = ConvE(args, n_ent, n_rel)
     model.init()
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    if torch.cuda.device_count() > 1:
+    if args.multi_gpu:
         model = torch.nn.DataParallel(model)
-        criterion = torch.nn.BCELoss()
+    criterion = torch.nn.BCELoss()
     model.cuda()
     print ('cuda : ' + str(torch.cuda.is_available()) + ' count : ' + str(torch.cuda.device_count()))
 
@@ -130,6 +130,7 @@ if __name__ == '__main__':
     parser.add_argument('--label-smoothing', type=float, default=0.1, help='Label smoothing value to use. Default: 0.1')
     parser.add_argument('--hidden-size', type=int, default=9728, help='The side of the hidden layer. The required size changes with the size of the embeddings. Default: 9728 (embedding size 200).')
     parser.add_argument('--log-file', action='store', type=str)
+    parser.add_argument('--multi-gpu', type=bool, default=False, help='choose the training using by multigpu')
 
     args = parser.parse_args()
 
