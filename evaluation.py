@@ -1,9 +1,7 @@
 import torch
 import numpy as np
 import datetime, os
-import time
 from torch.utils.data import DataLoader
-#timer = CUDATimer()
 dir = os.getcwd()
 def ranking_and_hits(model, args, testset, n_ent, kg_vocab, epoch):
     dataloader = DataLoader(dataset=testset, num_workers=4, batch_size=args.test_batch_size, shuffle=True)

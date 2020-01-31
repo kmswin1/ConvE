@@ -1,14 +1,9 @@
 # !coding=utf8
 from __future__ import print_function
 from os.path import join
-import argparse
-import datetime
 import json
-import urllib
-import pickle
 import os
 import numpy as np
-import operator
 import sys
 import time
 
