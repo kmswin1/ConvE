@@ -49,6 +49,7 @@ def main(args, model_path):
         model.train()
         tot = 0.0
         dataloader = DataLoader(dataset=dataset, num_workers=args.num_worker, batch_size=args.batch_size, shuffle=True)
+        evalloader = DataLoader(dataset=evalset, num_workers=args.num_worker, batch_size=args.batch_size, shuffle=True)
         n_train = dataset.__len__()
 
         for i, data in enumerate(dataloader):
@@ -102,7 +103,7 @@ def main(args, model_path):
         model.eval()
         with torch.no_grad():
             start = time.time()
-            ranking_and_hits(model, args, evalset, n_ent, kg_vocab, epoch)
+            ranking_and_hits(model, args, evalloader, n_ent, kg_vocab, epoch)
             end = time.time()
             print ('eval time used: {} minutes'.format((end - start)/60))
 

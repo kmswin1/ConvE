@@ -3,8 +3,7 @@ import numpy as np
 import datetime, os
 from torch.utils.data import DataLoader
 dir = os.getcwd()
-def ranking_and_hits(model, args, testset, n_ent, kg_vocab, epoch):
-    dataloader = DataLoader(dataset=testset, num_workers=4, batch_size=args.test_batch_size, shuffle=True)
+def ranking_and_hits(model, args, evalloader, n_ent, kg_vocab, epoch):
     hits_left = []
     hits_right = []
     hits = []
@@ -17,7 +16,7 @@ def ranking_and_hits(model, args, testset, n_ent, kg_vocab, epoch):
         hits_right.append([])
         hits.append([])
 
-    for i, data in enumerate(dataloader):
+    for i, data in enumerate(evalloader):
         head, rel, tail, head2, rel_rev, tail2 = data
         head = torch.LongTensor(head)
         rel = torch.LongTensor(rel)
