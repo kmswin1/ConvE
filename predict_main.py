@@ -3,51 +3,80 @@ import json
 import torch
 import argparse
 import os
-from utils import heads_tails, inplace_shuffle, batch_by_num, batch_by_size, make_kg_vocab, graph_size, read_data, read_reverse_data, read_data_with_rel_reverse
 import time, datetime
 from pred_evaluation import ranking_and_hits
 from model import ConvE, Complex
-from utils import heads_tails_eval
+from utils import make_kg_vocab, graph_size
+from torch.utils.data import Dataset
 
 dir = os.getcwd() + '/data'
 
+class KG_EvalSet(Dataset):
+    def __init__(self, file_path, kg_vocab):
+        self.kg_vocab = kg_vocab
+        self.len = 0
+        self.head = []
+        self.rel = []
+        self.tail = []
+        self.head2 = []
+        self.rel_rev = []
+        self.tail2 = []
+        with open(file_path) as f:
+            for line in f:
+                self.len += 1
+                line = json.loads(line)
+                self.head.append(self.kg_vocab.ent_id[line['e1']])
+                self.rel.append(self.kg_vocab.rel_id[line['rel']])
+                self.tails = []
+                self.tail.append(line['e2_e1toe2'])
+
+                self.head2.append(self.kg_vocab.ent_id[line['e2']])
+                self.rel_rev.append(self.kg_vocab.rel_id[line['rel_eval']])
+                self.tail2.append(line['e2_e2toe1'])
+
+    def __len__(self):
+        return self.len
+
+    def __getitem__(self, idx):
+        return self.head[idx], self.rel[idx], self.tail[idx], self.head2[idx], self.rel_rev[idx], self.tail2[idx]
 
 def main(args, model_path):
     print (os.getcwd())
     print ('start prediction ...')
 
-    train_data = dir + '/train.json'
-    test_data = dir + '/test.json'
+    start = time.time()
+    kg_vocab = make_kg_vocab(dir+'/e1rel_to_e2_full.json')
+    print ("making vocab is done "+str(time.time()-start))
+    n_ent, n_rel = graph_size(kg_vocab)
 
     model_path = os.path.join(os.getcwd(), 'saved_models/'+args.model_name)
 
-    kg_vocab = make_kg_vocab(train_data, test_data)
-    n_ent, n_rel = graph_size(kg_vocab)
-
-    train_data_with_reverse = read_data_with_rel_reverse(os.path.join(dir, 'train.json'), kg_vocab)
-    inplace_shuffle(*train_data_with_reverse)
-
-    train_data = read_data(os.path.join(dir, 'train.json'), kg_vocab)
-    train_reverse = read_reverse_data(os.path.join(dir, 'train.json'), kg_vocab)
-    test_data = read_data(os.path.join(dir, 'test.json'), kg_vocab)
-    test_reverse = read_reverse_data(os.path.join(dir, 'test.json'), kg_vocab)
-    eval_h, eval_t = heads_tails_eval(n_ent, train_data, train_reverse, test_data, test_reverse)
-
-    test_data = [torch.LongTensor(vec) for vec in test_data]
-    test_reverse = [torch.LongTensor(vec) for vec in test_reverse]
 
     model = ConvE(args, n_ent, n_rel)
-    model.cuda() if torch.cuda.is_available() else model.cpu()
-    print ('cuda : ' + str(torch.cuda.is_available()))
+    model.init()
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    if torch.cuda.device_count() > 1:
+        model = torch.nn.DataParallel(model)
+        criterion = torch.nn.BCELoss()
     model.load_state_dict(torch.load(model_path))
+    model.cuda()
+    print ('cuda : ' + str(torch.cuda.is_available()) + ' count : ' + str(torch.cuda.device_count()))
 
-    model.eval()
-    with torch.no_grad():
-        start = time.time()
-        ranking_and_hits(model, args.batch_size, test_data, test_reverse, eval_h, eval_t,'prediction', kg_vocab)
-        end = time.time()
-        print ('eval time used: {} minutes'.format((end - start)/60))
+    params = [value.numel() for value in model.parameters()]
+    print(params)
+    print(sum(params))
+    opt = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.l2)
+    start = time.time()
+    evalset = KG_EvalSet(dir+'/e1rel_to_e2_ranking_test.json', kg_vocab)
+    print ("making evalset is done " + str(time.time()-start))
 
+    for epoch in range(args.test_batch_size):
+        model.eval()
+        with torch.no_grad():
+            start = time.time()
+            ranking_and_hits(model, args, evalset, n_ent, kg_vocab, epoch)
+            end = time.time()
+            print ('eval time used: {} minutes'.format((end - start)/60))
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='KG completion for cruise contents data')
