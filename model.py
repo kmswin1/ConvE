@@ -55,13 +55,14 @@ class ConvE(torch.nn.Module):
         self.loss = torch.nn.BCELoss()
         self.emb_dim1 = args.embedding_shape1
         self.emb_dim2 = args.embedding_dim // self.emb_dim1
+        self.hidden_size = ((2*self.emb_dim1)-2)*(self.emb_dim2-2)*32
 
         self.conv1 = torch.nn.Conv2d(1, 32, (3, 3), 1, 0, bias=args.use_bias)
         self.bn0 = torch.nn.BatchNorm2d(1)
         self.bn1 = torch.nn.BatchNorm2d(32)
         self.bn2 = torch.nn.BatchNorm1d(args.embedding_dim)
         self.register_parameter('b', Parameter(torch.zeros(num_entities)))
-        self.fc = torch.nn.Linear(args.hidden_size,args.embedding_dim)
+        self.fc = torch.nn.Linear(self.hidden_size, args.embedding_dim)
         print(num_entities, num_relations)
 
     def init(self):
