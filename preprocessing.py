@@ -6,7 +6,7 @@ import os
 import numpy as np
 import sys
 import time
-from utils import make_kg_vocab
+from utils import make_kg_id
 
 rdm = np.random.RandomState(234234)
 
@@ -138,7 +138,7 @@ def write_evaluation_graph(cases, graph, path, kg_vocab):
 
 def main():
     dir = os.getcwd()
-    kg_vocab = make_kg_vocab(dir+'/data/train.json', dir+'/data/test.json')
+    kg_vocab = make_kg_id(dir+'/data/train.json', dir+'/data/test.json')
     label_graph, train_graph, test_cases = make_knowledge_graph()
     start = time.time()
     all_cases = test_cases['train.json'] + test_cases['test.json']
