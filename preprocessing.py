@@ -14,11 +14,6 @@ rdm = np.random.RandomState(234234)
 def make_knowledge_graph(kg_vocab):
     dir = os.getcwd()
     print (dir)
-    if len(sys.argv) > 1:
-        dataset_name = sys.argv[1]
-    else:
-        dataset_name = 'person'
-        #dataset_name = 'melon'
     print('Processing dataset')
 
     base_path = dir+'/data/'
@@ -44,7 +39,7 @@ def make_knowledge_graph(kg_vocab):
                 line = json.loads(line)
                 e1 = kg_vocab.ent_id[line['src']]
                 e2 = kg_vocab.ent_id[line['dst']]
-                rel = kg_vocab.ent_id[line['dstProperty']]
+                rel = kg_vocab.rel_id[line['dstProperty']]
                 rel_reverse = kg_vocab.ent_id[rel+ '_reverse']
 
                 # data
