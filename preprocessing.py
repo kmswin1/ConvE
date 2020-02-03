@@ -40,7 +40,7 @@ def make_knowledge_graph(kg_vocab):
                 e1 = kg_vocab.ent_id[line['src']]
                 e2 = kg_vocab.ent_id[line['dst']]
                 rel = kg_vocab.rel_id[line['dstProperty']]
-                rel_reverse = kg_vocab.ent_id[rel+ '_reverse']
+                rel_reverse = kg_vocab.rel_id[line['dstProperty'] + '_reverse']
 
                 # data
                 # (Mike, fatherOf, John)
