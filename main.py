@@ -35,7 +35,7 @@ def main(args, model_path):
     print(sum(params))
     opt = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.l2)
     start = time.time()
-    dataset = KG_DataSet(dir+'/e1rel_to_e2_train.json', kg_vocab)
+    dataset = KG_DataSet(dir+'/t.json', kg_vocab)
     print ("making train dataset is done " + str(time.time()-start))
     start = time.time()
     evalset = KG_EvalSet(dir+'/e1rel_to_e2_ranking_test.json', kg_vocab)
@@ -59,20 +59,13 @@ def main(args, model_path):
             head, rel, tail = data
             head = torch.LongTensor(head)
             rel = torch.LongTensor(rel)
-            tails = []
-            for meta in tail:
-                meta = meta.split('@@')
-                temp = []
-                for t in meta:
-                    temp.append(t)
-                tails.append(temp)
             head = head.cuda()
             rel = rel.cuda()
             batch_size = head.size(0)
             e2_multi = torch.full((batch_size, n_ent), epsilon)
             # label smoothing
             start = time.time()
-            for i, t in enumerate(tails):
+            for i, t in enumerate(tail):
                 e2_multi[i][t] = smoothed_value + epsilon
             e2_multi = e2_multi.cuda()
             print ("e2_multi " + str(time.time()-start) + "\n")
