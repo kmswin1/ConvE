@@ -6,14 +6,19 @@ import os
 import numpy as np
 import sys
 import time
-from utils import make_kg_id
+from utils import make_kg_vocab
 
 rdm = np.random.RandomState(234234)
 
 
-def make_knowledge_graph(kg_vocab):
+def make_knowledge_graph():
     dir = os.getcwd()
     print (dir)
+    if len(sys.argv) > 1:
+        dataset_name = sys.argv[1]
+    else:
+        dataset_name = 'person'
+        #dataset_name = 'melon'
     print('Processing dataset')
 
     base_path = dir+'/data/'
@@ -37,10 +42,10 @@ def make_knowledge_graph(kg_vocab):
         with open(join(base_path, file)) as f:
             for i, line in enumerate(f):
                 line = json.loads(line)
-                e1 = kg_vocab.ent_id[line['src']]
-                e2 = kg_vocab.ent_id[line['dst']]
+                e1 = line['src']
+                e2 = line['dst']
                 rel = line['dstProperty']
-                rel_reverse = line['dstProperty'] + '_reverse'
+                rel_reverse = rel+ '_reverse'
 
                 # data
                 # (Mike, fatherOf, John)
@@ -81,7 +86,7 @@ def make_knowledge_graph(kg_vocab):
     return label_graph, train_graph, test_cases
 
 
-def write_training_graph(cases, graph, path, kg_vocab):
+def write_training_graph(cases, graph, path):
     with open(path, 'w') as f:
         n = len(graph)
         for i, key in enumerate(graph):
@@ -93,7 +98,7 @@ def write_training_graph(cases, graph, path, kg_vocab):
 
             # (John, fatherOf) -> Tom
             # (John, fatherOf_reverse, Mike)
-            entities1 = "@@".join(list(str(graph[key])))
+            entities1 = "@@".join(list(graph[key]))
 
             data_point = {}
             data_point['e1'] = e1
@@ -105,7 +110,7 @@ def write_training_graph(cases, graph, path, kg_vocab):
 
             f.write(json.dumps(data_point)  + '\n')
 
-def write_evaluation_graph(cases, graph, path, kg_vocab):
+def write_evaluation_graph(cases, graph, path):
     with open(path, 'w') as f:
         n = len(cases)
         n1 = 0
@@ -114,8 +119,8 @@ def write_evaluation_graph(cases, graph, path, kg_vocab):
             # (Mike, fatherOf) -> John
             # (John, fatherOf, Tom)
             rel_reverse = rel+'_reverse'
-            entities1 = "@@".join(list(str(graph[(e1, rel)])))
-            entities2 = "@@".join(list(str(graph[(e2, rel_reverse)])))
+            entities1 = "@@".join(list(graph[(e1, rel)]))
+            entities2 = "@@".join(list(graph[(e2, rel_reverse)]))
 
             n1 += len(entities1.split('@@'))
             n2 += len(entities2.split('@@'))
@@ -132,13 +137,11 @@ def write_evaluation_graph(cases, graph, path, kg_vocab):
             f.write(json.dumps(data_point)  + '\n')
 
 def main():
-    dir = os.getcwd()
-    kg_vocab = make_kg_id(dir+'/data/train.json', dir+'/data/test.json')
-    label_graph, train_graph, test_cases = make_knowledge_graph(kg_vocab)
+    label_graph, train_graph, test_cases = make_knowledge_graph()
     start = time.time()
     all_cases = test_cases['train.json'] + test_cases['test.json']
-    write_training_graph(test_cases['train.json'], train_graph['train.json'], 'data/e1rel_to_e2_train.json', kg_vocab)
-    write_evaluation_graph(test_cases['test.json'], label_graph, 'data/e1rel_to_e2_ranking_test.json', kg_vocab)
+    write_training_graph(test_cases['train.json'], train_graph['train.json'], 'data/e1rel_to_e2_train.json')
+    write_evaluation_graph(test_cases['test.json'], label_graph, 'data/e1rel_to_e2_ranking_test.json')
     write_training_graph(all_cases, label_graph, 'data/e1rel_to_e2_full.json')
     print (time.time() - start)
 
