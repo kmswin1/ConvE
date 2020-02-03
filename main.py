@@ -66,7 +66,6 @@ def main(args, model_path):
                 for t in meta:
                     temp.append(kg_vocab.ent_id[t])
                 tails.append(temp)
-            tails = [torch.LongTensor(vec) for vec in tails]
             head = head.cuda()
             rel = rel.cuda()
             batch_size = head.size(0)
