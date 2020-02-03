@@ -189,9 +189,6 @@ def main():
     write_training_graph(test_cases['train.json'], train_graph['train.json'], 'data/e1rel_to_e2_train.json')
     write_evaluation_graph(test_cases['test.json'], label_graph, 'data/e1rel_to_e2_ranking_test.json')
     write_training_graph(all_cases, label_graph, 'data/e1rel_to_e2_full.json')
-    kg_vocab = make_kg_vocab(os.getcwd()+'/data/e1rel_to_e2_full.json')
-    write_training_graph2(test_cases['train.json'], train_graph['train.json'], 'data/t.json', kg_vocab)
-    write_evaluation_graph2(test_cases['test.json'], label_graph, 'data/r.json', kg_vocab)
     print (time.time() - start)
 
 if __name__ == '__main__':
