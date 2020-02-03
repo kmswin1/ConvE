@@ -42,6 +42,8 @@ def main(args, model_path):
     print ("making evalset is done " + str(time.time()-start))
 
     cnt = 0
+    epsilon = 1.0 / n_ent
+    smoothed_value = 1 - args.label_smoothing
     for epoch in range(args.epochs):
         print (epoch)
         epoch_loss = 0
@@ -62,17 +64,14 @@ def main(args, model_path):
                 meta = meta.split('@@')
                 temp = []
                 for t in meta:
-                    temp.append(kg_vocab.ent_id[t])
+                    temp.append(t)
                 tails.append(temp)
-            tails = [torch.LongTensor(vec) for vec in tails]
             head = head.cuda()
             rel = rel.cuda()
             batch_size = head.size(0)
-            epsilon = 1.0 / n_ent
             e2_multi = torch.full((batch_size, n_ent), epsilon)
             # label smoothing
             start = time.time()
-            smoothed_value = 1 - args.label_smoothing
             for i, t in enumerate(tails):
                 e2_multi[i][t] = smoothed_value + epsilon
             e2_multi = e2_multi.cuda()
