@@ -39,7 +39,7 @@ def make_knowledge_graph(kg_vocab):
                 line = json.loads(line)
                 e1 = kg_vocab.ent_id[line['src']]
                 e2 = kg_vocab.ent_id[line['dst']]
-                rel = kg_vocab.rel_id[line['dstProperty']]
+                rel = line['dstProperty']
                 rel_reverse = line['dstProperty'] + '_reverse'
 
                 # data
