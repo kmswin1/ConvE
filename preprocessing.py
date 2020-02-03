@@ -172,9 +172,6 @@ def write_evaluation_graph2(cases, graph, path, kg_vocab):
             entities1 = [kg_vocab.ent_id[v] for v in graph[(e1, rel)]]
             entities2 = [kg_vocab.ent_id[v] for v in graph[(e2, rel_reverse)]]
 
-            n1 += len(entities1.split('@@'))
-            n2 += len(entities2.split('@@'))
-
             data_point = {}
             data_point['e1'] = e1
             data_point['e2'] = e2
