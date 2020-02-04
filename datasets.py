@@ -28,7 +28,7 @@ class KG_DataSet(Dataset):
         return self.len
 
     def __getitem__(self, idx):
-        logits = torch.full((self.n_ent, ), self.epsilon)
+        logits = torch.full((self.n_ent, ), self.epsilon, dtype=torch.long)
         logits[self.tail[idx]] = self.smoothed_value
         return self.head[idx], self.rel[idx], logits
 
@@ -64,8 +64,8 @@ class KG_EvalSet(Dataset):
         return self.len
 
     def __getitem__(self, idx):
-        logits1 = torch.zeros(self.n_ent, dtype=torch.int64)
+        logits1 = torch.zeros(self.n_ent, dtype=torch.long)
         logits1[self.tail[idx]] = 1
-        logits2 = torch.zeros(self.n_ent, dtype=torch.int64)
+        logits2 = torch.zeros(self.n_ent, dtype=torch.long)
         logits2[self.tail2[idx]] = 1
         return self.head[idx], self.rel[idx], logits1, self.head2[idx], self.rel_rev[idx], logits2
