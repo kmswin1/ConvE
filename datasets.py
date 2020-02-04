@@ -21,7 +21,7 @@ class KG_DataSet(Dataset):
                 self.rel.append(self.kg_vocab.rel_id[line['rel']])
                 temp = []
                 for meta in line['e2_e1toe2'].split('@@'):
-                    temp.append(kg_vocab.ent_id[t])
+                    temp.append(kg_vocab.ent_id[meta])
                 self.tail.append(temp)
 
     def __len__(self):
