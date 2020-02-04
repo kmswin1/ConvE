@@ -19,12 +19,9 @@ class KG_DataSet(Dataset):
                 line = json.loads(line)
                 self.head.append(self.kg_vocab.ent_id[line['e1']])
                 self.rel.append(self.kg_vocab.rel_id[line['rel']])
-                self.tail.append(line['e2_e1toe2'])
-                for meta in line['e2toe2']:
-                    meta = meta.split('@@')
-                    temp = []
-                    for t in meta:
-                        temp.append(kg_vocab.ent_id[t])
+                temp = []
+                for meta in line['e2_e1toe2'].split('@@'):
+                    temp.append(kg_vocab.ent_id[t])
                 self.tail.append(temp)
 
     def __len__(self):
