@@ -64,4 +64,6 @@ class KG_EvalSet(Dataset):
         return self.len
 
     def __getitem__(self, idx):
-        return self.head[idx], self.rel[idx], self.tail[idx], self.head2[idx], self.rel_rev[idx], self.tail2[idx]
+        tails1 = [t for t in self.tail[idx]]
+        tails2 = [t for t in self.tail2[idx]]
+        return self.head[idx], self.rel[idx], tails1, self.head2[idx], self.rel_rev[idx], tails2
