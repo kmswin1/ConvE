@@ -20,16 +20,16 @@ def ranking_and_hits(model, args, evalloader, n_ent, kg_vocab, epoch):
         head, rel, tail, head2, rel_rev, tail2 = data
         head = torch.LongTensor(head)
         rel = torch.LongTensor(rel)
-        tail = [torch.LongTensor(vec) for vec in tail]
         head2 = torch.LongTensor(head2)
         rel_rev = torch.LongTensor(rel_rev)
-        tail2 = [torch.LongTensor(vec) for vec in tail2]
         head = head.cuda()
         rel = rel.cuda()
         head2 = head2.cuda()
         rel_rev = rel_rev.cuda()
         batch_size = head.size(0)
 
+        e2_multi1 = tail.cuda()
+        e2_multi2 = tail2.cuda()
         pred1 = model.forward(head, rel)
         pred2 = model.forward(head2, rel_rev)
 
@@ -39,8 +39,8 @@ def ranking_and_hits(model, args, evalloader, n_ent, kg_vocab, epoch):
             target_value2 = pred2[i][head[i]].item()
             # zero all known cases (this are not interesting)
             # this corresponds to the filtered setting
-            pred1[i][tail[i]] = 0.0
-            pred2[i][tail2[i]] = 0.0
+            pred1[i] = e2_multi1[i] * 0.0
+            pred2[i] = e2_multi2[i] * 0.0
             # write base the saved values
             pred1[i][head2[i]] = target_value1
             pred2[i][head[i]] = target_value2

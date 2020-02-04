@@ -1,12 +1,9 @@
 import torch
 import numpy as np
-import datetime, os, pickle
+import datetime, os
 from torch.utils.data import DataLoader
-import time
-#timer = CUDATimer()
 dir = os.getcwd()
-def ranking_and_hits(model, args, testset, n_ent, kg_vocab, epoch):
-    dataloader = DataLoader(dataset=testset, num_workers=4, batch_size=args.batch_size, shuffle=True)
+def ranking_and_hits(model, args, evalloader, n_ent, kg_vocab, epoch):
     hits_left = []
     hits_right = []
     hits = []
@@ -19,41 +16,20 @@ def ranking_and_hits(model, args, testset, n_ent, kg_vocab, epoch):
         hits_right.append([])
         hits.append([])
 
-    for i, data in enumerate(dataloader):
+    for i, data in enumerate(evalloader):
         head, rel, tail, head2, rel_rev, tail2 = data
         head = torch.LongTensor(head)
         rel = torch.LongTensor(rel)
-        tails = []
-        for meta in tail:
-            meta = meta.split('@@')
-            temp = []
-            for t in meta:
-                temp.append(kg_vocab.ent_id[t])
-            tails.append(temp)
-        tails = [torch.LongTensor(vec) for vec in tails]
         head2 = torch.LongTensor(head2)
         rel_rev = torch.LongTensor(rel_rev)
-        tails2 = []
-        for meta in tail:
-            meta = meta.split('@@')
-            temp = []
-            for t in meta:
-                temp.append(kg_vocab.ent_id[t])
-            tails.append(temp)
-        tails2 = [torch.LongTensor(vec) for vec in tails2]
         head = head.cuda()
         rel = rel.cuda()
         head2 = head2.cuda()
         rel_rev = rel_rev.cuda()
         batch_size = head.size(0)
 
-        e2_multi1 = torch.zeros(batch_size, n_ent, dtype=torch.int64)
-        e2_multi2 = torch.zeros(batch_size, n_ent, dtype=torch.int64)
-        for i, (t,t_r) in enumerate(zip(tails, tails2)):
-            e2_multi1[i][t] = 1
-            e2_multi2[i][t_r] = 1
-        e2_multi1 = e2_multi1.cuda()
-        e2_multi2 = e2_multi2.cuda()
+        e2_multi1 = tail.cuda()
+        e2_multi2 = tail2.cuda()
         pred1 = model.forward(head, rel)
         pred2 = model.forward(head2, rel_rev)
 
@@ -63,8 +39,8 @@ def ranking_and_hits(model, args, testset, n_ent, kg_vocab, epoch):
             target_value2 = pred2[i][head[i]].item()
             # zero all known cases (this are not interesting)
             # this corresponds to the filtered setting
-            pred1[i][e2_multi1[i]] = 0.0
-            pred2[i][e2_multi2[i]] = 0.0
+            pred1[i] = e2_multi1[i] * 0.0
+            pred2[i] = e2_multi2[i] * 0.0
             # write base the saved values
             pred1[i][head2[i]] = target_value1
             pred2[i][head[i]] = target_value2

@@ -64,4 +64,8 @@ class KG_EvalSet(Dataset):
         return self.len
 
     def __getitem__(self, idx):
-        return self.head[idx], self.rel[idx], self.tail[idx], self.head2[idx], self.rel_rev[idx], self.tail2[idx]
+        logits = torch.zeros(self.n_ent)
+        logits[self.tail[idx]] = 1
+        logits2 = torch.zeros(self.n_ent)
+        logits2[self.tail2[idx]] = 1
+        return self.head[idx], self.rel[idx], logits, self.head2[idx], self.rel_rev[idx], logits2
