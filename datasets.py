@@ -34,7 +34,7 @@ class KG_DataSet(Dataset):
         return self.head[idx], self.rel[idx], logits
 
 class KG_EvalSet(Dataset):
-    def __init__(self, file_path, kg_vocab):
+    def __init__(self, file_path, kg_vocab, args, n_ent):
         self.kg_vocab = kg_vocab
         self.len = 0
         self.head = []
