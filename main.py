@@ -35,10 +35,10 @@ def main(args, model_path):
     print(sum(params))
     opt = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.l2)
     start = time.time()
-    dataset = KG_DataSet(dir+'/e1rel_to_e2_train.json', kg_vocab)
+    dataset = KG_DataSet(dir+'/e1rel_to_e2_train.json', kg_vocab, args, n_ent)
     print ("making train dataset is done " + str(time.time()-start))
     start = time.time()
-    evalset = KG_EvalSet(dir+'/e1rel_to_e2_ranking_test.json', kg_vocab)
+    evalset = KG_EvalSet(dir+'/e1rel_to_e2_ranking_test.json', kg_vocab, args, n_ent)
     print ("making evalset is done " + str(time.time()-start))
 
     cnt = 0
@@ -60,12 +60,6 @@ def main(args, model_path):
             head = torch.LongTensor(head)
             rel = torch.LongTensor(rel)
             tails = []
-            for meta in tail:
-                meta = meta.split('@@')
-                temp = []
-                for t in meta:
-                    temp.append(kg_vocab.ent_id[t])
-                tails.append(temp)
             head = head.cuda()
             rel = rel.cuda()
             batch_size = head.size(0)
