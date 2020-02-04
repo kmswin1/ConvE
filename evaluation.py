@@ -39,8 +39,8 @@ def ranking_and_hits(model, args, evalloader, n_ent, kg_vocab, epoch):
             target_value2 = pred2[i][head[i]].item()
             # zero all known cases (this are not interesting)
             # this corresponds to the filtered setting
-            pred1[i][e2_multi1 == 1] = 0.0
-            pred2[i][e2_multi2 == 1] = 0.0
+            pred1[i][e2_multi1[i] == 1] = 0.0
+            pred2[i][e2_multi2[i] == 1] = 0.0
             # write base the saved values
             pred1[i][head2[i]] = target_value1
             pred2[i][head[i]] = target_value2
