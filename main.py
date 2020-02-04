@@ -56,6 +56,7 @@ def main(args, model_path):
             head, rel, tail = data
             head = torch.LongTensor(head)
             rel = torch.LongTensor(rel)
+            tail = torch.LongTensor(tail)
             head = head.cuda()
             rel = rel.cuda()
             batch_size = head.size(0)
