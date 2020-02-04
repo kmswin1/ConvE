@@ -23,7 +23,6 @@ def main(args, model_path):
 
     model = ConvE(args, n_ent, n_rel)
     model.init()
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     if args.multi_gpu:
         model = torch.nn.DataParallel(model)
     criterion = torch.nn.BCELoss()
@@ -35,15 +34,13 @@ def main(args, model_path):
     print(sum(params))
     opt = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.l2)
     start = time.time()
-    dataset = KG_DataSet(dir+'/e1rel_to_e2_train.json', kg_vocab)
+    dataset = KG_DataSet(dir+'/e1rel_to_e2_train.json', kg_vocab, args, n_ent)
     print ("making train dataset is done " + str(time.time()-start))
     start = time.time()
-    evalset = KG_EvalSet(dir+'/e1rel_to_e2_ranking_test.json', kg_vocab)
+    evalset = KG_EvalSet(dir+'/e1rel_to_e2_ranking_test.json', kg_vocab, args, n_ent)
     print ("making evalset is done " + str(time.time()-start))
 
     cnt = 0
-    epsilon = 1.0 / n_ent
-    smoothed_value = 1 - args.label_smoothing
     for epoch in range(args.epochs):
         print (epoch)
         epoch_loss = 0
@@ -59,22 +56,10 @@ def main(args, model_path):
             head, rel, tail = data
             head = torch.LongTensor(head)
             rel = torch.LongTensor(rel)
-            tails = []
-            for meta in tail:
-                meta = meta.split('@@')
-                temp = []
-                for t in meta:
-                    temp.append(kg_vocab.ent_id[t])
-                tails.append(temp)
             head = head.cuda()
             rel = rel.cuda()
             batch_size = head.size(0)
-            e2_multi = torch.full((batch_size, n_ent), epsilon)
-            # label smoothing
-            start = time.time()
-            for i, t in enumerate(tails):
-                e2_multi[i][t] = smoothed_value + epsilon
-            e2_multi = e2_multi.cuda()
+            e2_multi = tail.cuda()
             print ("e2_multi " + str(time.time()-start) + "\n")
             start = time.time()
             pred = model.forward(head, rel)
