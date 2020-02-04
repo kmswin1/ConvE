@@ -20,10 +20,8 @@ def ranking_and_hits(model, args, evalloader, n_ent, kg_vocab, epoch):
         head, rel, tail, head2, rel_rev, tail2 = data
         head = torch.LongTensor(head)
         rel = torch.LongTensor(rel)
-        tail = torch.LongTensor(tail)
         head2 = torch.LongTensor(head2)
         rel_rev = torch.LongTensor(rel_rev)
-        tail2 = torch.LongTensor(tail2)
         head = head.cuda()
         rel = rel.cuda()
         head2 = head2.cuda()
