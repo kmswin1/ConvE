@@ -63,6 +63,7 @@ def main(args, model_path):
             print ("e2_multi " + str(time.time()-start) + "\n")
             start = time.time()
             pred = model.forward(head, rel)
+            #loss = model.loss(pred, e2_multi)
             loss = criterion(pred, e2_multi)
             loss.backward()
             opt.step()
