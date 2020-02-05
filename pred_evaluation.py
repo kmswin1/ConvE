@@ -114,17 +114,3 @@ def ranking_and_hits(model, args, evalloader, n_ent, kg_vocab, epoch):
     print('Mean reciprocal rank tail: {0}'.format(np.mean(1./np.array(ranks_left))))
     print('Mean reciprocal rank head: {0}'.format(np.mean(1./np.array(ranks_right))))
     print('Mean reciprocal rank: {0}'.format(np.mean(1./np.array(ranks_left+ranks_right))))
-
-    with open(dir+'/log_file/test.txt', 'wb') as f:
-        pickle.dump('Hits tail @{0}: {1}\n'.format(10, np.mean(hits_left[9])), f)
-        pickle.dump('Hits head @{0}: {1}\n'.format(10, np.mean(hits_right[9])), f)
-        pickle.dump('Hits @{0}: {1}\n'.format(10, np.mean(hits[9])), f)
-        pickle.dump('Mean rank tail: {0}\n'.format(np.mean(ranks_left)), f)
-        pickle.dump('Mean rank head: {0}\n'.format(np.mean(ranks_right)), f)
-        pickle.dump('Mean rank: {0}\n'.format(np.mean(ranks_left+ranks_right)), f)
-        pickle.dump('Mean reciprocal rank tail: {0}\n'.format(np.mean(1./np.array(ranks_left))), f)
-        pickle.dump('Mean reciprocal rank head: {0}\n'.format(np.mean(1./np.array(ranks_right))), f)
-        pickle.dump('Mean reciprocal rank: {0}\n'.format(np.mean(1./np.array(ranks_left+ranks_right))), f)
-
-
-    f.close()
