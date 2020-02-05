@@ -73,7 +73,7 @@ if __name__ == '__main__':
 
 
     model_name = '{2}_{0}_{1}'.format(args.input_drop, args.hidden_drop, args.model)
-    model_path = 'saved_models/{0}_{1}.model'.format(args.data, args.model_name)
+    model_path = 'saved_models/{0}_{1}.model'.format(args.data, model_name)
 
     torch.manual_seed(args.seed)
     main(args, model_path)
