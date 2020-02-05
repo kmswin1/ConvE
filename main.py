@@ -53,6 +53,7 @@ def main(args, model_path):
 
         for i, data in enumerate(dataloader):
             opt.zero_grad()
+            start = time.time()
             head, rel, tail = data
             head = torch.LongTensor(head)
             rel = torch.LongTensor(rel)
