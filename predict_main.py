@@ -20,9 +20,6 @@ def main(args, model_path):
     print ("making vocab is done "+str(time.time()-start))
     n_ent, n_rel = graph_size(kg_vocab)
 
-    model_path = os.path.join(os.getcwd(), 'saved_models/'+args.model_name)
-
-
     model = ConvE(args, n_ent, n_rel)
     model.init()
     model.load_state_dict(torch.load(model_path))
