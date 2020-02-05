@@ -25,7 +25,6 @@ def main(args, model_path):
 
     model = ConvE(args, n_ent, n_rel)
     model.init()
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.load_state_dict(torch.load(model_path))
     model.cuda()
     print ('cuda : ' + str(torch.cuda.is_available()) + ' count : ' + str(torch.cuda.device_count()))
