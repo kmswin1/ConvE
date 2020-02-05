@@ -66,7 +66,7 @@ if __name__ == '__main__':
     parser.add_argument('--label-smoothing', type=float, default=0.1, help='Label smoothing value to use. Default: 0.1')
     parser.add_argument('--hidden-size', type=int, default=9728, help='The side of the hidden layer. The required size changes with the size of the embeddings. Default: 9728 (embedding size 200).')
     parser.add_argument('--log-file', action='store', type=str)
-    parser.add_argument('--model-name', type=str, default='webtoon_conve_0.2_0.3.model', help='define your model to evaluate')
+    parser.add_argument('--model-name', type=str, default='conve_0.2_0.3.model', help='define your model to evaluate')
     parser.add_argument('--multi-gpu', type=bool, default=False, help='choose the training using by multigpu')
 
     args = parser.parse_args()
