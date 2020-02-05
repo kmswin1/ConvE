@@ -8,6 +8,7 @@ from pred_evaluation import ranking_and_hits
 from model import ConvE, Complex
 from utils import make_kg_vocab, graph_size
 from datasets import KG_EvalSet
+from torch.utils.data import DataLoader
 
 dir = os.getcwd() + '/data'
 
@@ -32,12 +33,13 @@ def main(args, model_path):
     start = time.time()
     evalset = KG_EvalSet(dir+'/e1rel_to_e2_ranking_test.json', kg_vocab, args, n_ent)
     print ("making evalset is done " + str(time.time()-start))
+    evalloader = DataLoader(dataset=evalset, num_workers=args.num_worker, batch_size=args.batch_size, shuffle=True)
 
     for epoch in range(args.test_batch_size):
         model.eval()
         with torch.no_grad():
             start = time.time()
-            ranking_and_hits(model, args, evalset, n_ent, kg_vocab, epoch)
+            ranking_and_hits(model, args, evalloader, n_ent, kg_vocab, epoch)
             end = time.time()
             print ('eval time used: {} minutes'.format((end - start)/60))
 
