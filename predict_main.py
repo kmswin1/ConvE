@@ -26,9 +26,6 @@ def main(args, model_path):
     model = ConvE(args, n_ent, n_rel)
     model.init()
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    if torch.cuda.device_count() > 1:
-        model = torch.nn.DataParallel(model)
-        criterion = torch.nn.BCELoss()
     model.load_state_dict(torch.load(model_path))
     model.cuda()
     print ('cuda : ' + str(torch.cuda.is_available()) + ' count : ' + str(torch.cuda.device_count()))
@@ -36,9 +33,8 @@ def main(args, model_path):
     params = [value.numel() for value in model.parameters()]
     print(params)
     print(sum(params))
-    opt = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.l2)
     start = time.time()
-    evalset = KG_EvalSet(dir+'/e1rel_to_e2_ranking_test.json', kg_vocab)
+    evalset = KG_EvalSet(dir+'/e1rel_to_e2_ranking_test.json', kg_vocab, args, n_ent)
     print ("making evalset is done " + str(time.time()-start))
 
     for epoch in range(args.test_batch_size):
@@ -72,6 +68,7 @@ if __name__ == '__main__':
     parser.add_argument('--hidden-size', type=int, default=9728, help='The side of the hidden layer. The required size changes with the size of the embeddings. Default: 9728 (embedding size 200).')
     parser.add_argument('--log-file', action='store', type=str)
     parser.add_argument('--model-name', type=str, default='webtoon_conve_0.2_0.3.model', help='define your model to evaluate')
+    parser.add_argument('--multi-gpu', type=bool, default=False, help='choose the training using by multigpu')
 
     args = parser.parse_args()
 
