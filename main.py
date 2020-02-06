@@ -108,6 +108,9 @@ def main(args, model_path):
                 sum_loss = torch.sum(loss1) + torch.sum(loss2)
                 sum_loss /= batch_size
                 valid_loss += sum_loss
+                print ("valid loss : " + str(valid_loss))
+                with open(dir + '/log_file/log.txt', 'a') as f:
+                    f.write(str(epoch) + " epochs valid loss : " + str(valid_loss))
         if valid_loss > pred_loss:
             patience += 1
             if patience > 2:
