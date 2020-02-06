@@ -1,8 +1,8 @@
 # !coding=utf8
 import torch
 from torch.nn import functional as F, Parameter
-from torch.nn.init import kaiming_normal_, xavier_normal_
-
+from torch.nn.init import kaiming_normal_, xavier_normal_, uniform_
+import numpy as np
 
 class Complex(torch.nn.Module):
     def __init__(self, args, num_entities, num_relations):
@@ -93,6 +93,4 @@ class ConvE(torch.nn.Module):
         prediction = torch.sigmoid(x)
 
         return prediction
-
-
 

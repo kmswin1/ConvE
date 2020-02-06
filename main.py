@@ -84,13 +84,44 @@ def main(args, model_path):
         torch.save(model.state_dict(), model_path)
 
         # TODO: calculate valid loss and develop early stopping
-
+        pred_loss = 1000
+        patience = 0
         model.eval()
         with torch.no_grad():
-            start = time.time()
-            ranking_and_hits(model, args, evalloader, n_ent, kg_vocab, epoch)
-            end = time.time()
-            print ('eval time used: {} minutes'.format((end - start)/60))
+            valid_loss = 0.0
+            for i,data in enumerate(evalloader):
+                head, rel, tail, head2, rel_rev, tail2 = data
+                head = torch.LongTensor(head)
+                rel = torch.LongTensor(rel)
+                head2 = torch.LongTensor(head2)
+                rel_rev = torch.LongTensor(rel_rev)
+                head = head.cuda()
+                rel = rel.cuda()
+                head2 = head2.cuda()
+                rel_rev = rel_rev.cuda()
+                batch_size = head.size(0)
+
+                e2_multi1 = tail.cuda()
+                e2_multi2 = tail2.cuda()
+                pred1 = model.forward(head, rel)
+                pred2 = model.forward(head2, rel_rev)
+                loss1 = criterion(pred1, e2_multi1)
+                loss2 = criterion(pred2, e2_multi2)
+                sum_loss = torch.sum(loss1) + torch.sum(loss2)
+                sum_loss /= batch_size
+                valid_loss += sum_loss
+        if valid_loss > pred_loss:
+            patience += 1
+            if patience > 2:
+                break
+        pred_loss = valid_loss
+        patience = 0
+    model.eval()
+    with torch.no_grad():
+        start = time.time()
+        ranking_and_hits(model, args, evalloader, n_ent, kg_vocab, epoch)
+        end = time.time()
+        print ('eval time used: {} minutes'.format((end - start)/60))
 
 
 if __name__ == '__main__':
