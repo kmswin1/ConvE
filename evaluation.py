@@ -105,5 +105,3 @@ def ranking_and_hits(model, args, evalloader, n_ent, kg_vocab, epoch):
         f.write('Mean reciprocal rank tail: {0}\n'.format(np.mean(1./np.array(ranks_left))))
         f.write('Mean reciprocal rank head: {0}\n'.format(np.mean(1./np.array(ranks_right))))
         f.write('Mean reciprocal rank: {0}\n'.format(np.mean(1./np.array(ranks_left+ranks_right))))
-
-    f.close()

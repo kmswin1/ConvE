@@ -105,12 +105,12 @@ def main(args, model_path):
                 pred2 = model.forward(head2, rel_rev)
                 loss1 = criterion(pred1, e2_multi1)
                 loss2 = criterion(pred2, e2_multi2)
-                sum_loss = torch.sum(loss1) + torch.sum(loss2)
+                sum_loss = (torch.sum(loss1) + torch.sum(loss2))/2
                 sum_loss /= batch_size
                 valid_loss += sum_loss
-                print ("valid loss : " + str(valid_loss))
-                with open(os.getcwd() + '/log_file/log.txt', 'a') as f:
-                    f.write(str(epoch) + " epochs valid loss : " + str(valid_loss))
+            print ("valid loss : " + str(valid_loss))
+            with open(os.getcwd() + '/log_file/log.txt', 'a') as f:
+                f.write(str(epoch) + " epochs valid loss : " + str(valid_loss))
         if valid_loss > pred_loss:
             patience += 1
             if patience > 2:
