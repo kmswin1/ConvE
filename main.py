@@ -113,11 +113,12 @@ def main(args, model_path):
             patience += 1
             if patience > 2:
                 early_stop = True
+        else:
+            patience = 0
+        prev_loss = valid_loss
         if early_stop:
             print("{0} epochs Early stopping ...".format(epoch))
             break
-        prev_loss = valid_loss
-        patience = 0
         print ('saving to {0}'.format(model_path))
         torch.save(model.state_dict(), model_path)
 
