@@ -65,7 +65,6 @@ def main(args, model_path):
             print ("e2_multi " + str(time.time()-start) + "\n")
             start = time.time()
             pred = model.forward(head, rel)
-            #loss = model.loss(pred, e2_multi)
             loss = criterion(pred, e2_multi)
             loss.backward()
             opt.step()
@@ -81,9 +80,6 @@ def main(args, model_path):
         print ('one epoch time: {} minutes'.format(time_used/60))
         print ('{} epochs'.format(epoch))
         print ('epoch {} loss: {}'.format(epoch+1, epoch_loss))
-        print ('saving to {0}'.format(model_path))
-        torch.save(model.state_dict(), model_path)
-
         # TODO: calculate valid loss and develop early stopping
         model.eval()
         with torch.no_grad():
@@ -106,7 +102,7 @@ def main(args, model_path):
                 pred2 = model.forward(head2, rel_rev)
                 loss1 = criterion(pred1, e2_multi1)
                 loss2 = criterion(pred2, e2_multi2)
-                sum_loss = (torch.sum(loss1) + torch.sum(loss2))/2
+                sum_loss = (torch.sum(loss1).item() + torch.sum(loss2).item())/2
                 sum_loss /= batch_size
                 valid_loss += sum_loss
             print ("valid loss : " + str(valid_loss))
@@ -119,6 +115,9 @@ def main(args, model_path):
                 break
         prev_loss = valid_loss
         patience = 0
+        print ('saving to {0}'.format(model_path))
+        torch.save(model.state_dict(), model_path)
+
     model.eval()
     with torch.no_grad():
         start = time.time()
