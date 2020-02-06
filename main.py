@@ -39,8 +39,8 @@ def main(args, model_path):
     start = time.time()
     evalset = KG_EvalSet(dir+'/e1rel_to_e2_ranking_test.json', kg_vocab, args, n_ent)
     print ("making evalset is done " + str(time.time()-start))
-
-    cnt = 0
+    pred_loss = 0
+    patience = 0
     for epoch in range(args.epochs):
         print (epoch)
         epoch_loss = 0
@@ -84,8 +84,6 @@ def main(args, model_path):
         torch.save(model.state_dict(), model_path)
 
         # TODO: calculate valid loss and develop early stopping
-        pred_loss = 1000
-        patience = 0
         model.eval()
         with torch.no_grad():
             valid_loss = 0.0
@@ -113,6 +111,7 @@ def main(args, model_path):
         if valid_loss > pred_loss:
             patience += 1
             if patience > 2:
+                print ("{0} epochs Early stopping ...".format(epoch))
                 break
         pred_loss = valid_loss
         patience = 0
