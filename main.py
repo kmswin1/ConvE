@@ -42,6 +42,7 @@ def main(args, model_path):
     print ("making evalset is done " + str(time.time()-start))
     prev_loss = 1000
     patience = 0
+    early_stop = False
     for epoch in range(args.epochs):
         print (epoch)
         epoch_loss = 0
@@ -111,8 +112,10 @@ def main(args, model_path):
         if valid_loss > prev_loss:
             patience += 1
             if patience > 2:
-                print ("{0} epochs Early stopping ...".format(epoch))
-                break
+                early_stop = True
+        if early_stop:
+            print("{0} epochs Early stopping ...".format(epoch))
+            break
         prev_loss = valid_loss
         patience = 0
         print ('saving to {0}'.format(model_path))
