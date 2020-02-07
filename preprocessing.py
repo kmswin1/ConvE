@@ -193,22 +193,20 @@ def make_kg_vocab(*data):
     return ent_list, rel_list, ent_dict, rel_dict
 
 def write_str2id(kg, path):
-    f = open(path, 'wb')
-    for i, meta in enumerate(kg):
+    with open(path, 'wb') as f:
         str2id = {}
-        str2id[meta] = i
+        for i, meta in enumerate(kg):
+            str2id[meta] = i
 
-    pickle.dump(str2id, f)
-    f.close()
+        pickle.dump(str2id, f)
 
 def write_id2str(kg, path):
-    f = open(path, 'wb')
-    for i, meta in enumerate(kg):
+    with open(path, 'wb') as f:
         id2str = {}
-        id2str[i] = meta
+        for i, meta in enumerate(kg):
+            id2str[i] = meta
 
-    pickle.dump(id2str, f)
-    f.close()
+        pickle.dump(id2str, f)
 
 def write_train_set(data, ent_str2id, rel_str2id):
     with open('data/train_set.txt', 'w') as ff:
@@ -237,10 +235,10 @@ def main():
     start = time.time()
     label_graph, train_graph, test_cases = make_knowledge_graph()
     ent_list, rel_list, ent_dict, rel_dict = make_kg_vocab('data/train.json', 'data/test.json')
-    write_str2id(ent_list, 'data/ent_str2id.pickle')
-    write_id2str(ent_list, 'data/ent_id2str.pickle')
-    write_str2id(rel_list, 'data/rel_str2id.pickle')
-    write_id2str(rel_list, 'data/rel_id2str.pickle')
+    write_str2id(ent_list, 'data/ent_str2id')
+    write_id2str(ent_list, 'data/ent_id2str')
+    write_str2id(rel_list, 'data/rel_str2id')
+    write_id2str(rel_list, 'data/rel_id2str')
     write_evaluation_graph2idx(test_cases['test.json'], label_graph, ent_dict, rel_dict, 'data/test_ranking.json')
     write_train_set('data/train.json', ent_dict, rel_dict)
     print (time.time() - start)
