@@ -126,7 +126,7 @@ def main(args, model_path):
     model.eval()
     with torch.no_grad():
         start = time.time()
-        ranking_and_hits(model, args, evalloader, n_ent, kg_vocab, epoch)
+        ranking_and_hits(model, args, evalloader, n_ent, epoch)
         end = time.time()
         print ('eval time used: {} minutes'.format((end - start)/60))
 

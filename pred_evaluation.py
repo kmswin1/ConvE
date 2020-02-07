@@ -3,7 +3,7 @@ import numpy as np
 import datetime, os
 from torch.utils.data import DataLoader
 dir = os.getcwd()
-def ranking_and_hits(model, args, evalloader, n_ent, kg_vocab, epoch):
+def ranking_and_hits(model, args, evalloader, n_ent, ent_id2str, rel_id2str, epoch):
     hits_left = []
     hits_right = []
     hits = []
@@ -81,27 +81,27 @@ def ranking_and_hits(model, args, evalloader, n_ent, kg_vocab, epoch):
             #         hits_right[hits_level].append(0.0)
             if rank1 == 1:
                 with open(dir + '/log_file/hit.txt', 'a') as f:
-                    f.write(kg_vocab.ent_list[head[i].item()]+"\n")
-                    f.write(kg_vocab.rel_list[rel[i].item()]+"\n")
-                    f.write(kg_vocab.ent_list[argsort1[i][0].item()]+"\n")
+                    f.write(ent_id2str[head[i].item()]+"\n")
+                    f.write(rel_id2str[rel[i].item()]+"\n")
+                    f.write(ent_id2str[argsort1[i][0].item()]+"\n")
                     f.close()
             elif rank1 > 1:
                 with open(dir + '/log_file/nohit.txt', 'a') as f:
-                    f.write(kg_vocab.ent_list[head[i].item()]+"\n")
-                    f.write(kg_vocab.rel_list[rel[i].item()]+"\n")
-                    f.write(kg_vocab.ent_list[argsort1[i][0].item()]+"\n")
+                    f.write(ent_id2str[head[i].item()]+"\n")
+                    f.write(rel_id2str[rel[i].item()]+"\n")
+                    f.write(ent_id2str[argsort1[i][0].item()]+"\n")
                     f.close()
             if rank2 == 1:
                 with open(dir + '/log_file/hit.txt', 'a') as f:
-                    f.write(kg_vocab.ent_list[head2[i].item()]+"\n")
-                    f.write(kg_vocab.rel_list[rel_rev[i].item()]+"\n")
-                    f.write(kg_vocab.ent_list[argsort2[i][0].item()]+"\n")
+                    f.write(ent_id2str[head2[i].item()]+"\n")
+                    f.write(rel_id2str[rel_rev[i].item()]+"\n")
+                    f.write(ent_id2str[argsort2[i][0].item()]+"\n")
                     f.close()
             elif rank2 > 1:
                 with open(dir + '/log_file/nohit.txt', 'a') as f:
-                    f.write(kg_vocab.ent_list[head2[i].item()]+"\n")
-                    f.write(kg_vocab.rel_list[rel_rev[i].item()]+"\n")
-                    f.write(kg_vocab.ent_list[argsort2[i][0].item()]+"\n")
+                    f.write(ent_id2str[head2[i].item()]+"\n")
+                    f.write(rel_id2str[rel_rev[i].item()]+"\n")
+                    f.write(ent_id2str[argsort2[i][0].item()]+"\n")
                     f.close()
 
 

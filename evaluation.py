@@ -3,7 +3,7 @@ import numpy as np
 import datetime, os
 from torch.utils.data import DataLoader
 dir = os.getcwd()
-def ranking_and_hits(model, args, evalloader, n_ent, kg_vocab, epoch):
+def ranking_and_hits(model, args, evalloader, n_ent, epoch):
     hits_left = []
     hits_right = []
     hits = []
