@@ -20,6 +20,10 @@ class KG_DataSet(Dataset):
                 self.rel.append(line['rel'])
                 self.tail.append(line['e2_e1toe2'])
 
+        self.head = torch.LongTensor(self.head)
+        self.rel = torch.LongTensor(self.rel)
+        self.tail = [torch.LongTensor(vec) for vec in self.tail]
+
     def __len__(self):
         return self.len
 

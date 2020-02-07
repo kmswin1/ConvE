@@ -58,8 +58,8 @@ def main(args, model_path):
             opt.zero_grad()
             start = time.time()
             head, rel, tail = data
-            head = torch.LongTensor(head)
-            rel = torch.LongTensor(rel)
+            #head = torch.LongTensor(head)
+            #rel = torch.LongTensor(rel)
             head = head.cuda()
             rel = rel.cuda()
             batch_size = head.size(0)
