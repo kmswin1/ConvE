@@ -6,7 +6,7 @@ import os
 import numpy as np
 import sys
 import time
-from utils import make_kg_vocab
+from itertools import count
 import glob
 rdm = np.random.RandomState(234234)
 
@@ -106,7 +106,7 @@ def write_training_graph(cases, graph, path):
             data_point['rel'] = rel
             data_point['rel_eval'] = 'None'
             data_point['e2_e1toe2'] =  entities1
-            data_point['e2_e2toe1'] = "None"
+            data_point['e1_e2toe1'] = "None"
 
             f.write(json.dumps(data_point)  + '\n')
 
@@ -132,17 +132,116 @@ def write_evaluation_graph(cases, graph, path):
             data_point['rel'] = rel
             data_point['rel_eval'] = rel_reverse
             data_point['e2_e1toe2'] = entities1
-            data_point['e2_e2toe1'] = entities2
+            data_point['e1_e2toe1'] = entities2
 
             f.write(json.dumps(data_point)  + '\n')
 
+def write_evaluation_graph2idx(cases, graph, ent_str2idx, rel_str2idx, path):
+    with open(path, 'w') as f:
+        n = len(cases)
+        n1 = 0
+        n2 = 0
+        for i, (e1, rel, e2) in enumerate(cases):
+            # (Mike, fatherOf) -> John
+            # (John, fatherOf, Tom)
+            rel_reverse = rel+'_reverse'
+            entities1 = "@@".join(list(graph[(e1, rel)]))
+            entities2 = "@@".join(list(graph[(e2, rel_reverse)]))
+
+            n1 += len(entities1.split('@@'))
+            n2 += len(entities2.split('@@'))
+
+            ents1 = []
+            ents2 = []
+            for meta in entities1.split('@@'):
+                ents1.append(ent_str2idx[meta])
+
+            for meta in entities2.split('@@'):
+                ents2.append(ent_str2idx[meta])
+
+            data_point = {}
+            data_point['e1'] = ent_str2idx[e1]
+            data_point['e2'] = ent_str2idx[e2]
+            data_point['rel'] = rel_str2idx[rel]
+            data_point['rel_eval'] = rel_str2idx[rel_reverse]
+            data_point['e2_e1toe2'] = ents1
+            data_point['e1_e2toe1'] = ents2
+
+            f.write(json.dumps(data_point)  + '\n')
+
+def make_kg_vocab(*data):
+    ent_set = set()
+    rel_set = set()
+    for filename in data:
+        with open(filename) as f:
+            for line in f:
+                line = json.loads(line)
+                e1 = line['src']
+                e2 = line['dst']
+                rel = line['dstProperty']
+                rel_rev = line['dstProperty'] + '_reverse'
+                ent_set.add(e1)
+                ent_set.add(e2)
+                rel_set.add(rel)
+                rel_set.add(rel_rev)
+    ent_list = sorted(list(ent_set))
+    rel_list = sorted(list(rel_set))
+    ent_id = dict(zip(ent_list, count()))
+    rel_id = dict(zip(rel_list, count()))
+
+    return ent_list, ent_id, rel_list, rel_id
+
+def write_str2id(kg, path):
+    with open(path, 'w') as f:
+        for i, meta in enumerate(kg):
+            data_point = {}
+            data_point[meta] = i
+
+            f.write(json.dumps(data_point) + '\n')
+
+def write_id2str(kg, path):
+    with open(path, 'w') as f:
+        for key in kg.keys():
+            data_point = {}
+            data_point[key] = kg[key]
+
+            f.write(json.dumps(data_point) + '\n')
+
+def write_train_set(data, ent_str2id, rel_str2id):
+    with open(data, 'r') as f:
+        for line in f:
+            line = json.loads(line)
+            e1 = line['src']
+            e2 = line['dst']
+            rel = line['dstProperty']
+            rel_rev = line['dstProperty'] + '_reverse'
+
+            with open('data/train_set.txt', 'w') as ff:
+                ff.write(str(ent_str2id[e1]) + " " + str(rel_str2id[rel]) + " " + str(ent_str2id[e2]))
+                ff.write(str(ent_str2id[e2]) + " " + str(rel_str2id[rel_rev]) + " " + str(ent_str2id[e1]))
+
+
+
+
 def main():
+    '''
     label_graph, train_graph, test_cases = make_knowledge_graph()
     start = time.time()
     all_cases = test_cases['train.json'] + test_cases['test.json']
     write_training_graph(test_cases['train.json'], train_graph['train.json'], 'data/e1rel_to_e2_train.json')
     write_evaluation_graph(test_cases['test.json'], label_graph, 'data/e1rel_to_e2_ranking_test.json')
     write_training_graph(all_cases, label_graph, 'data/e1rel_to_e2_full.json')
+    '''
+
+    start = time.time()
+    label_graph, train_graph, test_cases = make_knowledge_graph()
+    ent_id2str, ent_str2id, rel_id2str, rel_str2id = make_kg_vocab('data/train.json', 'data/test.json')
+    write_str2id(ent_str2id, 'data/ent_str2id.json')
+    write_id2str(ent_id2str, 'data/ent_id2str.json')
+    write_str2id(rel_str2id, 'data/rel_str2id.json')
+    write_id2str(rel_id2str, 'data/rel_id2str.json')
+    write_evaluation_graph2idx(test_cases['test.json'], label_graph, ent_str2id, rel_str2id, 'data/test_ranking.json')
+    write_train_set('data/train.json')
     print (time.time() - start)
 
 if __name__ == '__main__':
