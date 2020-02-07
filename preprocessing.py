@@ -270,7 +270,7 @@ def main():
     write_str2id(rel_list, 'data/rel_str2id')
     write_id2str(rel_list, 'data/rel_id2str')
     write_evaluation_graph2idx(test_cases['test.json'], label_graph, ent_dict, rel_dict, 'data/test_ranking.json')
-    write_training_graph2idx(test_cases['test.json'], label_graph, ent_dict, rel_dict, 'data/train.json')
+    write_training_graph2idx(test_cases['train.json'], label_graph, ent_dict, rel_dict, 'data/train_set.json')
     print (time.time() - start)
 
 if __name__ == '__main__':

@@ -17,9 +17,9 @@ class KG_DataSet(Dataset):
                 self.len += 1
                 line = line.strip('\n')
                 triple = line.split(' ')
-                self.head.append(int(triple[0]))
-                self.rel.append(int(triple[1]))
-                self.tail.append(int(triple[2]))
+                self.head.append(line['e1'])
+                self.rel.append(line['rel'])
+                self.tail.append(line['e2_e1toe2'])
 
     def __len__(self):
         return self.len
