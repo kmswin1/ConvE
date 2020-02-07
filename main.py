@@ -2,7 +2,7 @@
 import torch
 import argparse
 import os
-from utils import load_kg, graph_size
+from utils import load_kg
 from datasets import KG_DataSet, KG_EvalSet
 import time, datetime
 from torch.utils.data import DataLoader
