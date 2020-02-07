@@ -193,20 +193,22 @@ def make_kg_vocab(*data):
     return ent_list, rel_list, ent_dict, rel_dict
 
 def write_str2id(kg, path):
-    with open(path, 'wb') as f:
-        for i, meta in enumerate(kg):
-            str2id = {}
-            str2id[meta] = i
+    f = open(path, 'wb')
+    for i, meta in enumerate(kg):
+        str2id = {}
+        str2id[meta] = i
 
-        pickle.dump(str2id, f)
+    pickle.dump(str2id, f)
+    f.close()
 
 def write_id2str(kg, path):
-    with open(path, 'wb') as f:
-        for i, meta in enumerate(kg):
-            id2str = {}
-            id2str[i] = meta
+    f = open(path, 'wb')
+    for i, meta in enumerate(kg):
+        id2str = {}
+        id2str[i] = meta
 
     pickle.dump(id2str, f)
+    f.close()
 
 def write_train_set(data, ent_str2id, rel_str2id):
     with open('data/train_set.txt', 'w') as ff:
