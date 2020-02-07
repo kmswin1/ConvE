@@ -3,8 +3,7 @@ import torch
 import json
 
 class KG_DataSet(Dataset):
-    def __init__(self, file_path, kg_vocab, args, n_ent):
-        self.kg_vocab = kg_vocab
+    def __init__(self, file_path, args, n_ent):
         self.n_ent = n_ent
         self.args = args
         self.len = 0
@@ -16,13 +15,11 @@ class KG_DataSet(Dataset):
         with open(file_path) as f:
             for line in f:
                 self.len += 1
-                line = json.loads(line)
-                self.head.append(self.kg_vocab.ent_id[line['e1']])
-                self.rel.append(self.kg_vocab.rel_id[line['rel']])
-                temp = []
-                for meta in line['e2_e1toe2'].split('@@'):
-                    temp.append(kg_vocab.ent_id[meta])
-                self.tail.append(temp)
+                line = line.strip('\n')
+                triple = line.split(' ')
+                self.head.append(triple[0])
+                self.rel.append(triple[1])
+                self.tail.append(triple[2])
 
     def __len__(self):
         return self.len
@@ -33,8 +30,7 @@ class KG_DataSet(Dataset):
         return self.head[idx], self.rel[idx], logits
 
 class KG_EvalSet(Dataset):
-    def __init__(self, file_path, kg_vocab, args, n_ent):
-        self.kg_vocab = kg_vocab
+    def __init__(self, file_path, args, n_ent):
         self.len = 0
         self.head = []
         self.rel = []
@@ -47,19 +43,12 @@ class KG_EvalSet(Dataset):
             for line in f:
                 self.len += 1
                 line = json.loads(line)
-                self.head.append(self.kg_vocab.ent_id[line['e1']])
-                self.rel.append(self.kg_vocab.rel_id[line['rel']])
-                temp = []
-                for meta in line['e2_e1toe2'].split('@@'):
-                    temp.append(kg_vocab.ent_id[meta])
-                self.tail.append(temp)
-
-                self.head2.append(self.kg_vocab.ent_id[line['e2']])
-                self.rel_rev.append(self.kg_vocab.rel_id[line['rel_eval']])
-                temp = []
-                for meta in line['e2_e2toe1'].split('@@'):
-                    temp.append(kg_vocab.ent_id[meta])
-                self.tail2.append(temp)
+                self.head.append(line['e1'])
+                self.rel.append(line['rel'])
+                self.tail.append(line['e2_e1toe2'])
+                self.head2.append(line['e2'])
+                self.rel_rev.append(line['rel_eval'])
+                self.tail2.append(line['e1_e2toe1'])
     def __len__(self):
         return self.len
 

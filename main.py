@@ -2,13 +2,13 @@
 import torch
 import argparse
 import os
-from utils import make_kg_vocab, graph_size
+from utils import load_kg, graph_size
 from datasets import KG_DataSet, KG_EvalSet
 import time, datetime
 from torch.utils.data import DataLoader
 from evaluation import ranking_and_hits
 from model import ConvE, Complex
-import glob
+import pickle
 
 dir = os.getcwd() + '/data'
 
@@ -18,8 +18,9 @@ def main(args, model_path):
 
     start = time.time()
 
+    ent_str2id, ent_id2str, rel_str2id, rel_id2str = load_kg()
     print ("making vocab is done "+str(time.time()-start))
-    n_ent, n_rel = graph_size(kg_vocab)
+    n_ent, n_rel = len(ent_str2id), len(rel_str2id)
 
 
     model = ConvE(args, n_ent, n_rel)
@@ -35,10 +36,10 @@ def main(args, model_path):
     print(sum(params))
     opt = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.l2)
     start = time.time()
-    dataset = KG_DataSet(dir+'/e1rel_to_e2_train.json', kg_vocab, args, n_ent)
+    dataset = KG_DataSet(dir+'/train_set.json', args, n_ent)
     print ("making train dataset is done " + str(time.time()-start))
     start = time.time()
-    evalset = KG_EvalSet(dir+'/e1rel_to_e2_ranking_test.json', kg_vocab, args, n_ent)
+    evalset = KG_EvalSet(dir+'/test_ranking.json', args, n_ent)
     print ("making evalset is done " + str(time.time()-start))
     prev_loss = 1000
     patience = 0
