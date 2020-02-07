@@ -1,7 +1,7 @@
 import torch
 import numpy as np
 import datetime, os
-from torch.utils.data import DataLoader
+import pickle
 dir = os.getcwd()
 def ranking_and_hits(model, args, evalloader, n_ent, kg_vocab, epoch):
     hits_left = []
@@ -136,6 +136,15 @@ def ranking_and_hits(model, args, evalloader, n_ent, kg_vocab, epoch):
         f.write("nohit1 : " + str(nohit1_cnt) + "\n")
         f.write("hit10 : " + str(hit10_cnt) + "\n")
         f.write("nohit10 : " + str(nohit10_cnt) + "\n")
+        
+    with open(dir + '/log_file/hit1_rels', 'wb') as f:
+        pickle.dump(hit1_rels, f)
+    with open(dir + '/log_file/nohit1_rels', 'wb') as f:
+        pickle.dump(nohit1_rels, f)
+    with open(dir + '/log_file/hit10_rels', 'wb') as f:
+        pickle.dump(hit10_rels, f)
+    with open(dir + '/log_file/nohit10_rels', 'wb') as f:
+        pickle.dump(nohit10_rels, f)
 
     print('Hits tail @{0}: {1}'.format(10, np.mean(hits_left[9])))
     print('Hits head @{0}: {1}'.format(10, np.mean(hits_right[9])))
