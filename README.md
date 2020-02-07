@@ -1,5 +1,8 @@
 # KG-Completion
 
+# Preprocessing (make KG)
+python preprocessing.py
+
 # Training
 cuda_visible_devices="devices" python main.py
 
