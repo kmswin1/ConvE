@@ -193,7 +193,7 @@ def make_kg_vocab(*data):
     return ent_list, rel_list, ent_dict, rel_dict
 
 def write_str2id(kg, path):
-    with open(path, 'w') as f:
+    with open(path, 'wb') as f:
         for i, meta in enumerate(kg):
             str2id = {}
             str2id[meta] = i
@@ -201,7 +201,7 @@ def write_str2id(kg, path):
         pickle.dump(str2id, f)
 
 def write_id2str(kg, path):
-    with open(path, 'w') as f:
+    with open(path, 'wb') as f:
         for i, meta in enumerate(kg):
             id2str = {}
             id2str[i] = meta
