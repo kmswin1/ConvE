@@ -131,7 +131,7 @@ def ranking_and_hits(model, args, evalloader, n_ent, kg_vocab, epoch):
                         nohit10_rels[kg_vocab.rel_list[rel[i].item()]] += 1
                     nohit10_cnt += 1
 
-    with open(dir + '/log_file/result.txt') as f:
+    with open(dir + '/log_file/result.txt', 'w') as f:
         f.write("hit1 : " + str(hit1_cnt) + "\n")
         f.write("nohit1 : " + str(nohit1_cnt) + "\n")
         f.write("hit10 : " + str(hit10_cnt) + "\n")
