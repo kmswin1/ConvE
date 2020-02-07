@@ -137,6 +137,36 @@ def write_evaluation_graph(cases, graph, path):
 
             f.write(json.dumps(data_point)  + '\n')
 
+def write_training_graph2idx(cases, graph, ent_str2idx, rel_str2idx, path):
+    with open(path, 'w') as f:
+        n = len(cases)
+        n1 = 0
+        n2 = 0
+        for i, (e1, rel, e2) in enumerate(cases):
+            # (Mike, fatherOf) -> John
+            # (John, fatherOf, Tom)
+            rel_reverse = rel+'_reverse'
+            entities1 = "@@".join(list(graph[(e1, rel)]))
+            entities2 = "@@".join(list(graph[(e2, rel_reverse)]))
+
+            n1 += len(entities1.split('@@'))
+            n2 += len(entities2.split('@@'))
+
+            ents1 = []
+            for meta in entities1.split('@@'):
+                ents1.append(ent_str2idx[meta])
+
+
+            data_point = {}
+            data_point['e1'] = ent_str2idx[e1]
+            data_point['e2'] = 'None'
+            data_point['rel'] = rel_str2idx[rel]
+            data_point['rel_eval'] = 'None'
+            data_point['e2_e1toe2'] =  ents1
+            data_point['e1_e2toe1'] = "None"
+
+            f.write(json.dumps(data_point)  + '\n')
+
 def write_evaluation_graph2idx(cases, graph, ent_str2idx, rel_str2idx, path):
     with open(path, 'w') as f:
         n = len(cases)
@@ -240,7 +270,7 @@ def main():
     write_str2id(rel_list, 'data/rel_str2id')
     write_id2str(rel_list, 'data/rel_id2str')
     write_evaluation_graph2idx(test_cases['test.json'], label_graph, ent_dict, rel_dict, 'data/test_ranking.json')
-    write_train_set('data/train.json', ent_dict, rel_dict)
+    write_eavaluation_graph2idx('data/train.json', ent_dict, rel_dict)
     print (time.time() - start)
 
 if __name__ == '__main__':
