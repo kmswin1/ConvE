@@ -7,6 +7,7 @@ import numpy as np
 import sys
 import time
 from itertools import count
+import pickle
 import glob
 rdm = np.random.RandomState(234234)
 
@@ -194,33 +195,31 @@ def make_kg_vocab(*data):
 def write_str2id(kg, path):
     with open(path, 'w') as f:
         for i, meta in enumerate(kg):
-            data_point = {}
-            data_point[meta] = i
+            str2id = {}
+            str2id[meta] = i
 
-            f.write(json.dumps(data_point) + '\n')
+        pickle.dump(str2id, f)
 
 def write_id2str(kg, path):
     with open(path, 'w') as f:
         for i, meta in enumerate(kg):
-            data_point = {}
-            data_point[i] = meta
+            id2str = {}
+            id2str[i] = meta
 
-            f.write(json.dumps(data_point) + '\n')
+    pickle.dump(id2str, f)
 
 def write_train_set(data, ent_str2id, rel_str2id):
-    with open(data, 'r') as f:
-        for line in f:
-            line = json.loads(line)
-            e1 = line['src']
-            e2 = line['dst']
-            rel = line['dstProperty']
-            rel_rev = line['dstProperty'] + '_reverse'
+    with open('data/train_set.txt', 'w') as ff:
+        with open(data, 'r') as f:
+            for line in f:
+                line = json.loads(line)
+                e1 = line['src']
+                e2 = line['dst']
+                rel = line['dstProperty']
+                rel_rev = line['dstProperty'] + '_reverse'
 
-            with open('data/train_set.txt', 'a') as ff:
                 ff.write(str(ent_str2id[e1]) + " " + str(rel_str2id[rel]) + " " + str(ent_str2id[e2]) + "\n")
                 ff.write(str(ent_str2id[e2]) + " " + str(rel_str2id[rel_rev]) + " " + str(ent_str2id[e1]) + "\n")
-
-
 
 
 def main():
