@@ -10,6 +10,14 @@ def ranking_and_hits(model, args, evalloader, n_ent, kg_vocab, epoch):
     ranks = []
     ranks_left = []
     ranks_right = []
+    hit1_cnt = 0
+    nohit1_cnt = 0
+    hit10_cnt = 0
+    nohit10_cnt = 0
+    hit1_rels = {}
+    nohit1_rels = {}
+    hit10_rels = {}
+    nohit10_rels = {}
 
     for i in range(10):
         hits_left.append([])
@@ -80,30 +88,54 @@ def ranking_and_hits(model, args, evalloader, n_ent, kg_vocab, epoch):
             #         hits[hits_level].append(0.0)
             #         hits_right[hits_level].append(0.0)
             if rank1 == 1:
-                with open(dir + '/log_file/hit.txt', 'a') as f:
+                with open(dir + '/log_file/hit1.txt', 'a') as f:
                     f.write(kg_vocab.ent_list[head[i].item()]+"\n")
                     f.write(kg_vocab.rel_list[rel[i].item()]+"\n")
                     f.write(kg_vocab.ent_list[argsort1[i][0].item()]+"\n")
-                    f.close()
-            elif rank1 > 1:
-                with open(dir + '/log_file/nohit.txt', 'a') as f:
-                    f.write(kg_vocab.ent_list[head[i].item()]+"\n")
-                    f.write(kg_vocab.rel_list[rel[i].item()]+"\n")
-                    f.write(kg_vocab.ent_list[argsort1[i][0].item()]+"\n")
-                    f.close()
-            if rank2 == 1:
-                with open(dir + '/log_file/hit.txt', 'a') as f:
-                    f.write(kg_vocab.ent_list[head2[i].item()]+"\n")
-                    f.write(kg_vocab.rel_list[rel_rev[i].item()]+"\n")
-                    f.write(kg_vocab.ent_list[argsort2[i][0].item()]+"\n")
-                    f.close()
-            elif rank2 > 1:
-                with open(dir + '/log_file/nohit.txt', 'a') as f:
-                    f.write(kg_vocab.ent_list[head2[i].item()]+"\n")
-                    f.write(kg_vocab.rel_list[rel_rev[i].item()]+"\n")
-                    f.write(kg_vocab.ent_list[argsort2[i][0].item()]+"\n")
-                    f.close()
+                    if kg_vocab.rel_list[rel[i].item()] not in hit1_rels.keys():
+                        hit1_rels[kg_vocab.rel_list[rel[i].item()]] = 1
+                    else:
+                        hit1_rels[kg_vocab.rel_list[rel[i].item()]] += 1
+                    hit1_cnt += 1
 
+            elif rank1 > 1:
+                with open(dir + '/log_file/nohit1.txt', 'a') as f:
+                    f.write(kg_vocab.ent_list[head[i].item()]+"\n")
+                    f.write(kg_vocab.rel_list[rel[i].item()]+"\n")
+                    f.write(kg_vocab.ent_list[argsort1[i][0].item()]+"\n")
+                    if kg_vocab.rel_list[rel[i].item()] not in nohit1_rels.keys():
+                        nohit1_rels[kg_vocab.rel_list[rel[i].item()]] = 1
+                    else:
+                        nohit1_rels[kg_vocab.rel_list[rel[i].item()]] += 1
+                    nohit1_cnt += 1
+
+            if rank1 <= 10:
+                with open(dir + '/log_file/hit10.txt', 'a') as f:
+                    f.write(kg_vocab.ent_list[head[i].item()]+"\n")
+                    f.write(kg_vocab.rel_list[rel[i].item()]+"\n")
+                    f.write(kg_vocab.ent_list[argsort1[i][0].item()]+"\n")
+                    if kg_vocab.rel_list[rel[i].item()] not in hit10_rels.keys():
+                        hit10_rels[kg_vocab.rel_list[rel[i].item()]] = 1
+                    else:
+                        hit10_rels[kg_vocab.rel_list[rel[i].item()]] += 1
+                    hit10_cnt += 1
+
+            elif rank1 > 10:
+                with open(dir + '/log_file/nohit10.txt', 'a') as f:
+                    f.write(kg_vocab.ent_list[head[i].item()]+"\n")
+                    f.write(kg_vocab.rel_list[rel[i].item()]+"\n")
+                    f.write(kg_vocab.ent_list[argsort1[i][0].item()]+"\n")
+                    if kg_vocab.rel_list[rel[i].item()] not in nohit10_rels.keys():
+                        nohit10_rels[kg_vocab.rel_list[rel[i].item()]] = 1
+                    else:
+                        nohit10_rels[kg_vocab.rel_list[rel[i].item()]] += 1
+                    nohit10_cnt += 1
+
+    with open(dir + '/log_file/result.txt') as f:
+        f.write("hit1 : " + str(hit1_cnt) + "\n")
+        f.write("nohit1 : " + str(nohit1_cnt) + "\n")
+        f.write("hit10 : " + str(hit10_cnt) + "\n")
+        f.write("nohit10 : " + str(nohit10_cnt) + "\n")
 
     print('Hits tail @{0}: {1}'.format(10, np.mean(hits_left[9])))
     print('Hits head @{0}: {1}'.format(10, np.mean(hits_right[9])))
