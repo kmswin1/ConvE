@@ -162,7 +162,7 @@ def write_training_graph2idx(cases, graph, ent_str2idx, rel_str2idx, path):
             data_point['e2'] = 'None'
             data_point['rel'] = int(rel_str2idx[rel])
             data_point['rel_eval'] = 'None'
-            data_point['e2_e1toe2'] =  int(ents1)
+            data_point['e2_e1toe2'] =  ents1
             data_point['e1_e2toe1'] = "None"
 
             f.write(json.dumps(data_point)  + '\n')
