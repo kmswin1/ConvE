@@ -17,7 +17,7 @@ def main(args, model_path):
     print ("start training ...")
 
     start = time.time()
-    kg_vocab = make_kg_vocab(dir+'/e1rel_to_e2_full.json')
+
     print ("making vocab is done "+str(time.time()-start))
     n_ent, n_rel = graph_size(kg_vocab)
 
