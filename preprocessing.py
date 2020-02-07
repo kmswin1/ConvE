@@ -154,15 +154,15 @@ def write_training_graph2idx(cases, graph, ent_str2idx, rel_str2idx, path):
 
             ents1 = []
             for meta in entities1.split('@@'):
-                ents1.append(ent_str2idx[meta])
+                ents1.append(int(ent_str2idx[meta]))
 
 
             data_point = {}
-            data_point['e1'] = ent_str2idx[e1]
+            data_point['e1'] = int(ent_str2idx[e1])
             data_point['e2'] = 'None'
-            data_point['rel'] = rel_str2idx[rel]
+            data_point['rel'] = int(rel_str2idx[rel])
             data_point['rel_eval'] = 'None'
-            data_point['e2_e1toe2'] =  ents1
+            data_point['e2_e1toe2'] =  int(ents1)
             data_point['e1_e2toe1'] = "None"
 
             f.write(json.dumps(data_point)  + '\n')
@@ -185,16 +185,16 @@ def write_evaluation_graph2idx(cases, graph, ent_str2idx, rel_str2idx, path):
             ents1 = []
             ents2 = []
             for meta in entities1.split('@@'):
-                ents1.append(ent_str2idx[meta])
+                ents1.append(int(ent_str2idx[meta]))
 
             for meta in entities2.split('@@'):
-                ents2.append(ent_str2idx[meta])
+                ents2.append(int(ent_str2idx[meta]))
 
             data_point = {}
-            data_point['e1'] = ent_str2idx[e1]
-            data_point['e2'] = ent_str2idx[e2]
-            data_point['rel'] = rel_str2idx[rel]
-            data_point['rel_eval'] = rel_str2idx[rel_reverse]
+            data_point['e1'] = int(ent_str2idx[e1])
+            data_point['e2'] = int(ent_str2idx[e2])
+            data_point['rel'] = int(rel_str2idx[rel])
+            data_point['rel_eval'] = int(rel_str2idx[rel_reverse])
             data_point['e2_e1toe2'] = ents1
             data_point['e1_e2toe1'] = ents2
 
