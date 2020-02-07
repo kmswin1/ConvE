@@ -186,10 +186,10 @@ def make_kg_vocab(*data):
                 rel_set.add(rel_rev)
     ent_list = sorted(list(ent_set))
     rel_list = sorted(list(rel_set))
-    #ent_id = dict(zip(ent_list, count()))
-    #rel_id = dict(zip(rel_list, count()))
+    ent_dict = dict(zip(ent_list, count()))
+    rel_dict = dict(zip(rel_list, count()))
 
-    return ent_list, rel_list
+    return ent_list, rel_list, ent_dict, rel_dict
 
 def write_str2id(kg, path):
     with open(path, 'w') as f:
@@ -235,12 +235,12 @@ def main():
 
     start = time.time()
     label_graph, train_graph, test_cases = make_knowledge_graph()
-    ent_dict, rel_dict = make_kg_vocab('data/train.json', 'data/test.json')
-    write_str2id(ent_dict, 'data/ent_str2id.json')
-    write_id2str(ent_dict, 'data/ent_id2str.json')
-    write_str2id(rel_dict, 'data/rel_str2id.json')
-    write_id2str(rel_dict, 'data/rel_id2str.json')
-    write_evaluation_graph2idx(test_cases['test.json'], label_graph, ent_str2id, rel_str2id, 'data/test_ranking.json')
+    ent_list, rel_list, ent_dict, rel_dict = make_kg_vocab('data/train.json', 'data/test.json')
+    write_str2id(ent_list, 'data/ent_str2id.json')
+    write_id2str(ent_list, 'data/ent_id2str.json')
+    write_str2id(rel_list, 'data/rel_str2id.json')
+    write_id2str(rel_list, 'data/rel_id2str.json')
+    write_evaluation_graph2idx(test_cases['test.json'], label_graph, ent_dict, rel_dict, 'data/test_ranking.json')
     write_train_set('data/train.json')
     print (time.time() - start)
 
