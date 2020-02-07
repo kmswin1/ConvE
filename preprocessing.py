@@ -216,9 +216,9 @@ def write_train_set(data, ent_str2id, rel_str2id):
             rel = line['dstProperty']
             rel_rev = line['dstProperty'] + '_reverse'
 
-            with open('data/train_set.txt', 'w') as ff:
-                ff.write(str(ent_str2id[e1]) + " " + str(rel_str2id[rel]) + " " + str(ent_str2id[e2]))
-                ff.write(str(ent_str2id[e2]) + " " + str(rel_str2id[rel_rev]) + " " + str(ent_str2id[e1]))
+            with open('data/train_set.txt', 'a') as ff:
+                ff.write(str(ent_str2id[e1]) + " " + str(rel_str2id[rel]) + " " + str(ent_str2id[e2]) + "\n")
+                ff.write(str(ent_str2id[e2]) + " " + str(rel_str2id[rel_rev]) + " " + str(ent_str2id[e1]) + "\n")
 
 
 
