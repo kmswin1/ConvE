@@ -141,8 +141,11 @@ def main():
     start = time.time()
     all_cases = test_cases['train.json'] + test_cases['test.json']
     write_training_graph(test_cases['train.json'], train_graph['train.json'], 'data/e1rel_to_e2_train.json')
+    print ("write train set is done")
     write_evaluation_graph(test_cases['test.json'], label_graph, 'data/e1rel_to_e2_ranking_test.json')
+    print ("write test set is done")
     write_training_graph(all_cases, label_graph, 'data/e1rel_to_e2_full.json')
+    print ("write vocab set is done")
     print (time.time() - start)
 
 if __name__ == '__main__':
