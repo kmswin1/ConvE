@@ -90,7 +90,7 @@ class ConvE(torch.nn.Module):
         x = self.hidden_drop(x)
         x = self.bn2(x)
         x = F.relu(x)
-        x = torch.mm(x, self.emb_e(e2).weight.transpose(1,0))
+        x = torch.mm(x, self.emb_e(e2).transpose(1,0))
         x = self.softmax(x)
 
         return self.loss(x)
