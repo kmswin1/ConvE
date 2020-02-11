@@ -65,6 +65,7 @@ def main(args, model_path):
             batch_size = head.size(0)
             label = torch.zeros(batch_size, 6)
             label[torch.arange(batch_size), 0] = 1
+            label = label.long()
             label = label.cuda()
             print ("e2_multi " + str(time.time()-start) + "\n")
             start = time.time()
