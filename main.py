@@ -36,7 +36,7 @@ def main(args, model_path):
     print(sum(params))
     opt = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.l2)
     start = time.time()
-    dataset = KG_DataSet(dir+'/train_set.json', args, n_ent)
+    dataset = KG_DataSet(dir+'/train_set.txt', args, n_ent)
     print ("making train dataset is done " + str(time.time()-start))
     start = time.time()
     evalset = KG_EvalSet(dir+'/test_ranking.json', args, n_ent)
