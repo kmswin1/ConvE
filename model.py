@@ -53,6 +53,7 @@ class ConvE(torch.nn.Module):
         self.hidden_drop = torch.nn.Dropout(args.hidden_drop)
         self.feature_map_drop = torch.nn.Dropout2d(args.feat_drop)
         self.loss = torch.nn.NLLLoss()
+        self.emb_dim = args.embedding_dim
         self.emb_dim1 = args.embedding_shape1
         self.emb_dim2 = args.embedding_dim // self.emb_dim1
         self.hidden_size = ((2*self.emb_dim1)-2)*(self.emb_dim2-2)*32
@@ -90,7 +91,7 @@ class ConvE(torch.nn.Module):
         x = self.hidden_drop(x)
         x = self.bn2(x)
         x = F.relu(x)
-        x = x.view(-1, 1, self.emb_dim1)
+        x = x.view(-1, 1, self.emb_dim)
         y = self.emb_e(e2)
 
         x = self.softmax()
