@@ -27,7 +27,8 @@ def main(args, model_path):
     model.init()
     if args.multi_gpu:
         model = torch.nn.DataParallel(model)
-    criterion = torch.nn.CrossEntropyLoss()
+    cross_entropy = torch.nn.CrossEntropyLoss()
+    bce = torch.nn.BCELoss()
     model.cuda()
     print ('cuda : ' + str(torch.cuda.is_available()) + ' count : ' + str(torch.cuda.device_count()))
 
@@ -69,7 +70,7 @@ def main(args, model_path):
             print ("e2_multi " + str(time.time()-start) + "\n")
             start = time.time()
             pred = model.forward(head, rel, tail, neg_sample)
-            loss = criterion(pred, label)
+            loss = cross_entropy(pred, label)
             loss.backward()
             opt.step()
             batch_loss = torch.sum(loss)
@@ -104,8 +105,8 @@ def main(args, model_path):
                 e2_multi2 = tail2.cuda()
                 pred1 = model.test(head, rel)
                 pred2 = model.test(head2, rel_rev)
-                loss1 = criterion(pred1, e2_multi1)
-                loss2 = criterion(pred2, e2_multi2)
+                loss1 = bce(pred1, e2_multi1)
+                loss2 = bce(pred2, e2_multi2)
                 sum_loss = (torch.sum(loss1).item() + torch.sum(loss2).item())/2
                 sum_loss /= batch_size
                 valid_loss += sum_loss
