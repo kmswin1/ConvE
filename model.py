@@ -98,7 +98,7 @@ class ConvE(torch.nn.Module):
         z = self.emb_e(neg_sample)
         t = torch.cat([y,z], 1)
         u = torch.bmm(t,x)
-        u = u.view(-1, 6)
+        u = u.view(-1, 21)
 
         return u
 
