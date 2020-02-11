@@ -57,14 +57,15 @@ def main(args, model_path):
         for i, data in enumerate(dataloader):
             opt.zero_grad()
             start = time.time()
-            head, rel, tail = data
+            head, rel, tail, neg_sample = data
             head = head.cuda()
             rel = rel.cuda()
-            sample = tail.cuda()
+            tail = tail.cuda()
+            neg_sample = neg_sample.cuda()
             batch_size = head.size(0)
             print ("e2_multi " + str(time.time()-start) + "\n")
             start = time.time()
-            loss = model.forward(head, rel, sample)
+            loss = model.forward(head, rel, tail, neg_sample)
             loss.backward()
             opt.step()
             batch_loss = torch.sum(loss)

@@ -73,7 +73,7 @@ class ConvE(torch.nn.Module):
         xavier_normal_(self.emb_e.weight.data)
         xavier_normal_(self.emb_rel.weight.data)
 
-    def forward(self, e1, rel, e2):
+    def forward(self, e1, rel, e2, neg_sample):
         e1_embedded= self.emb_e(e1).view(-1, 1, self.emb_dim1, self.emb_dim2)
         rel_embedded = self.emb_rel(rel).view(-1, 1, self.emb_dim1, self.emb_dim2)
 
@@ -90,8 +90,10 @@ class ConvE(torch.nn.Module):
         x = self.hidden_drop(x)
         x = self.bn2(x)
         x = F.relu(x)
-        x = torch.mm(x, self.emb_e.weight.transpose(1,0))
-        x = self.softmax(x[e2])
+        x = x.view(-1, 1, self.emb_dim1)
+        y = self.emb_e(e2)
+
+        x = self.softmax()
 
         return self.loss(x)
 
