@@ -93,6 +93,7 @@ class ConvE(torch.nn.Module):
         x = F.relu(x)
         x = x.view(-1, 1, self.emb_dim)
         y = self.emb_e(e2)
+        z = self.emb_e(neg_sample)
 
         x = self.softmax()
 
