@@ -98,10 +98,11 @@ class ConvE(torch.nn.Module):
         z = self.emb_e(neg_sample)
         t = torch.cat([y,z], 1)
         u = torch.bmm(t,x)
+        u = u.view(-1, 6)
+        v = self.softmax(u)
+        r = torch.LongTensor([1,0,0,0,0,0])
 
-        x = self.softmax()
-
-        return self.loss(x)
+        return self.loss(v, r)
 
 
     '''def forward(self, e1, rel, e2, batch_size):
