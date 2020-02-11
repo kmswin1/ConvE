@@ -39,8 +39,8 @@ def main(args, model_path):
     dataset = KG_DataSet(dir+'/train_set.txt', args, n_ent)
     print ("making train dataset is done " + str(time.time()-start))
     start = time.time()
-    evalset = KG_EvalSet(dir+'/test_ranking.json', args, n_ent)
-    print ("making evalset is done " + str(time.time()-start))
+    #evalset = KG_EvalSet(dir+'/test_ranking.json', args, n_ent)
+    #print ("making evalset is done " + str(time.time()-start))
     prev_loss = 1000
     patience = 0
     early_stop = False
