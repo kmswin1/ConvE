@@ -12,6 +12,7 @@ class KG_DataSet(Dataset):
         self.tail = []
         self.smoothed_value = 1 - args.label_smoothing
         self.epsilon = 1.0/self.n_ent
+        self.sample_num = args.sample_num
         with open(file_path) as f:
             for line in f:
                 self.len += 1
@@ -34,7 +35,7 @@ class KG_DataSet(Dataset):
         #logits[self.tail[idx]] = self.smoothed_value
         perm = torch.randperm(self.n_ent)
 
-        sample = perm[perm != self.tail[idx]][:20]
+        sample = perm[perm != self.tail[idx]][:self.sample_num]
         return self.head[idx], self.rel[idx], self.tail[idx], sample
 
 class KG_EvalSet(Dataset):

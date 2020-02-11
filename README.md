@@ -10,6 +10,7 @@ cuda_visible_devices="devices" python main.py
 cuda_visible_devices="devices" python predict_main.py --model-name 'name'
 
 # Args
+ parser = argparse.ArgumentParser(description='KG completion for cruise contents data')
     parser.add_argument('--batch-size', type=int, default=128, help='input batch size for training (default: 128)')
     parser.add_argument('--num-worker', type=int, default=16, help='num_process of dataloader (default: 16)')
     parser.add_argument('--test-batch-size', type=int, default=128, help='input batch size for testing/validation (default: 128)')
@@ -28,3 +29,4 @@ cuda_visible_devices="devices" python predict_main.py --model-name 'name'
     parser.add_argument('--use-bias', action='store_true', help='Use a bias in the convolutional layer. Default: True')
     parser.add_argument('--label-smoothing', type=float, default=0.1, help='Label smoothing value to use. Default: 0.1')
     parser.add_argument('--multi-gpu', type=bool, default=False, help='choose the training using by multigpu')
+    parser.add_argument('--sample-num', type=int, default=20, help='choose the number of negative sampling')

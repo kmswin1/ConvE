@@ -60,6 +60,7 @@ class ConvE(torch.nn.Module):
         self.hidden_size = ((2*self.emb_dim1)-2)*(self.emb_dim2-2)*32
         self.similarity = torch.nn.CosineSimilarity()
         self.softmax = torch.nn.Softmax(dim=1)
+        self.sample_n = args.sample_num
 
         self.conv1 = torch.nn.Conv2d(1, 32, (3, 3), 1, 0, bias=args.use_bias)
         self.bn0 = torch.nn.BatchNorm2d(1)
@@ -98,7 +99,7 @@ class ConvE(torch.nn.Module):
         z = self.emb_e(neg_sample)
         t = torch.cat([y,z], 1)
         u = torch.bmm(t,x)
-        u = u.view(-1, 21)
+        u = u.view(-1, self.sample_n+1)
 
         return u
 

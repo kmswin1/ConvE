@@ -154,6 +154,7 @@ if __name__ == '__main__':
     parser.add_argument('--use-bias', action='store_true', help='Use a bias in the convolutional layer. Default: True')
     parser.add_argument('--label-smoothing', type=float, default=0.1, help='Label smoothing value to use. Default: 0.1')
     parser.add_argument('--multi-gpu', type=bool, default=False, help='choose the training using by multigpu')
+    parser.add_argument('--sample-num', type=int, default=20, help='choose the number of negative sampling')
 
     args = parser.parse_args()
 
