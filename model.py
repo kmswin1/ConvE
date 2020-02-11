@@ -102,6 +102,7 @@ class ConvE(torch.nn.Module):
         v = self.softmax(u)
         r = torch.zeros(128,6)
         r[torch.arange(128), 0] = 1
+        r.cuda()
 
         return self.loss(v, r)
 
