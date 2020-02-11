@@ -34,7 +34,7 @@ class KG_DataSet(Dataset):
         #logits[self.tail[idx]] = self.smoothed_value
         perm = torch.randperm(self.n_ent)
 
-        sample = perm[perm != self.tail[idx]][:5]
+        sample = perm[perm != self.tail[idx]][:20]
         return self.head[idx], self.rel[idx], self.tail[idx], sample
 
 class KG_EvalSet(Dataset):
