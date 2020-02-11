@@ -27,7 +27,7 @@ def main(args, model_path):
     model.init()
     if args.multi_gpu:
         model = torch.nn.DataParallel(model)
-    criterion = torch.nn.BCELoss().cuda()
+    criterion = torch.nn.NLLLoss()
     model.cuda()
     print ('cuda : ' + str(torch.cuda.is_available()) + ' count : ' + str(torch.cuda.device_count()))
 
@@ -58,16 +58,13 @@ def main(args, model_path):
             opt.zero_grad()
             start = time.time()
             head, rel, tail = data
-            #head = torch.LongTensor(head)
-            #rel = torch.LongTensor(rel)
             head = head.cuda()
             rel = rel.cuda()
+            sample = tail.cuda()
             batch_size = head.size(0)
-            e2_multi = tail.cuda()
             print ("e2_multi " + str(time.time()-start) + "\n")
             start = time.time()
-            pred = model.forward(head, rel)
-            loss = criterion(pred, e2_multi)
+            loss = model.forward(head, rel, sample)
             loss.backward()
             opt.step()
             batch_loss = torch.sum(loss)
