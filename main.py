@@ -63,9 +63,12 @@ def main(args, model_path):
             tail = tail.cuda()
             neg_sample = neg_sample.cuda()
             batch_size = head.size(0)
+            label = torch.zeros(batch_size, 6)
+            label[torch.arange(batch_size), 0] = 1
+            label = label.cuda()
             print ("e2_multi " + str(time.time()-start) + "\n")
             start = time.time()
-            loss = model.forward(head, rel, tail, neg_sample)
+            loss = model.forward(head, rel, tail, neg_sample, label)
             loss.backward()
             opt.step()
             batch_loss = torch.sum(loss)
