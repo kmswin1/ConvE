@@ -51,7 +51,7 @@ def main(args, model_path):
         model.train()
         tot = 0.0
         dataloader = DataLoader(dataset=dataset, num_workers=args.num_worker, batch_size=args.batch_size, shuffle=True)
-        evalloader = DataLoader(dataset=evalset, num_workers=args.num_worker, batch_size=args.batch_size, shuffle=True)
+        #evalloader = DataLoader(dataset=evalset, num_workers=args.num_worker, batch_size=args.batch_size, shuffle=True)
         n_train = dataset.__len__()
 
         for i, data in enumerate(dataloader):
@@ -81,7 +81,7 @@ def main(args, model_path):
         print ('epoch {} loss: {}'.format(epoch+1, epoch_loss))
         # TODO: calculate valid loss and develop early stopping
         model.eval()
-        with torch.no_grad():
+        '''with torch.no_grad():
             valid_loss = 0.0
             for i,data in enumerate(evalloader):
                 head, rel, tail, head2, rel_rev, tail2 = data
@@ -116,16 +116,16 @@ def main(args, model_path):
         prev_loss = valid_loss
         if early_stop:
             print("{0} epochs Early stopping ...".format(epoch))
-            break
+            break'''
         print ('saving to {0}'.format(model_path))
         torch.save(model.state_dict(), model_path)
 
-    model.eval()
+    '''model.eval()
     with torch.no_grad():
         start = time.time()
         ranking_and_hits(model, args, evalloader, n_ent, epoch)
         end = time.time()
-        print ('eval time used: {} minutes'.format((end - start)/60))
+        print ('eval time used: {} minutes'.format((end - start)/60))'''
 
 
 if __name__ == '__main__':
