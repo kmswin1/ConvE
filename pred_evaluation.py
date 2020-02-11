@@ -30,8 +30,8 @@ def ranking_and_hits(model, args, evalloader, n_ent, ent_id2str, rel_id2str, epo
 
         e2_multi1 = tail.cuda()
         e2_multi2 = tail2.cuda()
-        pred1 = model.forward(head, rel)
-        pred2 = model.forward(head2, rel_rev)
+        pred1 = model.test(head, rel)
+        pred2 = model.test(head2, rel_rev)
 
         for i in range(batch_size):
             # save the prediction that is relevant
