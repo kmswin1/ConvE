@@ -40,8 +40,8 @@ def main(args, model_path):
     dataset = KG_DataSet(dir+'/train_set.txt', args, n_ent)
     print ("making train dataset is done " + str(time.time()-start))
     start = time.time()
-    evalset = KG_EvalSet(dir+'/test_ranking.json', args, n_ent)
-    print ("making evalset is done " + str(time.time()-start))
+    #evalset = KG_EvalSet(dir+'/test_ranking.json', args, n_ent)
+    #print ("making evalset is done " + str(time.time()-start))
     prev_loss = 1000
     patience = 0
     early_stop = False
@@ -52,7 +52,7 @@ def main(args, model_path):
         model.train()
         tot = 0.0
         dataloader = DataLoader(dataset=dataset, num_workers=args.num_worker, batch_size=args.batch_size, shuffle=True)
-        evalloader = DataLoader(dataset=evalset, num_workers=args.num_worker, batch_size=args.batch_size, shuffle=True)
+        #evalloader = DataLoader(dataset=evalset, num_workers=args.num_worker, batch_size=args.batch_size, shuffle=True)
         n_train = dataset.__len__()
 
         for i, data in enumerate(dataloader):
@@ -86,7 +86,7 @@ def main(args, model_path):
         print ('{} epochs'.format(epoch))
         print ('epoch {} loss: {}'.format(epoch+1, epoch_loss))
         # TODO: calculate valid loss and develop early stopping
-        model.eval()
+        '''model.eval()
         with torch.no_grad():
             valid_loss = 0.0
             for i,data in enumerate(evalloader):
@@ -122,7 +122,7 @@ def main(args, model_path):
         prev_loss = valid_loss
         if early_stop:
             print("{0} epochs Early stopping ...".format(epoch))
-            break
+            break'''
         print ('saving to {0}'.format(model_path))
         torch.save(model.state_dict(), model_path)
 
