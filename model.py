@@ -92,15 +92,15 @@ class ConvE(torch.nn.Module):
         x = self.hidden_drop(x)
         x = self.bn2(x)
         x = F.relu(x)
-        x = torch.mm(x, self.emb_e.weight.transpose(1,0))
-        x += self.b.expand_as(x)
+        x = x.view(-1, self.emb_dim, 1)
         y = self.emb_e(e2)
         y = y.view(-1,1,self.emb_dim)
         z = self.emb_e(neg_sample)
         t = torch.cat([y,z], 1)
-        t = t.view(-1, 6)
+        u = torch.bmm(t,x)
+        u = u.view(-1, 6)
 
-        return t
+        return u
 
 
     '''def forward(self, e1, rel, e2, batch_size):
