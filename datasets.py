@@ -30,7 +30,9 @@ class KG_DataSet(Dataset):
     def __getitem__(self, idx):
         #logits = torch.full((self.n_ent, ), self.epsilon)
         #logits[self.tail[idx]] = self.smoothed_value
-        return self.head[idx], self.rel[idx], self.tail[idx]
+        neg_sample = torch.randperm(self.n_ent)
+        sample = neg_sample[neg_sample != self.tail][:5]
+        return self.head[idx], self.rel[idx], sample
 
 class KG_EvalSet(Dataset):
     def __init__(self, file_path, args, n_ent):
