@@ -100,6 +100,8 @@ class ConvE(torch.nn.Module):
         u = torch.bmm(t,x)
         u = u.view(-1, 6)
         v = self.softmax(u)
+        print (v)
+        print (v.size())
 
         return self.loss(v, label)
 
