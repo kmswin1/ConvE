@@ -80,8 +80,8 @@ def main(args, model_path):
         print ('{} epochs'.format(epoch))
         print ('epoch {} loss: {}'.format(epoch+1, epoch_loss))
         # TODO: calculate valid loss and develop early stopping
-        model.eval()
-        '''with torch.no_grad():
+        '''model.eval()
+        with torch.no_grad():
             valid_loss = 0.0
             for i,data in enumerate(evalloader):
                 head, rel, tail, head2, rel_rev, tail2 = data
