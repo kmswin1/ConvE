@@ -102,6 +102,28 @@ class ConvE(torch.nn.Module):
 
         return u
 
+    def test(self, e1, rel):
+        e1_embedded= self.emb_e(e1).view(-1, 1, self.emb_dim1, self.emb_dim2)
+        rel_embedded = self.emb_rel(rel).view(-1, 1, self.emb_dim1, self.emb_dim2)
+
+        stacked_inputs = torch.cat([e1_embedded, rel_embedded], 2)
+
+        stacked_inputs = self.bn0(stacked_inputs)
+        x= self.inp_drop(stacked_inputs)
+        x= self.conv1(x)
+        x= self.bn1(x)
+        x= F.relu(x)
+        x = self.feature_map_drop(x)
+        x = x.view(x.shape[0], -1)
+        x = self.fc(x)
+        x = self.hidden_drop(x)
+        x = self.bn2(x)
+        x = F.relu(x)
+        x = torch.mm(x, self.emb_e.weight.transpose(1,0))
+        x += self.b.expand_as(x)
+        prediction = torch.sigmoid(x)
+
+        return prediction
 
     '''def forward(self, e1, rel, e2, batch_size):
         # An entities[:batch_size] are positive samples
