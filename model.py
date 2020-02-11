@@ -57,6 +57,7 @@ class ConvE(torch.nn.Module):
         self.emb_dim2 = args.embedding_dim // self.emb_dim1
         self.hidden_size = ((2*self.emb_dim1)-2)*(self.emb_dim2-2)*32
         self.similarity = torch.nn.CosineSimilarity()
+        self.softmax = torch.nn.Softmax(dim=1)
 
         self.conv1 = torch.nn.Conv2d(1, 32, (3, 3), 1, 0, bias=args.use_bias)
         self.bn0 = torch.nn.BatchNorm2d(1)
@@ -72,7 +73,30 @@ class ConvE(torch.nn.Module):
         xavier_normal_(self.emb_e.weight.data)
         xavier_normal_(self.emb_rel.weight.data)
 
-    def forward(self, e1, rel, e2, batch_size):
+    def forward(self, e1, rel, e2):
+        e1_embedded= self.emb_e(e1).view(-1, 1, self.emb_dim1, self.emb_dim2)
+        rel_embedded = self.emb_rel(rel).view(-1, 1, self.emb_dim1, self.emb_dim2)
+
+        stacked_inputs = torch.cat([e1_embedded, rel_embedded], 2)
+
+        stacked_inputs = self.bn0(stacked_inputs)
+        x= self.inp_drop(stacked_inputs)
+        x= self.conv1(x)
+        x= self.bn1(x)
+        x= F.relu(x)
+        x = self.feature_map_drop(x)
+        x = x.view(x.shape[0], -1)
+        x = self.fc(x)
+        x = self.hidden_drop(x)
+        x = self.bn2(x)
+        x = F.relu(x)
+        x = torch.mm(x, self.emb_e(e2).weight.transpose(1,0))
+        x = self.softmax(x)
+
+        self.emb_e(torch.cat([e1, e2], -1)).weight = x
+
+
+    '''def forward(self, e1, rel, e2, batch_size):
         # An entities[:batch_size] are positive samples
         # An entities[batch_size] are negative samples
         e1_embedded= self.emb_e(e1).view(-1, 1, self.emb_dim1, self.emb_dim2)
@@ -95,5 +119,5 @@ class ConvE(torch.nn.Module):
         loss = 1 - prediction[:batch_size]
         loss2 = torch.max(torch.zeros(batch_size), prediction[batch_size:] - 1)
 
-        return torch.mean(loss+loss2)
+        return torch.mean(loss+loss2)'''
 

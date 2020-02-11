@@ -22,15 +22,15 @@ class KG_DataSet(Dataset):
 
         self.head = torch.LongTensor(self.head)
         self.rel = torch.LongTensor(self.rel)
-        self.tail = [torch.LongTensor(vec) for vec in self.tail]
+        self.tail = torch.LongTensor(self.tail)
 
     def __len__(self):
         return self.len
 
     def __getitem__(self, idx):
-        logits = torch.full((self.n_ent, ), self.epsilon)
-        logits[self.tail[idx]] = self.smoothed_value
-        return self.head[idx], self.rel[idx], logits
+        #logits = torch.full((self.n_ent, ), self.epsilon)
+        #logits[self.tail[idx]] = self.smoothed_value
+        return self.head[idx], self.rel[idx], self.tail[idx]
 
 class KG_EvalSet(Dataset):
     def __init__(self, file_path, args, n_ent):
