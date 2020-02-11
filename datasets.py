@@ -18,9 +18,9 @@ class KG_DataSet(Dataset):
                 #line = json.loads(line)
                 line.strip("\n")
                 line = line.split(' ')
-                self.head.append(line[0])
-                self.rel.append(line[1])
-                self.tail.append(line[2])
+                self.head.append(int(line[0]))
+                self.rel.append(int(line[1]))
+                self.tail.append(int(line[2]))
 
         self.head = torch.LongTensor(self.head)
         self.rel = torch.LongTensor(self.rel)
