@@ -15,10 +15,12 @@ class KG_DataSet(Dataset):
         with open(file_path) as f:
             for line in f:
                 self.len += 1
-                line = json.loads(line)
-                self.head.append(line['e1'])
-                self.rel.append(line['rel'])
-                self.tail.append(line['e2_e1toe2'])
+                #line = json.loads(line)
+                line.strip("\n")
+                line = line.split(' ')
+                self.head.append(line[0])
+                self.rel.append(line[1])
+                self.tail.append(line[2])
 
         self.head = torch.LongTensor(self.head)
         self.rel = torch.LongTensor(self.rel)
