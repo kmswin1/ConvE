@@ -100,7 +100,8 @@ class ConvE(torch.nn.Module):
         u = torch.bmm(t,x)
         u = u.view(-1, 6)
         v = self.softmax(u)
-        r = torch.LongTensor([1,0,0,0,0,0])
+        r = torch.zeros(128,6)
+        r[torch.arange(128), 0] = 1
 
         return self.loss(v, r)
 
