@@ -11,7 +11,6 @@ class KG_DataSet(Dataset):
         self.rel = []
         self.smoothed_value = 1 - args.label_smoothing
         self.epsilon = 1.0/self.n_ent
-        self.sample_num = args.sample_num
         self.triple = {}
         with open(file_path) as f:
             for line in f:
