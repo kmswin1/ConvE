@@ -3,7 +3,8 @@ import torch
 import json
 
 class KG_DataSet(Dataset):
-    def __init__(self, file_path, args, n_ent):
+    def __init__(self, file_path, kg_vocab, args, n_ent):
+        self.kg_vocab = kg_vocab
         self.n_ent = n_ent
         self.args = args
         self.len = 0
