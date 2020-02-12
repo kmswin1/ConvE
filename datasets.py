@@ -42,6 +42,7 @@ class KG_EvalSet(Dataset):
         self.len = 0
         self.head = []
         self.rel = []
+        self.tail = []
         self.triple = {}
         with open(file_path) as f:
             for line in f:
@@ -51,6 +52,7 @@ class KG_EvalSet(Dataset):
                 line = line.split(' ')
                 self.head.append(int(line[0]))
                 self.rel.append(int(line[1]))
+                self.tail.append(int(line[2]))
                 if (line[0], line[1]) not in self.triple.keys():
                     self.triple[line[0], line[1]] = set()
 
@@ -64,4 +66,4 @@ class KG_EvalSet(Dataset):
         logits = torch.zeros(self.n_ent)
         logits[tail] = 1
 
-        return self.head[idx], self.rel[idx], logits
+        return self.head[idx], self.rel[idx], logits, self.tail[idx]

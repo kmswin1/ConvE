@@ -18,7 +18,7 @@ def ranking_and_hits(model, args, evalloader, n_ent, epoch):
 
     for i, data in enumerate(evalloader):
         #head, rel, tail, head2, rel_rev, tail2 = data
-        head, rel, tail = data
+        head, rel, tail, head2 = data
         head = torch.LongTensor(head)
         rel = torch.LongTensor(rel)
         #head2 = torch.LongTensor(head2)
@@ -26,7 +26,7 @@ def ranking_and_hits(model, args, evalloader, n_ent, epoch):
         head = head.cuda()
         rel = rel.cuda()
         head2 = head2.cuda()
-        rel_rev = rel_rev.cuda()
+        #rel_rev = rel_rev.cuda()
         batch_size = head.size(0)
 
         e2_multi1 = tail.cuda()
