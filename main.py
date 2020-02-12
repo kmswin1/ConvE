@@ -101,8 +101,8 @@ def main(args, model_path):
 
                 e2_multi1 = tail.cuda()
                 #e2_multi2 = tail2.cuda()
-                pred1 = model.test(head, rel)
-                #pred2 = model.test(head2, rel_rev)
+                pred1 = model.forward(head, rel)
+                #pred2 = model.forward(head2, rel_rev)
                 loss1 = bce(pred1, e2_multi1)
                 #loss2 = bce(pred2, e2_multi2)
                 sum_loss = torch.sum(loss1).item()
