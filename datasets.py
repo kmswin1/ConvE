@@ -25,10 +25,6 @@ class KG_DataSet(Dataset):
 
                 self.triple[line[0],line[1]].add(int(line[2]))
 
-
-        self.head = torch.LongTensor(self.head)
-        self.rel = torch.LongTensor(self.rel)
-
     def __len__(self):
         return self.len
 
