@@ -18,12 +18,12 @@ class KG_DataSet(Dataset):
                 #line = json.loads(line)
                 line.strip("\n")
                 line = line.split(' ')
-                self.head.append(line[0])
-                self.rel.append(line[1])
+                self.head.append(int(line[0]))
+                self.rel.append(int(line[1]))
                 if (line[0], line[1]) not in self.triple.keys():
                     self.triple[line[0], line[1]] = set()
 
-                self.triple[line[0],line[1]].add(line[2])
+                self.triple[line[0],line[1]].add(int(line[2]))
 
 
         self.head = torch.LongTensor(self.head)
