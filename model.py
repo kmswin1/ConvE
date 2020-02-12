@@ -126,7 +126,7 @@ class ConvE(torch.nn.Module):
 
         return u
 
-    '''def forward(self, e1, rel, e2, batch_size):
+    def forward3(self, e1, rel, e2, batch_size):
         # An entities[:batch_size] are positive samples
         # An entities[batch_size] are negative samples
         e1_embedded= self.emb_e(e1).view(-1, 1, self.emb_dim1, self.emb_dim2)
@@ -149,5 +149,4 @@ class ConvE(torch.nn.Module):
         loss = 1 - prediction[:batch_size]
         loss2 = torch.max(torch.zeros(batch_size), prediction[batch_size:] - 1)
 
-        return torch.mean(loss+loss2)'''
-
+        return torch.mean(loss+loss2)
