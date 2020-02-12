@@ -15,6 +15,7 @@ class KG_DataSet(Dataset):
         with open(file_path) as f:
             for line in f:
                 #line = json.loads(line)
+                self.len += 1
                 line = line.strip("\n")
                 line = line.split(' ')
                 self.head.append(int(line[0]))
