@@ -33,9 +33,9 @@ class KG_DataSet(Dataset):
         return self.len
 
     def __getitem__(self, idx):
-        self.tail = list(self.triple[self.head[idx], self.rel[idx]])
+        tail = list(self.triple[self.head[idx], self.rel[idx]])
         logits = torch.full((self.n_ent, ), self.epsilon)
-        logits[self.tail] = self.smoothed_value
+        logits[tail] = self.smoothed_value
 
         return self.head[idx], self.rel[idx], logits
 
