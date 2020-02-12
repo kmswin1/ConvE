@@ -246,10 +246,8 @@ def write_train_set(data, ent_str2id, rel_str2id):
                 e1 = line['src']
                 e2 = line['dst']
                 rel = line['dstProperty']
-                rel_rev = line['dstProperty'] + '_reverse'
 
                 ff.write(str(ent_str2id[e1]) + " " + str(rel_str2id[rel]) + " " + str(ent_str2id[e2]) + "\n")
-                ff.write(str(ent_str2id[e2]) + " " + str(rel_str2id[rel_rev]) + " " + str(ent_str2id[e1]) + "\n")
 
 def write_test_set(data, ent_str2id, rel_str2id):
     with open('data/test_set.txt', 'w') as ff:
@@ -259,10 +257,8 @@ def write_test_set(data, ent_str2id, rel_str2id):
                 e1 = line['src']
                 e2 = line['dst']
                 rel = line['dstProperty']
-                rel_rev = line['dstProperty'] + '_reverse'
 
                 ff.write(str(ent_str2id[e1]) + " " + str(rel_str2id[rel]) + " " + str(ent_str2id[e2]) + "\n")
-                ff.write(str(ent_str2id[e2]) + " " + str(rel_str2id[rel_rev]) + " " + str(ent_str2id[e1]) + "\n")
 
 
 def main():
