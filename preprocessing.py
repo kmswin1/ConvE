@@ -8,6 +8,7 @@ import sys
 import time
 from itertools import count
 import pickle
+from collections import defaultdict
 import glob
 rdm = np.random.RandomState(234234)
 
@@ -240,6 +241,8 @@ def write_id2str(kg, path):
 
 def write_train_set(data, ent_str2id, rel_str2id):
     with open('data/train_set.txt', 'w') as ff:
+        h2t = defaultdict(lambda : set())
+        t2h = defaultdict(lambda : set())
         with open(data, 'r') as f:
             for line in f:
                 line = json.loads(line)
@@ -247,6 +250,8 @@ def write_train_set(data, ent_str2id, rel_str2id):
                 e2 = line['dst']
                 rel = line['dstProperty']
                 rel_rev = line['dstProperty'] + '_reverse'
+                h2t[e1, rel].add(e2)
+                t2h[e2,rel_rev].add(e1)
 
                 ff.write(str(ent_str2id[e1]) + " " + str(rel_str2id[rel]) + " " + str(ent_str2id[e2]) + "\n")
                 ff.write(str(ent_str2id[e2]) + " " + str(rel_str2id[rel_rev]) + " " + str(ent_str2id[e1]) + "\n")
@@ -269,7 +274,7 @@ def main():
     write_id2str(ent_list, 'data/ent_id2str')
     write_str2id(rel_list, 'data/rel_str2id')
     write_id2str(rel_list, 'data/rel_id2str')
-    write_evaluation_graph2idx(test_cases['test.json'], label_graph, ent_dict, rel_dict, 'data/test_ranking.json')
+    #write_evaluation_graph2idx(test_cases['test.json'], label_graph, ent_dict, rel_dict, 'data/test_ranking.json')
     write_train_set('data/train.json', ent_dict, rel_dict)
     print (time.time() - start)
 
