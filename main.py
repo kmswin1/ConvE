@@ -27,7 +27,7 @@ def main(args, model_path):
     model.init()
     if args.multi_gpu:
         model = torch.nn.DataParallel(model)
-    bce_loss = torch.nn.BCELoss()
+    criterion = torch.nn.BCELoss().cuda()
     model.cuda()
     print ('cuda : ' + str(torch.cuda.is_available()) + ' count : ' + str(torch.cuda.device_count()))
 
@@ -39,7 +39,7 @@ def main(args, model_path):
     dataset = KG_DataSet(dir+'/train_set.txt', args, n_ent)
     print ("making train dataset is done " + str(time.time()-start))
     start = time.time()
-    #evalset = KG_EvalSet(dir+'/test_ranking.json', args, n_ent)
+    #evalset = KG_EvalSet(dir+'/test_set.txt', args, n_ent)
     #print ("making evalset is done " + str(time.time()-start))
     prev_loss = 1000
     patience = 0
@@ -58,14 +58,16 @@ def main(args, model_path):
             opt.zero_grad()
             start = time.time()
             head, rel, tail = data
+            head = torch.LongTensor(head)
+            rel = torch.LongTensor(rel)
             head = head.cuda()
             rel = rel.cuda()
-            tail = tail.cuda()
             batch_size = head.size(0)
+            e2_multi = tail.cuda()
             print ("e2_multi " + str(time.time()-start) + "\n")
             start = time.time()
             pred = model.forward(head, rel)
-            loss = bce_loss(pred, tail)
+            loss = criterion(pred, e2_multi)
             loss.backward()
             opt.step()
             batch_loss = torch.sum(loss)
