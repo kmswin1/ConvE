@@ -27,7 +27,7 @@ def main(args, model_path):
     model.init()
     if args.multi_gpu:
         model = torch.nn.DataParallel(model)
-    criterion = torch.nn.BCELoss().cuda()
+    bce = torch.nn.BCELoss()
     model.cuda()
     print ('cuda : ' + str(torch.cuda.is_available()) + ' count : ' + str(torch.cuda.device_count()))
 
@@ -39,8 +39,8 @@ def main(args, model_path):
     dataset = KG_DataSet(dir+'/train_set.txt', args, n_ent)
     print ("making train dataset is done " + str(time.time()-start))
     start = time.time()
-    #evalset = KG_EvalSet(dir+'/test_set.txt', args, n_ent)
-    #print ("making evalset is done " + str(time.time()-start))
+    evalset = KG_EvalSet(dir+'/test_set.txt', args, n_ent)
+    print ("making evalset is done " + str(time.time()-start))
     prev_loss = 1000
     patience = 0
     early_stop = False
@@ -51,7 +51,7 @@ def main(args, model_path):
         model.train()
         tot = 0.0
         dataloader = DataLoader(dataset=dataset, num_workers=args.num_worker, batch_size=args.batch_size, shuffle=True)
-        #evalloader = DataLoader(dataset=evalset, num_workers=args.num_worker, batch_size=args.batch_size, shuffle=True)
+        evalloader = DataLoader(dataset=evalset, num_workers=args.num_worker, batch_size=args.batch_size, shuffle=True)
         n_train = dataset.__len__()
 
         for i, data in enumerate(dataloader):
@@ -67,7 +67,7 @@ def main(args, model_path):
             print ("e2_multi " + str(time.time()-start) + "\n")
             start = time.time()
             pred = model.forward(head, rel)
-            loss = criterion(pred, e2_multi)
+            loss = bce(pred, e2_multi)
             loss.backward()
             opt.step()
             batch_loss = torch.sum(loss)
@@ -83,28 +83,30 @@ def main(args, model_path):
         print ('{} epochs'.format(epoch))
         print ('epoch {} loss: {}'.format(epoch+1, epoch_loss))
         # TODO: calculate valid loss and develop early stopping
-        '''model.eval()
+        model.eval()
         with torch.no_grad():
             valid_loss = 0.0
             for i,data in enumerate(evalloader):
-                head, rel, tail, head2, rel_rev, tail2 = data
+                #head, rel, tail, head2, rel_rev, tail2 = data
+                head, rel, tail = data
                 head = torch.LongTensor(head)
                 rel = torch.LongTensor(rel)
-                head2 = torch.LongTensor(head2)
-                rel_rev = torch.LongTensor(rel_rev)
+                #head2 = torch.LongTensor(head2)
+                #rel_rev = torch.LongTensor(rel_rev)
                 head = head.cuda()
                 rel = rel.cuda()
-                head2 = head2.cuda()
-                rel_rev = rel_rev.cuda()
+                #head2 = head2.cuda()
+                #rel_rev = rel_rev.cuda()
                 batch_size = head.size(0)
 
                 e2_multi1 = tail.cuda()
-                e2_multi2 = tail2.cuda()
+                #e2_multi2 = tail2.cuda()
                 pred1 = model.test(head, rel)
-                pred2 = model.test(head2, rel_rev)
+                #pred2 = model.test(head2, rel_rev)
                 loss1 = bce(pred1, e2_multi1)
-                loss2 = bce(pred2, e2_multi2)
-                sum_loss = (torch.sum(loss1).item() + torch.sum(loss2).item())/2
+                #loss2 = bce(pred2, e2_multi2)
+                sum_loss = torch.sum(loss1).item()
+                #sum_loss = (torch.sum(loss1).item() + torch.sum(loss2).item())/2
                 sum_loss /= batch_size
                 valid_loss += sum_loss
             print ("valid loss : " + str(valid_loss))
@@ -119,16 +121,16 @@ def main(args, model_path):
         prev_loss = valid_loss
         if early_stop:
             print("{0} epochs Early stopping ...".format(epoch))
-            break'''
+            break
         print ('saving to {0}'.format(model_path))
         torch.save(model.state_dict(), model_path)
 
-    '''model.eval()
+    model.eval()
     with torch.no_grad():
         start = time.time()
         ranking_and_hits(model, args, evalloader, n_ent, epoch)
         end = time.time()
-        print ('eval time used: {} minutes'.format((end - start)/60))'''
+        print ('eval time used: {} minutes'.format((end - start)/60))
 
 
 if __name__ == '__main__':
