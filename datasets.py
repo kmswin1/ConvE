@@ -37,7 +37,7 @@ class KG_DataSet(Dataset):
         logits = torch.full((self.n_ent, ), self.epsilon)
         logits[self.tail] = self.smoothed_value
 
-        return self.head[idx], self.rel[idx], self.tail[idx]
+        return self.head[idx], self.rel[idx], logits
 
 class KG_EvalSet(Dataset):
     def __init__(self, file_path, args, n_ent):
