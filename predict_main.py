@@ -6,7 +6,7 @@ import os
 import time, datetime
 from pred_evaluation import ranking_and_hits
 from model import ConvE, Complex
-from utils import make_kg_vocab, graph_size
+from utils import load_kg
 from datasets import KG_EvalSet
 from torch.utils.data import DataLoader
 
@@ -14,12 +14,13 @@ dir = os.getcwd() + '/data'
 
 def main(args, model_path):
     print (os.getcwd())
-    print ('start prediction ...')
+    print ("start training ...")
 
     start = time.time()
-    kg_vocab = make_kg_vocab(dir+'/e1rel_to_e2_full.json')
+
+    ent_str2id, ent_id2str, rel_str2id, rel_id2str = load_kg()
     print ("making vocab is done "+str(time.time()-start))
-    n_ent, n_rel = graph_size(kg_vocab)
+    n_ent, n_rel = len(ent_str2id), len(rel_str2id)
 
     model = ConvE(args, n_ent, n_rel)
     model.init()
@@ -31,16 +32,18 @@ def main(args, model_path):
     print(params)
     print(sum(params))
     start = time.time()
-    evalset = KG_EvalSet(dir+'/e1rel_to_e2_ranking_test.json', kg_vocab, args, n_ent)
+    evalset = KG_EvalSet(dir+'/test_ranking.json', args, n_ent)
     print ("making evalset is done " + str(time.time()-start))
     evalloader = DataLoader(dataset=evalset, num_workers=args.num_worker, batch_size=args.batch_size, shuffle=True)
 
-    model.eval()
-    with torch.no_grad():
-        start = time.time()
-        ranking_and_hits(model, args, evalloader, n_ent, kg_vocab)
-        end = time.time()
-        print ('eval time used: {} minutes'.format((end - start)/60))
+
+    for epoch in range(args.test_batch_size):
+        model.eval()
+        with torch.no_grad():
+            start = time.time()
+            ranking_and_hits(model, args, evalloader, n_ent, ent_id2str, rel_id2str, epoch)
+            end = time.time()
+            print ('eval time used: {} minutes'.format((end - start)/60))
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='KG completion for cruise contents data')

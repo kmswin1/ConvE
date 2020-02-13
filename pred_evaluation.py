@@ -3,7 +3,7 @@ import numpy as np
 import datetime, os
 import pickle
 dir = os.getcwd()
-def ranking_and_hits(model, args, evalloader, n_ent, kg_vocab, epoch):
+def ranking_and_hits(model, args, evalloader, n_ent, ent_id2str, rel_id2str, epoch):
     hits_left = []
     hits_right = []
     hits = []
@@ -25,54 +25,55 @@ def ranking_and_hits(model, args, evalloader, n_ent, kg_vocab, epoch):
         hits.append([])
 
     for i, data in enumerate(evalloader):
-        head, rel, tail, head2, rel_rev, tail2 = data
+        #head, rel, tail, head2, rel_rev, tail2 = data
+        head, rel, tail, head2 = data
         head = torch.LongTensor(head)
         rel = torch.LongTensor(rel)
-        head2 = torch.LongTensor(head2)
-        rel_rev = torch.LongTensor(rel_rev)
+        #head2 = torch.LongTensor(head2)
+        #rel_rev = torch.LongTensor(rel_rev)
         head = head.cuda()
         rel = rel.cuda()
         head2 = head2.cuda()
-        rel_rev = rel_rev.cuda()
+        #rel_rev = rel_rev.cuda()
         batch_size = head.size(0)
 
         e2_multi1 = tail.cuda()
-        e2_multi2 = tail2.cuda()
-        pred1 = model.forward(head, rel)
-        pred2 = model.forward(head2, rel_rev)
+        #e2_multi2 = tail2.cuda()
+        pred1 = model.test(head, rel)
+        #pred2 = model.test(head2, rel_rev)
 
         for i in range(batch_size):
             # save the prediction that is relevant
             target_value1 = pred1[i][head2[i]].item()
-            target_value2 = pred2[i][head[i]].item()
+            #target_value2 = pred2[i][head[i]].item()
             # zero all known cases (this are not interesting)
             # this corresponds to the filtered setting
             pred1[i][e2_multi1[i] == 1] = 0.0
-            pred2[i][e2_multi2[i] == 1] = 0.0
+            #pred2[i][e2_multi2[i] == 1] = 0.0
             # write base the saved values
             pred1[i][head2[i]] = target_value1
-            pred2[i][head[i]] = target_value2
+            #pred2[i][head[i]] = target_value2
 
         # sort and rank
         max_values, argsort1 = torch.sort(pred1, 1, descending=True)
-        max_values, argsort2 = torch.sort(pred2, 1, descending=True)
+        #max_values, argsort2 = torch.sort(pred2, 1, descending=True)
         for i in range(batch_size):
             # find the rank of the target entities
             find_target1 = argsort1[i] == head2[i]
-            find_target2 = argsort2[i] == head[i]
+            #find_target2 = argsort2[i] == head[i]
             rank1 = torch.nonzero(find_target1)[0, 0].item() + 1
-            rank2 = torch.nonzero(find_target2)[0, 0].item() + 1
+            #rank2 = torch.nonzero(find_target2)[0, 0].item() + 1
             # rank+1, since the lowest rank is rank 1 not rank 0
             ranks.append(rank1+1)
             ranks_left.append(rank1)
-            ranks.append(rank2+1)
-            ranks_right.append(rank2)
+            #ranks.append(rank2+1)
+            #ranks_right.append(rank2)
 
             # this could be done more elegantly, but here you go
             hits[9].append(int(rank1<=10))
-            hits[9].append(int(rank2<=10))
+            #hits[9].append(int(rank2<=10))
             hits_left[9].append((int(rank1<=10)))
-            hits_right[9].append((int(rank2<=10)))
+            #hits_right[9].append((int(rank2<=10)))
             # for hits_level in range(10):
             #     if rank1 <= hits_level:
             #         hits[hits_level].append(1.0)
@@ -89,9 +90,9 @@ def ranking_and_hits(model, args, evalloader, n_ent, kg_vocab, epoch):
             #         hits_right[hits_level].append(0.0)
             if rank1 == 1:
                 with open(dir + '/log_file/hit1.txt', 'a') as f:
-                    f.write(kg_vocab.ent_list[head[i].item()]+"\n")
+                    f.write(ent_id2str[head[i].item()]+"\n")
                     f.write(kg_vocab.rel_list[rel[i].item()]+"\n")
-                    f.write(kg_vocab.ent_list[argsort1[i][0].item()]+"\n")
+                    f.write(ent_id2str[argsort1[i][0].item()]+"\n")
                     if kg_vocab.rel_list[rel[i].item()] not in hit1_rels.keys():
                         hit1_rels[kg_vocab.rel_list[rel[i].item()]] = 1
                     else:
@@ -100,35 +101,35 @@ def ranking_and_hits(model, args, evalloader, n_ent, kg_vocab, epoch):
 
             elif rank1 > 1:
                 with open(dir + '/log_file/nohit1.txt', 'a') as f:
-                    f.write(kg_vocab.ent_list[head[i].item()]+"\n")
-                    f.write(kg_vocab.rel_list[rel[i].item()]+"\n")
-                    f.write(kg_vocab.ent_list[argsort1[i][0].item()]+"\n")
-                    if kg_vocab.rel_list[rel[i].item()] not in nohit1_rels.keys():
-                        nohit1_rels[kg_vocab.rel_list[rel[i].item()]] = 1
+                    f.write(ent_id2str[head[i].item()]+"\n")
+                    f.write(rel_id2str[rel[i].item()]+"\n")
+                    f.write(ent_id2str[argsort1[i][0].item()]+"\n")
+                    if rel_id2str[rel[i].item()] not in nohit1_rels.keys():
+                        nohit1_rels[rel_id2str[rel[i].item()]] = 1
                     else:
-                        nohit1_rels[kg_vocab.rel_list[rel[i].item()]] += 1
+                        nohit1_rels[rel_id2str[rel[i].item()]] += 1
                     nohit1_cnt += 1
 
             if rank1 <= 10:
                 with open(dir + '/log_file/hit10.txt', 'a') as f:
-                    f.write(kg_vocab.ent_list[head[i].item()]+"\n")
-                    f.write(kg_vocab.rel_list[rel[i].item()]+"\n")
-                    f.write(kg_vocab.ent_list[argsort1[i][0].item()]+"\n")
-                    if kg_vocab.rel_list[rel[i].item()] not in hit10_rels.keys():
-                        hit10_rels[kg_vocab.rel_list[rel[i].item()]] = 1
+                    f.write(ent_id2str[head[i].item()]+"\n")
+                    f.write(rel_id2str[rel[i].item()]+"\n")
+                    f.write(ent_id2str[argsort1[i][0].item()]+"\n")
+                    if rel_id2str[rel[i].item()] not in hit10_rels.keys():
+                        hit10_rels[rel_id2str[rel[i].item()]] = 1
                     else:
-                        hit10_rels[kg_vocab.rel_list[rel[i].item()]] += 1
+                        hit10_rels[rel_id2str[rel[i].item()]] += 1
                     hit10_cnt += 1
 
             elif rank1 > 10:
                 with open(dir + '/log_file/nohit10.txt', 'a') as f:
-                    f.write(kg_vocab.ent_list[head[i].item()]+"\n")
-                    f.write(kg_vocab.rel_list[rel[i].item()]+"\n")
-                    f.write(kg_vocab.ent_list[argsort1[i][0].item()]+"\n")
-                    if kg_vocab.rel_list[rel[i].item()] not in nohit10_rels.keys():
-                        nohit10_rels[kg_vocab.rel_list[rel[i].item()]] = 1
+                    f.write(ent_id2str[head[i].item()]+"\n")
+                    f.write(rel_id2str[rel[i].item()]+"\n")
+                    f.write(ent_id2str[argsort1[i][0].item()]+"\n")
+                    if rel_id2str[rel[i].item()] not in nohit10_rels.keys():
+                        nohit10_rels[rel_id2str[rel[i].item()]] = 1
                     else:
-                        nohit10_rels[kg_vocab.rel_list[rel[i].item()]] += 1
+                        nohit10_rels[rel_id2str[rel[i].item()]] += 1
                     nohit10_cnt += 1
 
     with open(dir + '/log_file/result.txt', 'w') as f:

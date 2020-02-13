@@ -2,13 +2,13 @@
 import torch
 import argparse
 import os
-from utils import make_kg_vocab, graph_size
+from utils import load_kg
 from datasets import KG_DataSet, KG_EvalSet
 import time, datetime
 from torch.utils.data import DataLoader
 from evaluation import ranking_and_hits
 from model import ConvE, Complex
-import glob
+import pickle
 
 dir = os.getcwd() + '/data'
 
@@ -17,16 +17,17 @@ def main(args, model_path):
     print ("start training ...")
 
     start = time.time()
-    kg_vocab = make_kg_vocab(dir+'/e1rel_to_e2_full.json')
+
+    ent_str2id, ent_id2str, rel_str2id, rel_id2str = load_kg()
     print ("making vocab is done "+str(time.time()-start))
-    n_ent, n_rel = graph_size(kg_vocab)
+    n_ent, n_rel = len(ent_str2id), len(rel_str2id)
 
 
     model = ConvE(args, n_ent, n_rel)
     model.init()
     if args.multi_gpu:
         model = torch.nn.DataParallel(model)
-    criterion = torch.nn.BCELoss().cuda()
+    bce = torch.nn.BCELoss()
     model.cuda()
     print ('cuda : ' + str(torch.cuda.is_available()) + ' count : ' + str(torch.cuda.device_count()))
 
@@ -35,10 +36,10 @@ def main(args, model_path):
     print(sum(params))
     opt = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.l2)
     start = time.time()
-    dataset = KG_DataSet(dir+'/e1rel_to_e2_train.json', kg_vocab, args, n_ent)
+    dataset = KG_DataSet(dir+'/train_set.txt', args, n_ent)
     print ("making train dataset is done " + str(time.time()-start))
     start = time.time()
-    evalset = KG_EvalSet(dir+'/e1rel_to_e2_ranking_test.json', kg_vocab, args, n_ent)
+    evalset = KG_EvalSet(dir+'/test_set.txt', args, n_ent)
     print ("making evalset is done " + str(time.time()-start))
     prev_loss = 1000
     patience = 0
@@ -66,7 +67,7 @@ def main(args, model_path):
             print ("e2_multi " + str(time.time()-start) + "\n")
             start = time.time()
             pred = model.forward(head, rel)
-            loss = criterion(pred, e2_multi)
+            loss = bce(pred, e2_multi)
             loss.backward()
             opt.step()
             batch_loss = torch.sum(loss)
@@ -86,24 +87,26 @@ def main(args, model_path):
         with torch.no_grad():
             valid_loss = 0.0
             for i,data in enumerate(evalloader):
-                head, rel, tail, head2, rel_rev, tail2 = data
+                #head, rel, tail, head2, rel_rev, tail2 = data
+                head, rel, tail = data
                 head = torch.LongTensor(head)
                 rel = torch.LongTensor(rel)
-                head2 = torch.LongTensor(head2)
-                rel_rev = torch.LongTensor(rel_rev)
+                #head2 = torch.LongTensor(head2)
+                #rel_rev = torch.LongTensor(rel_rev)
                 head = head.cuda()
                 rel = rel.cuda()
-                head2 = head2.cuda()
-                rel_rev = rel_rev.cuda()
+                #head2 = head2.cuda()
+                #rel_rev = rel_rev.cuda()
                 batch_size = head.size(0)
 
                 e2_multi1 = tail.cuda()
-                e2_multi2 = tail2.cuda()
+                #e2_multi2 = tail2.cuda()
                 pred1 = model.forward(head, rel)
-                pred2 = model.forward(head2, rel_rev)
-                loss1 = criterion(pred1, e2_multi1)
-                loss2 = criterion(pred2, e2_multi2)
-                sum_loss = (torch.sum(loss1).item() + torch.sum(loss2).item())/2
+                #pred2 = model.forward(head2, rel_rev)
+                loss1 = bce(pred1, e2_multi1)
+                #loss2 = bce(pred2, e2_multi2)
+                sum_loss = torch.sum(loss1).item()
+                #sum_loss = (torch.sum(loss1).item() + torch.sum(loss2).item())/2
                 sum_loss /= batch_size
                 valid_loss += sum_loss
             print ("valid loss : " + str(valid_loss))
@@ -125,7 +128,7 @@ def main(args, model_path):
     model.eval()
     with torch.no_grad():
         start = time.time()
-        ranking_and_hits(model, args, evalloader, n_ent, kg_vocab, epoch)
+        ranking_and_hits(model, args, evalloader, n_ent, epoch)
         end = time.time()
         print ('eval time used: {} minutes'.format((end - start)/60))
 
