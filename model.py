@@ -53,12 +53,12 @@ class ConvE(torch.nn.Module):
         self.hidden_drop = torch.nn.Dropout(args.hidden_drop)
         self.feature_map_drop = torch.nn.Dropout2d(args.feat_drop)
         self.batch_size = args.batch_size
-        self.emb_dim = args.embedding_dim
+        #self.emb_dim = args.embedding_dim
         self.emb_dim1 = args.embedding_shape1
         self.emb_dim2 = args.embedding_dim // self.emb_dim1
         self.hidden_size = ((2*self.emb_dim1)-2)*(self.emb_dim2-2)*32
-        self.similarity = torch.nn.CosineSimilarity()
-        self.softmax = torch.nn.Softmax(dim=1)
+        #self.similarity = torch.nn.CosineSimilarity()
+        #self.softmax = torch.nn.Softmax(dim=1)
 
         self.conv1 = torch.nn.Conv2d(1, 32, (3, 3), 1, 0, bias=args.use_bias)
         self.bn0 = torch.nn.BatchNorm2d(1)
@@ -97,7 +97,7 @@ class ConvE(torch.nn.Module):
 
         return prediction
 
-    def forward2(self, e1, rel, e2, neg_sample):
+    '''def forward2(self, e1, rel, e2, neg_sample):
         e1_embedded= self.emb_e(e1).view(-1, 1, self.emb_dim1, self.emb_dim2)
         rel_embedded = self.emb_rel(rel).view(-1, 1, self.emb_dim1, self.emb_dim2)
 
@@ -147,4 +147,4 @@ class ConvE(torch.nn.Module):
         loss = 1 - prediction[:batch_size]
         loss2 = torch.max(torch.zeros(batch_size), prediction[batch_size:] - 1)
 
-        return torch.mean(loss+loss2)
+        return torch.mean(loss+loss2)'''
