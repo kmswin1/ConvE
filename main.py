@@ -8,8 +8,7 @@ import time, datetime
 from torch.utils.data import DataLoader
 from evaluation import ranking_and_hits
 from model import ConvE, Complex
-import pickle
-
+from parallel import DataParallelModel, DataParallelCriterion
 dir = os.getcwd() + '/data'
 
 def main(args, model_path):
@@ -28,6 +27,8 @@ def main(args, model_path):
     if args.multi_gpu:
         model = torch.nn.DataParallel(model)
     bce = torch.nn.BCELoss().cuda()
+    model = DataParallelModel(model)
+    bce = DataParallelCriterion(bce)
     model.cuda()
     print ('cuda : ' + str(torch.cuda.is_available()) + ' count : ' + str(torch.cuda.device_count()))
 
@@ -68,8 +69,10 @@ def main(args, model_path):
             start = time.time()
             pred = model.forward(head, rel)
             loss = bce(pred, e2_multi)
-            loss.backward()
-            opt.step()
+            loss /= args.accumulation_steps
+            loss.mean().backward()
+            if (i+1) % args.accumulation_steps == 0:
+                opt.step()
             batch_loss = torch.sum(loss)
             del e2_multi
             del loss
@@ -156,6 +159,7 @@ if __name__ == '__main__':
     parser.add_argument('--label-smoothing', type=float, default=0.1, help='Label smoothing value to use. Default: 0.1')
     parser.add_argument('--multi-gpu', type=bool, default=False, help='choose the training using by multigpu')
     parser.add_argument('--feature-channel', type=int, default=32, help='The number of Feature map channels. Default: 32')
+    parser.add_argument('--accumulation-steps', type=int, default=10, help='The number of Feature map channels. Default: 32')
 
 
     args = parser.parse_args()
