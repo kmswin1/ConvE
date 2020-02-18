@@ -67,10 +67,7 @@ def main(args, model_path):
             start = time.time()
             pred = model.forward(head, rel)
             loss = bce(pred, e2_multi)
-            loss /= args.accumulation_steps
-            loss.mean().backward()
-            if (i+1) % args.accumulation_steps == 0:
-                opt.step()
+            loss.backward()
             batch_loss = torch.sum(loss)
             del e2_multi
             del loss
@@ -157,7 +154,6 @@ if __name__ == '__main__':
     parser.add_argument('--label-smoothing', type=float, default=0.1, help='Label smoothing value to use. Default: 0.1')
     parser.add_argument('--multi-gpu', type=bool, default=False, help='choose the training using by multigpu')
     parser.add_argument('--feature-channel', type=int, default=32, help='The number of Feature map channels. Default: 32')
-    parser.add_argument('--accumulation-steps', type=int, default=10, help='The number of Feature map channels. Default: 32')
 
 
     args = parser.parse_args()
