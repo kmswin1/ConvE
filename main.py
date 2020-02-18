@@ -2,7 +2,7 @@
 import torch
 import argparse
 import os
-from utils import load_kg
+from utils import load_kg, lr_scheduler
 from datasets import KG_DataSet, KG_EvalSet
 import time, datetime
 from torch.utils.data import DataLoader
@@ -35,7 +35,6 @@ def main(args, model_path):
     params = [value.numel() for value in model.parameters()]
     print(params)
     print(sum(params))
-    opt = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.l2)
     start = time.time()
     dataset = KG_DataSet(dir+'/train_set.txt', args, n_ent)
     print ("making train dataset is done " + str(time.time()-start))
@@ -47,6 +46,8 @@ def main(args, model_path):
     early_stop = False
     for epoch in range(args.epochs):
         print (epoch)
+        lr = lr_scheduler(args.lr, epoch, args.epochs)
+        opt = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=args.l2)
         epoch_loss = 0
         epoch_start = time.time()
         model.train()
