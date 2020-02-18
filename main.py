@@ -89,7 +89,7 @@ def main(args, model_path):
             valid_loss = 0.0
             for i,data in enumerate(evalloader):
                 #head, rel, tail, head2, rel_rev, tail2 = data
-                head, rel, tail = data
+                head, rel, tail, tail_idx = data
                 head = torch.LongTensor(head)
                 rel = torch.LongTensor(rel)
                 #head2 = torch.LongTensor(head2)

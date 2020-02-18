@@ -66,4 +66,4 @@ class KG_EvalSet(Dataset):
         logits = torch.zeros(self.n_ent)
         logits[tail] = 1
 
-        return self.head[idx], self.rel[idx], logits
+        return self.head[idx], self.rel[idx], logits, self.tail[idx]
