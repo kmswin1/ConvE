@@ -76,6 +76,7 @@ def main(args, model_path):
         epoch_loss /= batch_size
         print ('')
         end = time.time()
+        opt.step()
         scheduler.step()
         time_used = end - epoch_start
         print ('one epoch time: {} minutes'.format(time_used/60))
