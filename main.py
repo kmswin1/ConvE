@@ -32,6 +32,7 @@ def main(args, model_path):
     params = [value.numel() for value in model.parameters()]
     print(params)
     print(sum(params))
+    opt = torch.optim.Adam(model.parameters(), lr=args.lr*100, weight_decay=args.l2)
     start = time.time()
     dataset = KG_DataSet(dir+'/train_set.txt', args, n_ent)
     print ("making train dataset is done " + str(time.time()-start))
@@ -41,7 +42,6 @@ def main(args, model_path):
     prev_loss = 1000
     patience = 0
     early_stop = False
-    opt = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.l2)
     scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer=opt, lr_lambda=lambda epoch: 0.95 ** epoch)
     for epoch in range(args.epochs):
         print (epoch)
