@@ -69,8 +69,6 @@ def main(args, model_path):
             loss = bce(pred, e2_multi)
             loss.backward()
             batch_loss = torch.sum(loss)
-            del e2_multi
-            del loss
             print ("step " + str(time.time()-start) + "\n")
             epoch_loss += batch_loss
             tot += head.size(0)
