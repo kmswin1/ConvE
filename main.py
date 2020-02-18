@@ -32,7 +32,7 @@ def main(args, model_path):
     params = [value.numel() for value in model.parameters()]
     print(params)
     print(sum(params))
-    opt = torch.optim.Adam(model.parameters(), lr=args.lr*10, weight_decay=args.l2)
+    opt = torch.optim.Adam(model.parameters(), lr=args.lr*100, weight_decay=args.l2)
     start = time.time()
     dataset = KG_DataSet(dir+'/train_set.txt', args, n_ent)
     print ("making train dataset is done " + str(time.time()-start))
@@ -68,6 +68,7 @@ def main(args, model_path):
             pred = model.forward(head, rel)
             loss = bce(pred, e2_multi)
             loss.backward()
+            opt.step()
             batch_loss = torch.sum(loss)
             print ("step " + str(time.time()-start) + "\n")
             epoch_loss += batch_loss
@@ -76,7 +77,6 @@ def main(args, model_path):
         epoch_loss /= batch_size
         print ('')
         end = time.time()
-        opt.step()
         scheduler.step()
         time_used = end - epoch_start
         print ('one epoch time: {} minutes'.format(time_used/60))
