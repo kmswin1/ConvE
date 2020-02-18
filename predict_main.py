@@ -32,7 +32,7 @@ def main(args, model_path):
     print(params)
     print(sum(params))
     start = time.time()
-    evalset = KG_EvalSet(dir+'/test_ranking.json', args, n_ent)
+    evalset = KG_EvalSet(dir+'/test_set.txt', args, n_ent)
     print ("making evalset is done " + str(time.time()-start))
     evalloader = DataLoader(dataset=evalset, num_workers=args.num_worker, batch_size=args.batch_size, shuffle=True)
 
