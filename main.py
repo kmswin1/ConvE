@@ -41,7 +41,7 @@ def main(args, model_path):
     prev_loss = 1000
     patience = 0
     early_stop = False
-    opt = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=args.l2)
+    opt = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.l2)
     scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer=opt, lr_lambda=lambda epoch: 0.95 ** epoch)
     for epoch in range(args.epochs):
         print (epoch)
