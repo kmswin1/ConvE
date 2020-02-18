@@ -56,7 +56,7 @@ class ConvE(torch.nn.Module):
         #self.emb_dim = args.embedding_dim
         self.emb_dim1 = args.embedding_shape1
         self.emb_dim2 = args.embedding_dim // self.emb_dim1
-        self.hidden_size = ((2*self.emb_dim1)-2)*(self.emb_dim2-2)*32
+        self.hidden_size = ((2*self.emb_dim1)-2)*(self.emb_dim2-2)*args.feature_channel
         #self.similarity = torch.nn.CosineSimilarity()
         #self.softmax = torch.nn.Softmax(dim=1)
 
