@@ -39,8 +39,8 @@ def ranking_and_hits(model, args, evalloader, n_ent, ent_id2str, rel_id2str, epo
 
         e2_multi1 = tail.cuda()
         #e2_multi2 = tail2.cuda()
-        pred1 = model.test(head, rel)
-        #pred2 = model.test(head2, rel_rev)
+        pred1 = model.forward(head, rel)
+        #pred2 = model.forward(head2, rel_rev)
 
         for i in range(batch_size):
             # save the prediction that is relevant
@@ -91,12 +91,12 @@ def ranking_and_hits(model, args, evalloader, n_ent, ent_id2str, rel_id2str, epo
             if rank1 == 1:
                 with open(dir + '/log_file/hit1.txt', 'a') as f:
                     f.write(ent_id2str[head[i].item()]+"\n")
-                    f.write(kg_vocab.rel_list[rel[i].item()]+"\n")
+                    f.write(rel_id2str[rel[i].item()]+"\n")
                     f.write(ent_id2str[argsort1[i][0].item()]+"\n")
-                    if kg_vocab.rel_list[rel[i].item()] not in hit1_rels.keys():
-                        hit1_rels[kg_vocab.rel_list[rel[i].item()]] = 1
+                    if rel_id2str[rel[i].item()] not in hit1_rels.keys():
+                        hit1_rels[rel_id2str[rel[i].item()]] = 1
                     else:
-                        hit1_rels[kg_vocab.rel_list[rel[i].item()]] += 1
+                        hit1_rels[rel_id2str[rel[i].item()]] += 1
                     hit1_cnt += 1
 
             elif rank1 > 1:
