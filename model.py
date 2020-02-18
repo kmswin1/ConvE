@@ -53,12 +53,9 @@ class ConvE(torch.nn.Module):
         self.hidden_drop = torch.nn.Dropout(args.hidden_drop)
         self.feature_map_drop = torch.nn.Dropout2d(args.feat_drop)
         self.batch_size = args.batch_size
-        #self.emb_dim = args.embedding_dim
         self.emb_dim1 = args.embedding_shape1
         self.emb_dim2 = args.embedding_dim // self.emb_dim1
         self.hidden_size = ((2*self.emb_dim1)-2)*(self.emb_dim2-2)*args.feature_channel
-        #self.similarity = torch.nn.CosineSimilarity()
-        #self.softmax = torch.nn.Softmax(dim=1)
 
         self.conv1 = torch.nn.Conv2d(1, args.feature_channel, (3, 3), 1, 0, bias=args.use_bias)
         self.bn0 = torch.nn.BatchNorm2d(1)
@@ -96,55 +93,3 @@ class ConvE(torch.nn.Module):
         prediction = torch.sigmoid(x)
 
         return prediction
-
-    '''def forward2(self, e1, rel, e2, neg_sample):
-        e1_embedded= self.emb_e(e1).view(-1, 1, self.emb_dim1, self.emb_dim2)
-        rel_embedded = self.emb_rel(rel).view(-1, 1, self.emb_dim1, self.emb_dim2)
-
-        stacked_inputs = torch.cat([e1_embedded, rel_embedded], 2)
-
-        stacked_inputs = self.bn0(stacked_inputs)
-        x= self.inp_drop(stacked_inputs)
-        x= self.conv1(x)
-        x= self.bn1(x)
-        x= F.relu(x)
-        x = self.feature_map_drop(x)
-        x = x.view(x.shape[0], -1)
-        x = self.fc(x)
-        x = self.hidden_drop(x)
-        x = self.bn2(x)
-        x = F.relu(x)
-        x = x.view(-1, self.emb_dim, 1)
-        y = self.emb_e(e2)
-        y = y.view(-1,1,self.emb_dim)
-        z = self.emb_e(neg_sample)
-        t = torch.cat([y,z], 1)
-        u = torch.bmm(t,x)
-        u = u.view(-1, self.sample_n+1)
-
-        return u
-
-    def forward3(self, e1, rel, e2, batch_size):
-        # An entities[:batch_size] are positive samples
-        # An entities[batch_size] are negative samples
-        e1_embedded= self.emb_e(e1).view(-1, 1, self.emb_dim1, self.emb_dim2)
-        rel_embedded = self.emb_rel(rel).view(-1, 1, self.emb_dim1, self.emb_dim2)
-
-        stacked_inputs = torch.cat([e1_embedded, rel_embedded], 2)
-
-        stacked_inputs = self.bn0(stacked_inputs)
-        x= self.inp_drop(stacked_inputs)
-        x= self.conv1(x)
-        x= self.bn1(x)
-        x= F.relu(x)
-        x = self.feature_map_drop(x)
-        x = x.view(x.shape[0], -1)
-        x = self.fc(x)
-        x = self.hidden_drop(x)
-        x = self.bn2(x)
-        x = F.relu(x)
-        prediction = self.similarity(x, e2)
-        loss = 1 - prediction[:batch_size]
-        loss2 = torch.max(torch.zeros(batch_size), prediction[batch_size:] - 1)
-
-        return torch.mean(loss+loss2)'''
