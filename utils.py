@@ -14,6 +14,3 @@ def load_kg():
         rel_id2str = pickle.load(f)
 
     return ent_str2id, ent_id2str, rel_str2id, rel_id2str
-
-def lr_scheduler(lr, epoch, epochs, lr0=0.1):
-    return  epoch/epochs*lr + (1-(epoch/epochs))*lr0

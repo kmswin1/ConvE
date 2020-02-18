@@ -2,7 +2,7 @@
 import torch
 import argparse
 import os
-from utils import load_kg, lr_scheduler
+from utils import load_kg
 from datasets import KG_DataSet, KG_EvalSet
 import time, datetime
 from torch.utils.data import DataLoader
@@ -41,10 +41,10 @@ def main(args, model_path):
     prev_loss = 1000
     patience = 0
     early_stop = False
+    opt = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=args.l2)
+    scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer=opt, lr_lambda=lambda epoch: 0.95 ** epoch)
     for epoch in range(args.epochs):
         print (epoch)
-        lr = lr_scheduler(args.lr, epoch, args.epochs)
-        opt = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=args.l2)
         epoch_loss = 0
         epoch_start = time.time()
         model.train()
@@ -76,6 +76,7 @@ def main(args, model_path):
         epoch_loss /= batch_size
         print ('')
         end = time.time()
+        scheduler.step()
         time_used = end - epoch_start
         print ('one epoch time: {} minutes'.format(time_used/60))
         print ('{} epochs'.format(epoch))
