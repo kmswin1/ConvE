@@ -32,7 +32,7 @@ def main(args, model_path):
     params = [value.numel() for value in model.parameters()]
     print(params)
     print(sum(params))
-    opt = torch.optim.Adam(model.parameters(), lr=args.lr*100, weight_decay=args.l2)
+    opt = torch.optim.Adam(model.parameters(), lr=args.lr*10, weight_decay=args.l2)
     start = time.time()
     dataset = KG_DataSet(dir+'/train_set.txt', args, n_ent)
     print ("making train dataset is done " + str(time.time()-start))
