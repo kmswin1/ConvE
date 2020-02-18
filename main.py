@@ -8,7 +8,6 @@ import time, datetime
 from torch.utils.data import DataLoader
 from evaluation import ranking_and_hits
 from model import ConvE, Complex
-from parallel import DataParallelModel, DataParallelCriterion
 dir = os.getcwd() + '/data'
 
 def main(args, model_path):
@@ -27,8 +26,6 @@ def main(args, model_path):
     if args.multi_gpu:
         model = torch.nn.DataParallel(model)
     bce = torch.nn.BCELoss().cuda()
-    model = DataParallelModel(model)
-    bce = DataParallelCriterion(bce)
     model.cuda()
     print ('cuda : ' + str(torch.cuda.is_available()) + ' count : ' + str(torch.cuda.device_count()))
 
