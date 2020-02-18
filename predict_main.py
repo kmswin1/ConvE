@@ -53,7 +53,7 @@ if __name__ == '__main__':
     parser.add_argument('--epochs', type=int, default=100, help='number of epochs to train (default: 100)')
     parser.add_argument('--lr', type=float, default=0.003, help='learning rate (default: 0.003)')
     parser.add_argument('--seed', type=int, default=17, metavar='S', help='random seed (default: 17)')
-    parser.add_argument('--data', type=str, default='webtoon', help='The kind of domain for training cruise data, default: person')
+    parser.add_argument('--data', type=str, default='cruise', help='The kind of domain for training cruise data, default: person')
     parser.add_argument('--l2', type=float, default=0.0, help='Weight decay value to use in the optimizer. Default: 0.0')
     parser.add_argument('--model', type=str, default='conve', help='Choose from: {conve, distmult, complex}')
     parser.add_argument('--embedding-dim', type=int, default=200, help='The embedding dimension (1D). Default: 200')
