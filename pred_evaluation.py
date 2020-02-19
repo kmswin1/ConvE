@@ -3,7 +3,7 @@ import numpy as np
 import datetime, os
 import pickle, json
 dir = os.getcwd()
-def ranking_and_hits(model, args, evalloader, n_ent, ent_id2str, rel_id2str, epoch):
+def ranking_and_hits(model, args, evalloader, n_ent, ent_id2str, rel_id2str):
     hits_left = []
     hits_right = []
     hits = []

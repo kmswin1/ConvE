@@ -39,13 +39,12 @@ def main(args, model_path):
     evalloader = DataLoader(dataset=evalset, num_workers=args.num_worker, batch_size=args.batch_size, shuffle=True)
 
 
-    for epoch in range(args.test_batch_size):
-        model.eval()
-        with torch.no_grad():
-            start = time.time()
-            ranking_and_hits(model, args, evalloader, n_ent, ent_id2str, rel_id2str, epoch)
-            end = time.time()
-            print ('eval time used: {} minutes'.format((end - start)/60))
+    model.eval()
+    with torch.no_grad():
+        start = time.time()
+        ranking_and_hits(model, args, evalloader, n_ent, ent_id2str, rel_id2str)
+        end = time.time()
+        print ('eval time used: {} minutes'.format((end - start)/60))
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='KG completion for cruise contents data')
