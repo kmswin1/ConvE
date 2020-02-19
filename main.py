@@ -80,7 +80,6 @@ def main(args, model_path):
         print ('one epoch time: {} minutes'.format(time_used/60))
         print ('{} epochs'.format(epoch))
         print ('epoch {} loss: {}'.format(epoch+1, epoch_loss))
-        # TODO: calculate valid loss and develop early stopping
         model.eval()
         with torch.no_grad():
             valid_loss = 0.0
