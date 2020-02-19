@@ -101,7 +101,7 @@ def ranking_and_hits(model, args, evalloader, n_ent, ent_id2str, rel_id2str, epo
                     data_point = {}
                     top = []
                     for j in range(10):
-                        top.append(argsort1[i][j])
+                        top.append(ent_id2str[argsort1[i][j].item()])
                     data_point['head'] = ent_id2str[head[i].item()]
                     data_point['relation'] = rel_id2str[rel[i].item()]
                     data_point['topten'] = top
@@ -121,7 +121,7 @@ def ranking_and_hits(model, args, evalloader, n_ent, ent_id2str, rel_id2str, epo
                     data_point = {}
                     top = []
                     for j in range(10):
-                        top.append(argsort1[i][j])
+                        top.append(ent_id2str[argsort1[i][j].item()])
                     data_point['head'] = ent_id2str[head[i].item()]
                     data_point['relation'] = rel_id2str[rel[i].item()]
                     data_point['topten'] = top
@@ -141,7 +141,7 @@ def ranking_and_hits(model, args, evalloader, n_ent, ent_id2str, rel_id2str, epo
                     data_point = {}
                     top = []
                     for j in range(10):
-                        top.append(argsort1[i][j])
+                        top.append(ent_id2str[argsort1[i][j].item()])
                     data_point['head'] = ent_id2str[head[i].item()]
                     data_point['relation'] = rel_id2str[rel[i].item()]
                     data_point['topten'] = top
@@ -161,7 +161,7 @@ def ranking_and_hits(model, args, evalloader, n_ent, ent_id2str, rel_id2str, epo
                     data_point = {}
                     top = []
                     for j in range(10):
-                        top.append(argsort1[i][j])
+                        top.append(ent_id2str[argsort1[i][j].item()])
                     data_point['head'] = ent_id2str[head[i].item()]
                     data_point['relation'] = rel_id2str[rel[i].item()]
                     data_point['topten'] = top
