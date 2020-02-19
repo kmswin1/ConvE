@@ -23,7 +23,6 @@ def main(args, model_path):
     n_ent, n_rel = len(ent_str2id), len(rel_str2id)
 
     model = ConvE(args, n_ent, n_rel)
-    model.init()
     model.load_state_dict(torch.load(model_path))
     model.cuda()
     print ('cuda : ' + str(torch.cuda.is_available()) + ' count : ' + str(torch.cuda.device_count()))
