@@ -8,6 +8,8 @@ import time, datetime
 from torch.utils.data import DataLoader
 from evaluation import ranking_and_hits
 from model import ConvE, Complex
+import pickle
+
 dir = os.getcwd() + '/data'
 
 def main(args, model_path):
@@ -25,14 +27,14 @@ def main(args, model_path):
     model.init()
     if args.multi_gpu:
         model = torch.nn.DataParallel(model)
-    bce = torch.nn.BCELoss().cuda()
+    bce = torch.nn.BCELoss()
     model.cuda()
     print ('cuda : ' + str(torch.cuda.is_available()) + ' count : ' + str(torch.cuda.device_count()))
 
     params = [value.numel() for value in model.parameters()]
     print(params)
     print(sum(params))
-    opt = torch.optim.Adam(model.parameters(), lr=args.lr*100, weight_decay=args.l2)
+    opt = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.l2)
     start = time.time()
     dataset = KG_DataSet(dir+'/train_set.txt', args, n_ent)
     print ("making train dataset is done " + str(time.time()-start))
@@ -80,12 +82,13 @@ def main(args, model_path):
         print ('one epoch time: {} minutes'.format(time_used/60))
         print ('{} epochs'.format(epoch))
         print ('epoch {} loss: {}'.format(epoch+1, epoch_loss))
+        # TODO: calculate valid loss and develop early stopping
         model.eval()
         with torch.no_grad():
             valid_loss = 0.0
             for i,data in enumerate(evalloader):
                 #head, rel, tail, head2, rel_rev, tail2 = data
-                head, rel, tail, tail_idx = data
+                head, rel, tail = data
                 head = torch.LongTensor(head)
                 rel = torch.LongTensor(rel)
                 #head2 = torch.LongTensor(head2)
@@ -138,7 +141,7 @@ if __name__ == '__main__':
     parser.add_argument('--epochs', type=int, default=100, help='number of epochs to train (default: 100)')
     parser.add_argument('--lr', type=float, default=0.003, help='learning rate (default: 0.003)')
     parser.add_argument('--seed', type=int, default=17, metavar='S', help='random seed (default: 17)')
-    parser.add_argument('--data', type=str, default='cruise', help='The kind of domain for training cruise data, default: person')
+    parser.add_argument('--data', type=str, default='webtoon', help='The kind of domain for training cruise data, default: person')
     parser.add_argument('--l2', type=float, default=0.0, help='Weight decay value to use in the optimizer. Default: 0.0')
     parser.add_argument('--model', type=str, default='conve', help='Choose from: {conve, distmult, complex}')
     parser.add_argument('--embedding-dim', type=int, default=200, help='The embedding dimension (1D). Default: 200')
@@ -150,8 +153,6 @@ if __name__ == '__main__':
     parser.add_argument('--use-bias', action='store_true', help='Use a bias in the convolutional layer. Default: True')
     parser.add_argument('--label-smoothing', type=float, default=0.1, help='Label smoothing value to use. Default: 0.1')
     parser.add_argument('--multi-gpu', type=bool, default=False, help='choose the training using by multigpu')
-    parser.add_argument('--feature-channel', type=int, default=32, help='The number of Feature map channels. Default: 32')
-
 
     args = parser.parse_args()
 
