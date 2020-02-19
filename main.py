@@ -42,7 +42,6 @@ def main(args, model_path):
     prev_loss = 1000
     patience = 0
     early_stop = False
-    scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer=opt, lr_lambda=lambda epoch: 0.95 ** epoch)
     for epoch in range(args.epochs):
         print (epoch)
         epoch_loss = 0
@@ -77,7 +76,6 @@ def main(args, model_path):
         epoch_loss /= batch_size
         print ('')
         end = time.time()
-        scheduler.step()
         time_used = end - epoch_start
         print ('one epoch time: {} minutes'.format(time_used/60))
         print ('{} epochs'.format(epoch))
