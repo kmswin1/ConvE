@@ -15,7 +15,7 @@ dir = os.getcwd() + '/data'
 def main(args, model_path):
     print (os.getcwd())
     print ("start training ...")
-
+    print (model_path)
     start = time.time()
 
     ent_str2id, ent_id2str, rel_str2id, rel_id2str = load_kg()
