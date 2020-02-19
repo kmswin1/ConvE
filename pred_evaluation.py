@@ -1,7 +1,7 @@
 import torch
 import numpy as np
 import datetime, os
-import pickle
+import pickle, json
 dir = os.getcwd()
 def ranking_and_hits(model, args, evalloader, n_ent, ent_id2str, rel_id2str, epoch):
     hits_left = []
@@ -98,6 +98,15 @@ def ranking_and_hits(model, args, evalloader, n_ent, ent_id2str, rel_id2str, epo
                     else:
                         hit1_rels[rel_id2str[rel[i].item()]] += 1
                     hit1_cnt += 1
+                    data_point = {}
+                    top = []
+                    for j in range(10):
+                        top.append(argsort1[i][j])
+                    data_point['head'] = ent_id2str[head[i].item()]
+                    data_point['relation'] = rel_id2str[rel[i].item()]
+                    data_point['topten'] = top
+                    with open(dir + 'log_file/hit1.json', 'a') as ff:
+                        ff.write(json.dumps(data_point) + '\n')
 
             elif rank1 > 1:
                 with open(dir + '/log_file/nohit1.txt', 'a') as f:
@@ -109,6 +118,15 @@ def ranking_and_hits(model, args, evalloader, n_ent, ent_id2str, rel_id2str, epo
                     else:
                         nohit1_rels[rel_id2str[rel[i].item()]] += 1
                     nohit1_cnt += 1
+                    data_point = {}
+                    top = []
+                    for j in range(10):
+                        top.append(argsort1[i][j])
+                    data_point['head'] = ent_id2str[head[i].item()]
+                    data_point['relation'] = rel_id2str[rel[i].item()]
+                    data_point['topten'] = top
+                    with open(dir + 'log_file/nohit1.json', 'a') as ff:
+                        ff.write(json.dumps(data_point) + '\n')
 
             if rank1 <= 10:
                 with open(dir + '/log_file/hit10.txt', 'a') as f:
@@ -120,6 +138,15 @@ def ranking_and_hits(model, args, evalloader, n_ent, ent_id2str, rel_id2str, epo
                     else:
                         hit10_rels[rel_id2str[rel[i].item()]] += 1
                     hit10_cnt += 1
+                    data_point = {}
+                    top = []
+                    for j in range(10):
+                        top.append(argsort1[i][j])
+                    data_point['head'] = ent_id2str[head[i].item()]
+                    data_point['relation'] = rel_id2str[rel[i].item()]
+                    data_point['topten'] = top
+                    with open(dir + 'log_file/hit10.json', 'a') as ff:
+                        ff.write(json.dumps(data_point) + '\n')
 
             elif rank1 > 10:
                 with open(dir + '/log_file/nohit10.txt', 'a') as f:
@@ -131,6 +158,15 @@ def ranking_and_hits(model, args, evalloader, n_ent, ent_id2str, rel_id2str, epo
                     else:
                         nohit10_rels[rel_id2str[rel[i].item()]] += 1
                     nohit10_cnt += 1
+                    data_point = {}
+                    top = []
+                    for j in range(10):
+                        top.append(argsort1[i][j])
+                    data_point['head'] = ent_id2str[head[i].item()]
+                    data_point['relation'] = rel_id2str[rel[i].item()]
+                    data_point['topten'] = top
+                    with open(dir + 'log_file/nohit10.json', 'a') as ff:
+                        ff.write(json.dumps(data_point) + '\n')
 
     with open(dir + '/log_file/result.txt', 'w') as f:
         f.write("hit1 : " + str(hit1_cnt) + "\n")
