@@ -105,7 +105,7 @@ def ranking_and_hits(model, args, evalloader, n_ent, ent_id2str, rel_id2str, epo
                     data_point['head'] = ent_id2str[head[i].item()]
                     data_point['relation'] = rel_id2str[rel[i].item()]
                     data_point['topten'] = top
-                    with open(dir + 'log_file/hit1.json', 'a') as ff:
+                    with open(dir + '/log_file/hit1.json', 'a') as ff:
                         ff.write(json.dumps(data_point) + '\n')
 
             elif rank1 > 1:
@@ -125,7 +125,7 @@ def ranking_and_hits(model, args, evalloader, n_ent, ent_id2str, rel_id2str, epo
                     data_point['head'] = ent_id2str[head[i].item()]
                     data_point['relation'] = rel_id2str[rel[i].item()]
                     data_point['topten'] = top
-                    with open(dir + 'log_file/nohit1.json', 'a') as ff:
+                    with open(dir + '/log_file/nohit1.json', 'a') as ff:
                         ff.write(json.dumps(data_point) + '\n')
 
             if rank1 <= 10:
@@ -145,7 +145,7 @@ def ranking_and_hits(model, args, evalloader, n_ent, ent_id2str, rel_id2str, epo
                     data_point['head'] = ent_id2str[head[i].item()]
                     data_point['relation'] = rel_id2str[rel[i].item()]
                     data_point['topten'] = top
-                    with open(dir + 'log_file/hit10.json', 'a') as ff:
+                    with open(dir + '/log_file/hit10.json', 'a') as ff:
                         ff.write(json.dumps(data_point) + '\n')
 
             elif rank1 > 10:
@@ -165,7 +165,7 @@ def ranking_and_hits(model, args, evalloader, n_ent, ent_id2str, rel_id2str, epo
                     data_point['head'] = ent_id2str[head[i].item()]
                     data_point['relation'] = rel_id2str[rel[i].item()]
                     data_point['topten'] = top
-                    with open(dir + 'log_file/nohit10.json', 'a') as ff:
+                    with open(dir + '/log_file/nohit10.json', 'a') as ff:
                         ff.write(json.dumps(data_point) + '\n')
 
     with open(dir + '/log_file/result.txt', 'w') as f:
