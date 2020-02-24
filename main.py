@@ -44,6 +44,7 @@ def main(args, model_path):
     prev_loss = 1000
     patience = 0
     early_stop = False
+    best_loss = 1000
     for epoch in range(args.epochs):
         print (epoch)
         epoch_loss = 0
@@ -122,8 +123,10 @@ def main(args, model_path):
         if early_stop:
             print("{0} epochs Early stopping ...".format(epoch))
             break
-        print ('saving to {0}'.format(model_path))
-        torch.save(model.state_dict(), model_path)
+        if valid_loss < best_loss:
+            best_loss = valid_loss
+            print ('saving to {0}'.format(model_path))
+            torch.save(model.state_dict(), model_path)
 
     model.eval()
     with torch.no_grad():
