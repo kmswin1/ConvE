@@ -90,10 +90,10 @@ def ranking_and_hits(model, args, evalloader, n_ent, epoch):
     print('Hits @{0}: {1}'.format(10, np.mean(hits[9])))
     print('Mean rank tail: {0}'.format(np.mean(ranks_left)))
     #print('Mean rank head: {0}'.format(np.mean(ranks_right)))
-    print('Mean rank: {0}'.format(np.mean(ranks_left+ranks_right)))
+    print('Mean rank: {0}'.format(np.mean(ranks_left)))
     print('Mean reciprocal rank tail: {0}'.format(np.mean(1./np.array(ranks_left))))
     #print('Mean reciprocal rank head: {0}'.format(np.mean(1./np.array(ranks_right))))
-    print('Mean reciprocal rank: {0}'.format(np.mean(1./np.array(ranks_left+ranks_right))))
+    print('Mean reciprocal rank: {0}'.format(np.mean(1./np.array(ranks_left))))
 
     with open(dir+'/log_file/log.txt', 'a') as f:
         f.write(str(epoch) + '-----evaluation-----\n')
@@ -102,7 +102,7 @@ def ranking_and_hits(model, args, evalloader, n_ent, epoch):
         f.write('Hits @{0}: {1}\n'.format(10, np.mean(hits[9])))
         f.write('Mean rank tail: {0}\n'.format(np.mean(ranks_left)))
         #f.write('Mean rank head: {0}\n'.format(np.mean(ranks_right)))
-        f.write('Mean rank: {0}\n'.format(np.mean(ranks_left+ranks_right)))
+        f.write('Mean rank: {0}\n'.format(np.mean(ranks_left)))
         f.write('Mean reciprocal rank tail: {0}\n'.format(np.mean(1./np.array(ranks_left))))
         #f.write('Mean reciprocal rank head: {0}\n'.format(np.mean(1./np.array(ranks_right))))
-        f.write('Mean reciprocal rank: {0}\n'.format(np.mean(1./np.array(ranks_left+ranks_right))))
+        f.write('Mean reciprocal rank: {0}\n'.format(np.mean(1./np.array(ranks_left))))
