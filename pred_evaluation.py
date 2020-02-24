@@ -173,6 +173,15 @@ def ranking_and_hits(model, args, evalloader, n_ent, ent_id2str, rel_id2str):
         f.write("nohit1 : " + str(nohit1_cnt) + "\n")
         f.write("hit10 : " + str(hit10_cnt) + "\n")
         f.write("nohit10 : " + str(nohit10_cnt) + "\n")
+        f.write('Hits tail @{0}: {1}\n'.format(10, np.mean(hits_left[9])))
+        #f.write('Hits head @{0}: {1}\n'.format(10, np.mean(hits_right[9])))
+        f.write('Hits @{0}: {1}\n'.format(10, np.mean(hits[9])))
+        f.write('Mean rank tail: {0}\n'.format(np.mean(ranks_left)))
+        #f.write('Mean rank head: {0}\n'.format(np.mean(ranks_right)))
+        f.write('Mean rank: {0}\n'.format(np.mean(ranks_left)))
+        f.write('Mean reciprocal rank tail: {0}\n'.format(np.mean(1./np.array(ranks_left))))
+        #f.write('Mean reciprocal rank head: {0}\n'.format(np.mean(1./np.array(ranks_right))))
+        f.write('Mean reciprocal rank: {0}\n'.format(np.mean(1./np.array(ranks_left))))
         
     with open(dir + '/log_file/hit1_rels', 'wb') as f:
         pickle.dump(hit1_rels, f)
