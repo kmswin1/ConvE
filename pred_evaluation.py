@@ -191,4 +191,4 @@ def ranking_and_hits(model, args, evalloader, n_ent, ent_id2str, rel_id2str):
     print('Mean rank: {0}'.format(np.mean(ranks_left+ranks_right)))
     print('Mean reciprocal rank tail: {0}'.format(np.mean(1./np.array(ranks_left))))
     #print('Mean reciprocal rank head: {0}'.format(np.mean(1./np.array(ranks_right))))
-    print('Mean reciprocal rank: {0}'.format(np.mean(1./np.array(ranks_left+ranks_right))))
+    print('Mean reciprocal rank: {0}'.format(np.mean(1./np.array(ranks_right))))
